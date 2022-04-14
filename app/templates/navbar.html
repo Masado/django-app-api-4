@@ -1,0 +1,21 @@
+{% block nav %}
+    <div class="container nav-wrapper navbar">
+
+        <ul>
+            <a
+{#                href="/"#}
+                class="brand-logo"
+            >Analysis Pipelines Web Application</a>
+            <div class="float-right">
+                {% block nav-home %}<a class="nav-a" href="{% url 'home' %}" title="Will take you to the 'Home' page">Home</a>{% endblock %}
+                {% block nav-pipelines %}<a class="nav-a" href="{% url 'pipelines:index' %}" title="Will take you to a list of all available pipelines">Pipelines</a>{% endblock %}
+{#                {% block nav-run %}<a class="nav-a" href="{% url 'run:index' %}" title="Same function as 'Find pipeline' button on Home page">Run</a>{% endblock %}#}
+                {% block nav-results-download %}<a class="nav-a" href="{% url 'run:getDownload' %}" title="Will take you to a page where you can find the results of your run">Find Results</a>{% endblock %}
+                {% block nav-spreadsheet %}<a class="nav-a" href="{% url 'run:Spreadsheets' %}" title="Spreadsheet generator" >Spreadsheets</a>{% endblock %}
+                {% block nav-referenceloader %}<a class="nav-a" href="{% url 'fetcher:fetcher' %}" title="Reference Fetcher" >Reference Fetcher</a>{% endblock %}
+                {% block nav-about %}<a class="nav-a" href="{% url 'about' %}">About</a>{% endblock %}
+                {% block nav-contact %}<a class="nav-a" href="{% url 'contact' %}">Contact</a>{% endblock %}
+            </div>
+        </ul>
+    </div>
+{% endblock %}

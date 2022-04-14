@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}CRISPR/Cas-detection-pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-Id for this pipeline-run is '{{ run_id }}'</h2>
+
+    <p>
+    Your data has been uploaded and assigend. Click below to start the pipeline run.<br>
+    Once you have started the run you can close the page and check on your results later using the "Find Results" tab.
+    If you choose to stay on this page you will be redirected to your results as soon as the pipeline has finished.
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit" name="run_criprcas">Start Run</button>
+    </form>
+
+{% endblock %}

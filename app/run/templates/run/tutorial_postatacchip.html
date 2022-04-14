@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Post-ATAC/ChIP-Seq Tutorial{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <form>
+        <div class="float-right ml-4">
+            {% csrf_token %}
+            <p>
+            <div class="input-group">
+                <label class="input-group-text" id="id_archive_form">You can download the files<br> used in this example
+                    as a .zip or .tar.gz archive:</label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_archive_form_zip" class="form-check-input" type="radio" name="archive_form"
+                               value="zip" checked>
+                        <label class="form-check-label" for="id_archive_form_zip">ZIP</label>
+                    </div>
+                    <div>
+                        <input id="id_archive_form_tar" class="form-check-input" type="radio" name="archive_form"
+                               value="tar">
+                        <label class="form-check-label" for="id_archive_form_tar">TAR</label>
+                    </div>
+                </div>
+            </div>
+            </p>
+            <div class="center-text">
+                <button class="ml-4" type="submit" name="tutorial_post_acseq">
+                    Download examples
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <p>
+        This page contains the tutorial for the Post-ATAC/ChIP-Seq analysis. For every input on the actual analysis-page
+        a more detailed description of what is required by the user is given.<br>
+        To the right of this text you will also be able to download all the files that were used in this example if
+        you would like to take a closer look at how they are structured or want to try to start a run yourself.
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postacseq/pac_bedfile.png' %}" alt="Post-ATAC/ChIP-Seq bed file">
+        <figcaption><small>
+            The "Gene bed"-input requires you to upload the a BED-file containing information about the chromosomes of
+            the species you obtained your data from. For this you can use the BED-file you originally used in the
+            ChIP- or ATAC-Seq Pipeline. If the BED-file was provided via the genome-parameter you should be able to find
+            the file in the genome folder inside your results.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postacseq/pac_gtffile.png' %}" alt="Post-ATAC/ChIP-Seq GTF-file">
+        <figcaption><small>
+            The "GTF-file"-input field needs you to upload an annotation file in .gtf-format. This gtf-file
+            will need to contain the additional attribute columns "gene_id", "transcript_id" and, in the case of
+            CDS, "protein_id". Files in this format can be, among others, obtained from ensembl.
+            You can also use the .gtf-file you used for the original pipeline. If the file was provided via the
+            genome-parameter you should be able to find it in the genome folder inside your results.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postacseq/pac_bigwigarchive.png' %}"
+             alt="Post-ATAC/ChIP-Seq BigWig-archive">
+        <figcaption><small>
+            The "BigWig-Archive"-input requires you to upload the folder "bigwig" from your results. You can find it in
+            "results/bwa/mergedLibrary/". Please upload the folder in form of a .tar.gz- or .zip-archive.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postacseq/pac_bamarchive.png' %}" alt="Post-ATAC/ChIP-Seq BAM-archive">
+        <figcaption><small>
+            The "BAM-Archive"-input requires you to place the .bam and .bam.bai files you can find in your results
+            in the "results/bwa/mergedLibrary" directory inside of a folder called "bam", compress the folder to a
+            .tar.gz- or .zip-archive and upload it here.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postacseq/pac_visualization.png' %}"
+             alt="Post-ATAC/ChIP-Seq Visualization">
+        <figcaption><small>
+            The last part of the page allows you to customize the parameters of the visualization.<br>
+            The pipeline will generate visualizations for your entire data every run. If you would like the same to be
+            done for a single chromosome you can do so by entering the id of said chromosome in the corresponding
+            textfield (e.g.: "IV", "chr4"). To see the available chromosomes refer to the first column of your
+            .bed-file.
+            If you want to visualize the data of multiple chromosomes enter all of them, seperated by a comma.<br>
+            The "Computation method"-selection allows you to pick the method for the matrix generation of your data from
+            which
+            the graph will be generated.<br>
+            The "Reference-Point"-option will set a specific point in the BED region around which the matrix will be
+            build. The
+            "Scale-Regions"-option will stretch or shrink the length of all regions in the BED file to the length
+            indicated
+            by the user.<br>
+            The "Upstream" and "Downstream"-inputs determine the distance upstream of the start and downstream of the
+            end site
+            will be included. The "Region Length"-input determines the length of the region if you selected
+            "Scale-Regions" as the
+            computation method.<br>
+            If you are using the "Reference-Point" computation method the "Reference-Point"-input allows you to specify
+            which reference-point you would like to use. The Transcription Start Site ("TSS") option is the default, but
+            Transcription End Site ("TES") and the center of the BED region are also options.<br>
+            Lastly, you can decide if you want the pipeline to combine all the generated graphs into one image.<br>
+        </small></figcaption>
+    </figure>
+
+    <form action="." method="post" enctype="multipart/form-data">
+
+
+        <div>
+            <button type="submit"
+                    name="tutorial_post_acseq">
+                Download examples
+            </button>
+            <input class="back-button" type="button" onclick="history.back()" ; value="Back">
+        </div>
+    </form>
+
+
+{% endblock %}

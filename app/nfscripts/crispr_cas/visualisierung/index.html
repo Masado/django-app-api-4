@@ -1,0 +1,554 @@
+<html>
+	<head>
+<style>
+body {
+	background-color: #fff;
+}
+#repeats {
+	overflow-x: auto;
+	white-space: nowrap;
+}
+#mainContent {
+	margin-left: 200px;
+	height: 100%;
+	overflow-x: auto;
+}
+#sidebar {
+	width: 200px;
+	height: 100%;
+	position: fixed;
+	z-index: 1;
+	top: 0;
+	left: 0;
+	overflow-x: hidden;
+	padding-top: 20px;
+	border-right: 1px solid #ccc;
+	background-color: #ededed;
+}
+ul.sidelist {
+	list-style-type: none;
+	padding-left: 0;
+	box-sizing: border-box;
+	width: 100%;
+}
+li.sidelist {
+}
+.sidelink {
+	padding: 5px 10px 5px 15px;
+	box-sizing: border-box;
+	width: 100%;
+}
+a.sidelink {
+	border-top: 1px solid #dedede;
+	display: inline-block;
+	text-decoration: none;
+	font-size: 0.9em;
+}
+.activesidelink {
+	background-color: #ccc;
+}
+.phylTree {
+	width: 100%;
+}
+.phylocanvasdiv {
+	width: 100%;
+	max-width: 60em;
+	margin: 10px auto;
+	height: 30em;
+	overflow: hidden;
+	border: 1px solid #ccc;
+}
+.spacerIdentityTable {
+	display: block;
+	border: 1px solid #ccc;
+	overflow-x: scroll;
+	white-space: nowrap;
+}
+td.crisprlocus {
+	cursor: pointer;
+	font-size: 0.85em;
+}
+td.spacer {
+	border: 1px solid #ccc;
+	cursor: pointer;
+	text-align: center;
+}
+.organismtable {
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+}
+.organismtable th {
+	border: 1px solid #ccc;
+	border-bottom: 3px double #ccc;
+}
+.organismtable td {
+	border: 1px solid #ccc;
+}
+.spacercluster {
+	background-color: #ff0;
+}
+td.spacerwithhits {
+	border: 1px solid #0c0;
+}
+.help {
+	color: #31708f;
+	padding: 15px;
+	background-color: #d9edf7;
+	border: 1px solid #bce8f1;
+	border-left: 6px solid #31708f;
+	margin-bottom: 20px;
+}
+</style>
+<link rel="stylesheet" href="js/SequenceLogoVis/assets/css/popup.css" type="text/css"/>
+	</head>
+	<body>
+		<div id="app">
+			<div id="sidebar">
+				<h4>CRISPR Cas</h4>
+				<ul class="sidelist">
+					<li><a class="sidelink" :class="{ activesidelink: currentPage === 'summary' }" href="#summary" @click="currentPage = 'summary'">Summary</a></li>
+					<li><a class="sidelink" :class="{ activesidelink: currentPage === 'spacerIdentity' }" href="#spacerIdentity" @click="currentPage = 'spacerIdentity'">Spacer identity</a></li>
+					<li><a class="sidelink" :class="{ activesidelink: currentPage === 'phylogeny' }" href="#phylogeny" @click="currentPage = 'phylogeny'">Phylogeny</a></li>
+				</ul class="sidelist">
+				<h5>Sequence:</h5>
+				<ul class="sidelist">
+					<li v-for="o in organisms">
+						<a class="sidelink" :class="{ activesidelink: currentPage.startsWith(o) }" :href="'#'+o" @click="currentPage = o" :title="headers[o]">{{ o }}</a>
+					</li>
+				</ul>
+			</div>
+			<div id="mainContent">
+
+
+
+
+
+				<div v-if="currentPage === 'summary'">
+					<h4>CRISPR Summary</h4>
+					<p>
+					CRISPR arrays were found in the following sequences from the input dataset.<br>
+					Click a sequence to view its CRISPR arrays, or view a comparison of all CRISPR arrays in the <a href="#spacerIdentity" @click="currentPage = 'spacerIdentity'">spacer table</a>.
+					</p>
+					<table class="organismtable">
+						<tr>
+							<th>ID</th>
+							<th># Arrays</th>
+							<th>Full name</th>
+						</tr>
+						<tr v-for="o in organisms">
+							<td><a :href="'#'+o" @click="currentPage = o">{{ o }}</a></td>
+							<td style="text-align: center">{{ organismData[o].crisprLoci.length }}</td>
+							<td><a :href="'#'+o" @click="currentPage = o">{{ headers[o] }}</a></td>
+						</tr>
+					</table>
+				</div>
+				<div v-if="currentPage === 'spacerIdentity'">
+					<h4>Spacer identity</h4>
+					<p>Spacers were clustered with <a href="https://github.com/weizhongli/cdhit">CD-HIT</a> to identify target sequences appearing in multiple spacers. Each cluster was assigned a unique number in the table.<br>
+					A target sequence appearing in multiple strains indicates shared descent from the cell in which the target sequence was integrated by a spacer acquisition event.</p>
+					<div class="help">
+						Mouse over a spacer to highlight identical target sequences.<br>
+						Click a spacer or CRISPR array to view it in more detail.<br>
+						Spacers with BLAST hits have a <span style="color: #0c0">green border</span>.
+					</div>
+					<spacer-identity
+						:data="{ headers: headers, crisprLoci: crisprLoci, maxSpacerCount: maxSpacerCount, spacerToCluster: spacerToCluster, clusterSpacers: clusterSpacers, spacerMSAs: spacerMSAs }"
+						@set-page="setPage"></spacer-identity>
+				</div>
+				<div v-if="currentPage === 'phylogeny'">
+					<h5>Phylogeny based on spacers only</h5>
+					<phylocanvas-component :newick="distanceTree" name="spacer" :key="'spacer-phylocanvas'"></phylocanvas-component>
+					<h5>Phylogeny based on whole CRISPR array sequence</h5>
+					<phylocanvas-component :newick="treeData" name="normal" :key="'normal-phylocanvas'"></phylocanvas-component>
+				</div>
+				<div v-if="pageType === 'organism'">
+					<h4>{{ currentOrganism }}: {{ headers[currentOrganism] }}</h4>
+					<p>Targets of each spacer were identified with a blastn search.</p>
+					<div class="help">Click a BLAST hit to view its NCBI GenBank entry.</div>
+					<div v-if="organismData[currentOrganism].crisprLoci.length > 1">
+						<span>{{ organismData[currentOrganism].crisprLoci.length }} CRISPR arrays: </span>
+						<span v-for="(cl, locus) in organismData[currentOrganism].crisprLoci">
+							<a :href="'#'+cl.name">CRISPR {{ locus }}</a>
+							<span>  </span>
+						</span>
+					</div>
+					<div v-else>One CRISPR array:</div>
+					<div v-for="(cl, locus) in organismData[currentOrganism].crisprLoci">
+						<h3 :id="cl.name">CRISPR Locus {{ locus }}</h3>
+						<h4>Repeat sequence:</h4>
+						<div id="repeats">
+							<repeat-logo :locus="cl.name" :key="cl.name"></repeat-logo>
+						</div>
+						<h4>Alignments of target sequences:</h4>
+						<div id="spacers">
+							<spacer-alignment v-for="(name, index) in cl.spacers" :spacer=index :name=name :key=name></spacer-alignment>
+						</div>
+					</div>
+				</div>
+				<div id="popup" class="popup hidden">
+					<div class="popup-header">Position <span id="position" class="pull-left"></span> </div>
+					<div class="clearfix"></div>
+					<div id="position_details"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="https://unpkg.com/vue"></script>
+	<script src="js/msa.min.gz.js"></script>
+	<script type="application/javascript" src="js/SequenceLogoVis/assets/js/lib/d3.v3.min.js"></script>
+	<script type="application/javascript" src="js/SequenceLogoVis/assets/js/lib/raphael-min.js"></script>
+	<script src="js/SequenceLogoVis/assets/js/SequenceLogo.js"></script>
+	<script src="js/headers.js"></script>
+	<script src="js/repeats.js"></script>
+	<script src="js/spacerMSAs.js"></script>
+	<script src="js/treeData.js"></script>
+	<script src="js/parsed_cdHit_output.js"></script>
+	<script src="js/distanceTree.js"></script>
+	<script src="js/newick.js"></script>
+	<script type="application/javascript" src="js/phylocanvas.min.js"></script>
+	<script>
+
+/// Parse a name string referring to an organism, CRISPR locus, or spacer.
+function identify(identifier)
+{
+	var s = identifier.split("_");
+	if(s.length >= 3)
+	{
+		if(s[s.length-2] === "SPACER")
+		{
+			return {
+				type: "spacer",
+				spacer: parseInt(s[s.length-1]),
+				locus: parseInt(s[s.length-3]),
+				organism: s.slice(0,s.length-4).join("_")
+			};
+		}
+		if(s[s.length-2] === "CRISPR")
+		{
+			return {
+				type: "crispr",
+				locus: parseInt(s[s.length-1]),
+				organism: s.slice(0,s.length-2).join("_")
+			};
+		}
+	}
+	return {
+		type: "organism",
+		organism: identifier
+	};
+}
+
+/// Rebuild a name string from an organism and optionally a CRISPR locus or spacer number.
+/// Alternatively, an ID object as returned by identify() can be passed to the function.
+function name(id, crisprLocus = undefined, spacer = undefined)
+{
+	var organism = "";
+	if(typeof id === "string" || id instanceof String)
+	{
+		organism = id;
+	}
+	else
+	{
+		organism = id.organism;
+		crisprLocus = id.locus;
+		spacer = id.spacer;
+	}
+	var n = organism;
+	// crazy JavaScript way of checking "is this NOT undefined"
+	// if(crisprLocus) doesn't work because it'd be false if crisprLocus is 0
+	if(typeof crisprLocus !== "undefined")
+	{
+		n += `_CRISPR_${crisprLocus}`;
+		if(typeof spacer !== "undefined")
+		{
+			n += `_SPACER_${spacer}`;
+		}
+	}
+	return n;
+}
+
+/// an array of all integers from [0, length)
+function iota(length)
+{
+	return [...Array(length).keys()];
+}
+
+
+/// list of organisms with CRISPR casettes
+var organisms = Object.keys(headers);
+organisms.sort();
+
+var spacers = Object.keys(spacerMSAs);
+var spacerIDs = spacers.map(n => identify(n));
+
+/// number of CRISPR loci per organism
+var lociPerOrganism = {}
+function countCrisprLoci(spacerIDs)
+{
+	// set of unique CRISPR locus numbers in a list of spacers
+	var set = new Set(spacerIDs.map(id => id.locus));
+	return set.size;
+}
+// count loci in all spacers belonging to each organism
+organisms.forEach(o => lociPerOrganism[o] = countCrisprLoci(spacerIDs.filter(id => id.organism === o)));
+
+var organismData = {}
+organisms.forEach(o => organismData[o] = {
+	name: headers[o],
+	crisprLoci: iota(lociPerOrganism[o]).map(locus => {
+		return {
+			name: name(o, locus),
+			spacers: spacerIDs.filter(sID => sID.organism === o && sID.locus === locus)
+				.sort((a,b) => a.spacer > b.spacer) // put the spacers in order
+				.map(name)
+		};
+	})
+});
+
+// old version: names only
+//var crisprLoci = organisms.map(o => iota(lociPerOrganism[o])).map(locus => name(o, locus)).flat();
+var crisprLoci = organisms.map(o => organismData[o].crisprLoci).flat();
+
+var maxSpacerCount = Math.max(...crisprLoci.map(cl => cl.spacers.length));
+
+// **********
+// Components
+// **********
+var spacerComponent = {
+	props: [ "spacer", "name" ],
+	template: `
+		<div :id="name">
+		<h5 :id="'header'+name">Spacer {{ spacer }}</h5>
+			<div :id="'msaDiv'+name"></div>
+			<hr>
+		</div>`,
+	mounted() {
+		var msaOutput = spacerMSAs[this.name];
+		if(!msaOutput || msaOutput.length === 0)
+		{
+			document.getElementById("header"+this.name).textContent += ": no blastn hits";
+		}
+		else
+		{
+			// parse clustalw output
+			var seqs =	msa.io.clustal.parse(msaOutput);
+
+			// rename the original spacer
+			for(i in seqs)
+			{
+				var s = seqs[i];
+				if(s.name == this.name)
+				{
+					s.name = "spacer";
+					break;
+				}
+			}
+
+			console.log(seqs);
+
+			var msaEl = document.getElementById("msaDiv"+this.name);
+			var m = msa({
+				 el: msaEl,
+				 seqs: seqs
+			});
+			var seqHeight = 15*(seqs.length+1);
+
+
+			m.g.on("row:click", function(data){
+				var target = data.evt.target.innerText;
+				if(target === "spacer")
+				{
+					// do nothing, this is the original spacer
+				}
+				else
+				{
+					// open the GenBank page in a new tab
+					var win = window.open("https://www.ncbi.nlm.nih.gov/nuccore/"+target, '_blank');
+					win.focus();
+				}
+				
+				m.g.selcol.reset();
+			});
+
+			m.g.zoomer.set("alignmentHeight", seqHeight);
+			m.g.vis.set("conserv", true);
+			m.g.colorscheme.set("scheme", "nucleotide");
+			m.render();
+
+			// add tooltips to rows
+			msaEl.querySelectorAll('.biojs_msa_labelrow');
+		}
+	}
+}
+
+var repeatComponent = {
+	props: [ "locus" ],
+	template: `
+		<div>
+			<div :id=\"'repeatDiv'+locus\"></div>
+		</div>`,
+	mounted() {
+		var fasta = repeats[this.locus+"_repeats"];
+		var sequences = fasta.split("\n").filter(s => !s.startsWith(">"));
+		var seqData = "0|Repeats\n" + sequences.join("\n");
+		SequenceLogo.rendering.createSequenceLogo({
+			sequences: [seqData],
+			placement: "repeatDiv"+this.locus,
+			width: 1000,
+			height: 200,
+			glyph_strategy: "only_differences",
+			height_algorithm: "entropy",
+			type:"dna",
+			highlight_conserved: true,
+			draw_consensus: true
+		});
+	}
+}
+
+var phylocanvasComponent = {
+	props: [ "newick", "name" ],
+	template: `<div class="phylocanvasdiv" :id="'phylocanvas'+name"></div>`,
+	mounted() {
+/// add phylocanvas to summary page
+var tree = Phylocanvas.default.createTree('phylocanvas'+this.name);
+tree.setTreeType('rectangular');
+tree.alignLabels = true;
+tree.on('error', function (event) { throw event.error; });
+tree.load(this.newick);
+
+	}
+}
+
+var spacerIdentityComponent = {
+	props: [ "data" ],
+	template: `
+		<div>
+		<table class="spacerIdentityTable">
+			<thead>
+				<tr>
+					<th rowspan="2">CRISPR Array</th>
+					<th :colspan="data.maxSpacerCount">Spacer #</th>
+				</tr>
+				<tr>
+				<td v-for="i in data.maxSpacerCount">{{ i }}</td>
+				</tr>
+			</thead>
+			<tr v-for="locus in data.crisprLoci">
+				<td @mouseover="hovered = identify(locus.name).organism " @mouseout="hovered = -1"
+					@click="$emit('set-page', locus.name)"
+					class="crisprlocus" :class="{spacercluster: hovered === identify(locus.name).organism }"
+					:title="data.headers[identify(locus.name).organism]">
+					{{ identify(locus.name).organism }}<b> {{ identify(locus.name).locus }}</b>
+				</td>
+				<td v-for="(spacer, index) in locus.spacers" :id="'td'+locus.name+'_SPACER_'+index"
+					@mouseover="hovered = data.spacerToCluster[spacer]" @mouseout="hovered = -1"
+					@click="$emit('set-page', spacer)"
+					class="spacer" :class="{spacercluster: hovered === data.spacerToCluster[spacer], spacerwithhits: data.spacerMSAs[spacer].length > 0 }"></td>
+			</tr>
+		</table>
+		</div>
+		`,
+	data: function() {
+		return {
+			hovered: -1, /// the cluster number of the currently hovered spacer
+		};
+	},
+	methods: {
+		identify: identify,
+		isSpacerUnique: function(spacer)
+		{
+			var cluster = spacerToCluster[spacer];
+			return clusterSpacers[cluster].length === 1;
+		}
+	},
+	mounted() {
+		for(spacer in spacerToCluster)
+		{
+			var text = "";
+			var cluster = spacerToCluster[spacer];
+			if(clusterSpacers[cluster].length > 1)
+			{
+				text = cluster;
+			}
+			else
+			{
+				//text = "U";
+			}
+			var el = document.getElementById("td"+spacer);
+			el.textContent = text;
+		}
+
+		var newick = Newick.parse(distanceTree);
+		console.log(newick);
+	}
+}
+
+/// handle the URL #fragment (location.hash) for navigating between pages
+function parseFragment()
+{
+	var fragment = location.hash;
+	if(!fragment || fragment.length === 0) return "summary";
+
+	var page = fragment.substring(1); // cut off the #
+	return page;
+}
+
+
+// ************
+// Vue instance
+// ************
+const app = new Vue({
+	el: '#app',
+	data: {
+		"currentPage": parseFragment(),
+		"organisms": organisms,
+		"headers": headers,
+		"organismData": organismData,
+		"crisprLoci": crisprLoci,
+		"maxSpacerCount": maxSpacerCount,
+		"clusterSpacers": clusterSpacers,
+		"spacerToCluster": spacerToCluster,
+		"distanceTree": distanceTree,
+		"treeData": treeData,
+		"spacerMSAs": spacerMSAs,
+	},
+	computed: {
+		"pageType": function() {
+			switch(this.currentPage)
+			{
+				case "summary":
+				case "spacerIdentity":
+				case "phylogeny":
+					return this.currentPage;
+				default:
+					// spacers and CRISPR arrays don't get their own pages; they're sections of the organism page
+					return "organism";
+			}
+		},
+		"currentOrganism": function() {
+			var id = identify(this.currentPage);
+			return id.organism;
+		}
+	},
+	methods: {
+		"setPage": function(page)
+		{
+			this.currentPage = page;
+			// nextTick waits until the page is updated to show the selected organism before it scrolls
+			Vue.nextTick(function(){ location.href = '#'+page; });
+		}
+	},
+	created() {
+
+	},
+	components: {
+		"spacer-alignment": spacerComponent,
+		"repeat-logo": repeatComponent,
+		"phylocanvas-component": phylocanvasComponent,
+		"spacer-identity": spacerIdentityComponent,
+	}
+});
+
+
+	</script>
+</html>

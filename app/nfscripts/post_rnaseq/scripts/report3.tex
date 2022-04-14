@@ -1,0 +1,147 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{placeins}
+\usepackage{fancyvrb}
+\svgpath{../tex/images}
+
+\begin{document}
+
+\begin{center}
+\huge
+\textbf{Analysis report of RNA-Seq data from \input{species.tex}}
+\end{center}
+
+\section{introduction}
+The rnaseq-pipeline of nf-core project was used for initial processing of the provided data. In addition to the reads a reference genome and annotation file are required to successfully run the pipeline. The pipeline performs three basic processing steps:
+\begin{enumerate}
+\item quality check (FastQC/MultiyQC)
+\item adapter trimming (Cutadapt)
+\item alignment (STAR)
+\end{enumerate}
+\bigskip
+In addition the pipeline performs a number of anylses
+\bigskip
+\begin{itemize}
+\item biotype counts (featureCounts)
+\item alignment quality check (QualiMap)
+\item duplication rates (DupRadar)
+\item sample similarity (edgeR)
+\item complexity estimation (Preseq)
+\item pression quantification (Salmon)
+\end{itemize}
+\bigskip
+The results of the Salmon gene expression qunatification then are further analyzed using the DESeq2 R-package, providing a matrix of differntially expressed genes.
+\bigskip
+The resulting DESeq-matrix is analyzed using KeyPathwayMiner (KPM) in order to extract the pathways. The protein-protein-interaction network necessary for this is downloaded from the STRING database via cytoscape.
+\bigskip
+finally a GO-Term enrichment was done with g:Profiler, based on the results KPM provided, to identify over- or under-represented genes in the extracted pathway.
+\bigskip
+
+\newpage
+
+\section*{Results}	
+\subsection*{Quality Control}
+\FloatBarrier
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=16cm]{images/mqc_fastqc_per_base_sequence_quality_plot_1.png}
+\caption[Sequence Quality Histogram]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=16cm]{images/mqc_fastqc_per_sequence_quality_scores_plot_1.png}
+\caption[Per Sequence Quality Scores]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=16cm]{images/mqc_fastqc_per_base_n_content_plot_1.png}
+\caption[Per Base N Content]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\subsection*{Trimming}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=16cm]{images/mqc_cutadapt_plot_Counts.png}
+\caption[Lengths of Trimmed Sequences]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\newpage
+\subsection*{Alignment}
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=14cm]{images/mqc_star_alignment_plot_1_pc.png}
+\caption[Alignment Sequences]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\newpage
+\subsection*{BiotypeCounts}
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=14cm]{images/mqc_featureCounts_biotype_plot_1_pc.png}
+\caption[Biotype Counts]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\newpage
+\subsection*{Alignment Quality Check}
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=14cm]{images/mqc_qualimap_genomic_origin_1_pc.png}
+\caption[Genomic Origin]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\newpage
+\subsection*{Duplication Rates}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=16cm]{images/mqc_mqc_mplplot_bdofvwlkxn_1.png}
+\caption[DupRadar General Linear Models]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\subsection*{Sample Similarity}
+
+\subsection*{Complexity Estimation}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=16cm]{images/mqc_preseq_plot_1.png}
+\caption[Complexity Curve]{\input{species.tex}}
+\end{figure}
+\FloatBarrier
+
+\newpage
+\subsection*{Gene Expression Quantification}
+
+More detailed and interactive results from the rnaseq-pipeline can be viewed with the multiqc\_report.html in the MultiQC folder in the output directory.
+
+\subsection*{Differentially Expressed Genes}
+
+
+\subsection*{KeyPathwayMiner}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=12cm]{images/KPM_Graph_1.png}
+\caption[KeyPathwayMiner computed pathway]{\input{species.tex}}
+\end{figure}
+
+\newpage
+Additional plots and graphs from the MultiQC run can be found in the output directory of the RNA-Seq run in the MultiQC/multiqc\_report.html html-file 
+
+\end{document}

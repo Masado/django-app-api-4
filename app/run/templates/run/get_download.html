@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Result-Search{% endblock %}
+{% load static %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <p><h4>Please type or copy in your Run-Id to search for your results</h4></p>
+
+    <p>
+        If your analysis has already finished, you will be redirected to your download page.
+    </p>
+
+    <form action="." method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="run_id">Enter Run-ID:</label>
+        <input id="run_id" class="ml-4" type="text" name="run_id">
+        <br><br>
+        <button style="font-weight: 600" type="submit" name="pass_run_id">Search for id</button>
+    </form>
+
+    {#    <p style="padding: 0 7em 2em 0;"><input class="back-button" type="button" onclick="history.back()"; value="Back"></p>#}
+
+    <script>
+        window.addEventListener('beforeunload', function (){
+            $.ajax({
+
+            })
+        });
+    </script>
+
+{% endblock %}

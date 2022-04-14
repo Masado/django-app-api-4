@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">
+{% endblock %}
+
+{% block title %}Pipeline Path{% endblock %}
+
+{% block content %}
+
+    <h3>Pipeline Path</h3>
+
+{#    <p>#}
+{#        This page will ask you to choose what type of data you would like to use and what kind of data you would like to#}
+{#        generate from said data. Just click on the corresponding buttons.#}
+{#    </p>#}
+
+
+
+
+    {#    <table>#}
+    {#        <tr>#}
+    {#            <th><h4>Name</h4></th>#}
+    {#            <th><h4>Description</h4></th>#}
+    {#            <th></th>#}
+    {#        </tr>#}
+    {#        <tr>#}
+    {#            <td>Sarek</td>#}
+    {#            <td>Data from nf-core's Sarek analysis pipeline to detect germline or somatic variants (pre-processing,#}
+    {#                variant calling and#}
+    {#                annotation) from WGS / targeted sequencing.#}
+    {#            </td>#}
+    {#            <td>#}
+    {#                <form method="post">#}
+    {#                    {% csrf_token %}#}
+    {#                    <button type="submit" name="choose" value="sarek">Continue with Sarek data</button>#}
+    {#                </form>#}
+    {#            </td>#}
+    {#        </tr>#}
+    {#        <tr>#}
+    {#            <td>RNA-seq</td>#}
+    {#            <td>Data from nf-core's RNA sequencing analysis pipeline using STAR, RSEM, HISAT2 or Salmon with#}
+    {#                gene/isoform counts and#}
+    {#                extensive quality control.#}
+    {#            </td>#}
+    {#            <td>#}
+    {#                <form method="post">#}
+    {#                    {% csrf_token %}#}
+    {#                    <button type="submit" name="choose" value="rnaseq">Continue with RNA-seq data</button>#}
+    {#                </form>#}
+    {#            </td>#}
+    {#        </tr>#}
+    {#        <tr>#}
+    {#            <td>ATAC-seq</td>#}
+    {#            <td>Data from nf-core's ATAC-seq peak-calling, QC and differential analysis pipeline.</td>#}
+    {#            <td>#}
+    {#                <form method="post">#}
+    {#                    {% csrf_token %}#}
+    {#                    <button type="submit" name="choose" value="atacseq">Continue with ATAC-seq data</button>#}
+    {#                </form>#}
+    {#            </td>#}
+    {#        </tr>#}
+    {#        <tr>#}
+    {#            <td>ChIP-seq</td>#}
+    {#            <td>Data from nf-core's ChIP-seq peak-calling, QC and differential analysis pipeline.</td>#}
+    {#            <td>#}
+    {#                <form method="post">#}
+    {#                    {% csrf_token %}#}
+    {#                    <button type="submit" name="choose" value="chipseq">Continue with ChIP-seq data</button>#}
+    {#                </form>#}
+    {#            </td>#}
+    {#        </tr>#}
+    {##}
+    {#    </table>#}
+
+    {#    {% if dataset_list %}#}
+    {#        <table>#}
+    {#            <tr>#}
+    {#                <th><h4>Name</h4></th>#}
+    {#                <th><h4>Description</h4></th>#}
+    {#                <th></th>#}
+    {#            </tr>#}
+    {#            {% for dataset in dataset_list %}#}
+    {#                <tr>#}
+    {#                    <td class="mw-100"><h4>{{ dataset.base_pipe_name_wo }}</h4></td>#}
+    {#                    <td>{{ dataset.description }}</td>#}
+    {#                    <td>#}
+    {#                        <form method="post">#}
+    {#                            {% csrf_token %}#}
+    {#                            <button type="submit" name="choose" value="{{ dataset.base_pipeline_name }}">Continue with {{ dataset.short }}</button>#}
+    {#                        </form>#}
+    {#                    </td>#}
+    {#                </tr>#}
+    {#            {% endfor %}#}
+    {#        </table>#}
+    {#    {% endif %}#}
+
+    <div>
+        <h3 class="center-text">What kind of data are you using?</h3>
+        {% if dataset_list %}
+            <table class="center">
+                <tr>
+                    {% for dataset in dataset_list %}
+                        <td class="bl-table">
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" name="choose" class="mh-70"
+                                        value="{{ dataset.base_pipeline_name }}">{{ dataset.base_pipe_name_wo }}</button>
+                            </form>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
+        {% endif %}
+    </div>
+
+    <p>
+        It is also possible to reach analysis pipelines generating the data listed above from this page.
+        Simply click on the button for the analysis you would like to run. There you can choose the analysis itself.
+        From there you can also directly run a post-analysis pipeline once the base-pipeline has finished.
+    </p>
+    <br>
+
+
+    <p style="padding: 0 7em 2em 0;"><input class="back-button" type="button" onclick="history.back()" ; value="Back">
+    </p>
+
+{% endblock %}

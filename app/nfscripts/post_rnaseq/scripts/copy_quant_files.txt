@@ -1,0 +1,1 @@
+for i in $(ls -d path/to/results/salmon/*/); do cp `printf '%s\n' "${i}quant.sf"` `printf '%s\n' "${i%%/}_quant.sf" | sed 's/path\/to\/results\/salmon\//path\/to\/report\/salmon\//g'`; done

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}RNA-seq Pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-Id for this pipeline-run is '{{ run_id }}'</h2>
+
+    To start the pipeline
+
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}iGenome reference genomes{% endblock %}
+{% load static %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>iGenome reference list</h2>
+
+    <p>
+        Here you can find a list of all reference genomes provided by iGenome that can be used in the nf-core analysis
+        pipelines. Simply look for a reference for the species you obtained your samples from and use it in the
+        "Genome reference" input of your analysis.
+    </p>
+    <p>
+        You can search the columns by clicking the header.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="noBorder pl-4"><input type="text" class="search-input" placeholder="Genome"></th>
+                <th class="noBorder pl-4"><input type="text" class="search-input" placeholder="Species"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="bl-table pl-4">GRCh37</td>
+                <td class="bl-table pl-4"><i>Homo sapiens</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">GRCh38</td>
+                <td class="bl-table pl-4"><i>Homo sapiens</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">hg38</td>
+                <td class="bl-table pl-4"><i>Homo sapiens</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">hg19</td>
+                <td class="bl-table pl-4"><i>Homo sapiens</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">TAIR10</td>
+                <td class="bl-table pl-4"><i>Arabidopsis thaliana</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">EB2</td>
+                <td class="bl-table pl-4"><i>Bacillus subtilis 168</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">UMD3.1</td>
+                <td class="bl-table pl-4"><i>Bos taurus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">bosTau8</td>
+                <td class="bl-table pl-4"><i>Bos taurus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">WBcel235</td>
+                <td class="bl-table pl-4"><i>Caenorhabditis elegans</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">ce10</td>
+                <td class="bl-table pl-4"><i>Caenorhabditis elegans</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">canFam3</td>
+                <td class="bl-table pl-4"><i>Canis familiaris</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">CanFam3.1</td>
+                <td class="bl-table pl-4"><i>Canis familiaris</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">GRCz10</td>
+                <td class="bl-table pl-4"><i>Danio rerio</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">danRer10</td>
+                <td class="bl-table pl-4"><i>Danio rerio</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">BDGP6</td>
+                <td class="bl-table pl-4"><i>Drosophila melanogaster</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">dm6</td>
+                <td class="bl-table pl-4"><i>Drosophila melanogaster</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">EquCab2</td>
+                <td class="bl-table pl-4"><i>Equus caballus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">equCab2</td>
+                <td class="bl-table pl-4"><i>Equus caballus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">EB1</td>
+                <td class="bl-table pl-4"><i>Escherichia coli K12 DH10B</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">Galgal4</td>
+                <td class="bl-table pl-4"><i>Gallus gallus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">galGal4</td>
+                <td class="bl-table pl-4"><i>Gallus gallus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">Gm01</td>
+                <td class="bl-table pl-4"><i>Glycine max</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">Mmul_1</td>
+                <td class="bl-table pl-4"><i>Macaca mulatta</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">GRCm38</td>
+                <td class="bl-table pl-4"><i>Mus musculus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">mm10</td>
+                <td class="bl-table pl-4"><i>Mus musculus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">IRGSP-1.0</td>
+                <td class="bl-table pl-4"><i>Oryza sativa japonica</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">CHIMP2.1.4</td>
+                <td class="bl-table pl-4"><i>Pan troglodytes</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">panTro4</td>
+                <td class="bl-table pl-4"><i>Pan troglodytes</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">Rnor_6.0</td>
+                <td class="bl-table pl-4"><i>Rattus norvegicus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">rn6</td>
+                <td class="bl-table pl-4"><i>Rattus norvegicus</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">R64-1-1</td>
+                <td class="bl-table pl-4"><i>Saccharomyces cerevisiae</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">sacCer3</td>
+                <td class="bl-table pl-4"><i>Saccharomyces cerevisiae</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">EF2</td>
+                <td class="bl-table pl-4"><i>Schizosaccharomyces pombe</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">Sbi1</td>
+                <td class="bl-table pl-4"><i>Sorghum bicolor</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">Sscrofa10.2</td>
+                <td class="bl-table pl-4"><i>Sus scrofa</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">susScr3</td>
+                <td class="bl-table pl-4"><i>Sus scrofa</i></td>
+            </tr>
+            <tr>
+                <td class="bl-table pl-4">AGPv3</td>
+                <td class="bl-table pl-4"><i>Zea mays</i></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <p style="padding: 0 7em 2em 0;">
+        <input class="back-button" type="button" onclick="history.back();" value="Back">
+    </p>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".search-input").forEach(inputField => {
+                const tableRows = inputField.closest("table").querySelectorAll("tbody tr");
+                const headerCell = inputField.closest("th");
+                const otherHeaderCells = inputField.closest("tr").querySelectorAll("th");
+                const columnIndex = Array.from(otherHeaderCells).indexOf(headerCell);
+                const searchableCells = Array.from(tableRows)
+                    .map(row => row.querySelectorAll("td")[columnIndex])
+
+                inputField.addEventListener("input", () => {
+                    const searchQuery = inputField.value.toLowerCase();
+
+                    for (const tableCell of searchableCells) {
+                        const row = tableCell.closest("tr");
+                        const value = tableCell.textContent
+                            .toLowerCase()
+                            .replace(",", "");
+
+                        row.style.visibility = null;
+
+                        if (value.search(searchQuery) === -1) {
+                            row.style.visibility = "collapse";
+                        }
+                    }
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

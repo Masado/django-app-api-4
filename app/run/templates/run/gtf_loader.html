@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Reference Loader{% endblock %}
+{% load static %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <p><h4>This page will allow you to download a reference file of your choice</h4></p>
+
+    <p>
+        To use the reference loader please enter the name of the organism you want to obtain references for and select
+        the type of reference you would like to download. <br>
+        The reference loader will attempt to find and provide the latest reference for that organism on
+        <a href="https://www.ensembl.org/index.html" target="_blank">Ensembl</a>.
+    </p>
+
+    <form action="." method="post" enctype="multipart/form-data" onsubmit="pop_up('Finding the appropriate reference may take a while.\nPlease have patience.')">
+        {% csrf_token %}
+        <label for="id_org_name">Enter Organism name:</label>
+        <input id="id_org_name" class="ml-4" type="text" name="org_name">
+        <br><br>
+        <label for="id_selector">Reference type: </label>
+        <select id="id_selector" class="ml-4" name="selector">
+            <option value="gtf">GTF annotation file</option>
+            <option value="fasta">FASTA reference file</option>
+        </select>
+        <br><br>
+        <button type="submit" name="get_reference">Load reference</button>
+    </form>
+
+    <p style="padding: 0 7em 2em 0;"><input class="back-button" type="button" onclick="history.back()"; value="Back"></p>
+
+    <script>
+
+    </script>
+
+{% endblock %}

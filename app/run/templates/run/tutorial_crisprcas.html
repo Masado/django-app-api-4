@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}CRISPR/Cas Tutorial{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <form action="." method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="ml-4 float-right">
+            <p>
+            <div class="input-group">
+                <label class="input-group-text" id="id_archive_form">You can download the files<br> used in this example
+                    as a .zip or .tar.gz archive:</label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_archive_form_zip" class="form-check-input" type="radio" name="archive_form"
+                               value="zip" checked>
+                        <label class="form-check-label" for="id_archive_form_zip">ZIP</label>
+                    </div>
+                    <div>
+                        <input id="id_archive_form_tar" class="form-check-input" type="radio" name="archive_form"
+                               value="tar">
+                        <label class="form-check-label" for="id_archive_form_tar">TAR</label>
+                    </div>
+                </div>
+            </div>
+            </p>
+
+            <div class="center-text">
+                <button class="ml-4 mb-4" type="submit"
+                        name="tutorial_crisprcas">
+                    Download examples
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <p>
+        This page contains the tutorial for the CRISPR/Cas analysis. For every input on the actual analysis-page a more
+        detailed description of what is required by the user is given.<br>
+        To the right of this text you will also be able to download all the files that were used in this example if you
+        would like to take a closer look at how they are structured or want to try it yourself.
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/crisprcas/crisprcas_data.png' %}" alt="CRISPR/Cas data archive">
+        <figcaption><small>
+            For the "Data-Archive"-input please upload a .zip- or .tar.gz-archive containing your data in form of
+            gzipped FASTA files ending in '.fna.gz'. The sequences must be labeled with a unique ID. A meaningful
+            description
+            is recommended (e.g.: `>NC_013766.2 Listeria monocytogenes 08-5578, complete genome`).
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/crisprcas/crisprcas_database_fasta.png' %}"
+             alt="CRISPR/Cas database fasta">
+        <figcaption><small>
+            To run the pipeline a BLAST database is required. The pipeline will build this database for you. To do this,
+            you are required to upload a genome in form of a FASTA file for the species you obtained your data from.<br>
+            Different kinds of databases can be generated. Please select the type of database that you could like to
+            create.
+        </small></figcaption>
+    </figure>
+    <br>
+
+
+    <form action="." method="post">
+        <div>
+            <input class="back-button" type="button" onclick="history.back()" ; value="Back">
+        </div>
+    </form>
+
+
+{% endblock %}

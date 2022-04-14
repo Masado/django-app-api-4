@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "style.css" %}">
+{% endblock %}
+
+
+
+{% block content %}
+
+    <h1>Analysis Pipelines Web Application</h1>
+    <p style="text-align: justify">
+        The Analysis Pipelines Web Application is a tool designed to make running analyses an easy endeavor.<br>
+        It allows you to choose the kind of data you produced and what kind of analysis you would like to run on it.
+        Uploading your data and providing general information will allow the webapp to construct the nextflow
+        command to call the analysis pipeline.<br>
+        The analysis will be run for you and the results will be provided once completed.
+    </p>
+    <br>
+    <hr style="color: #ddd; width: 90%;">
+    <div>
+        <div class="center center-text">
+            <h2>Choose your dataset and start your own run</h2>
+        </div>
+{#        <div class="center center-text">#}
+{#            <p>#}
+{#                The button below will take you to the pipeline pathway, to find a pipeline applicable to your#}
+{#                data.<br>#}
+{#                Just click on the buttons that apply and you will be directed to a pipeline.#}
+{#            </p>#}
+{#        </div>#}
+        <div class="center">
+            <form action="/pipelines/pipe_path/">
+                <input class="start-button fw-bold"
+                       type="submit"
+                       title="Clicking this button will take you to a page, allowing you to pick out a dataset to find and run a pipeline for"
+                       value="Find pipeline">
+            </form>
+        </div>
+    </div>
+    <br>
+    <hr style="color: #ddd; width: 90%;">
+    <br>
+    <p style="text-align: justify">
+        If you already have a pipeline in mind, that you would like to run, you can select it directly in the
+        "Pipelines" tab. Here you will also find pipelines that do not take the output of other pipelines for further
+        analysis, but generate said output themselves.
+    </p>
+{#    <p style="text-align: justify">#}
+{#        If one of the requirements of an analysis confuses you, take a look at an example for every analysis in#}
+{#        the webapp. It includes the data used in the example so you can take a closer look or recreate the example using#}
+{#        the same data.#}
+{#    </p>#}
+
+{#    <br><br>#}
+{#    <hr style="color: #ddd;">#}
+{#    <div>#}
+{#        <div class="center">#}
+{#            <h2>Find a pipeline and start your own run</h2>#}
+{#        </div>#}
+{#        <div class="center center-text">#}
+{#            <p>#}
+{#                The button below will take you to the pipeline pathway, to find a pipeline applicable to your#}
+{#                data.<br>#}
+{#                Just click on the buttons that apply and you will be directed to a pipeline.#}
+{#            </p>#}
+{#        </div>#}
+{#        <div class="center">#}
+{#            <form action="/run/pipe_path/">#}
+{#                <input style="padding-top:25px; padding-bottom: 25px;" class="start-button ml-4"#}
+{#                       type="submit"#}
+{#                       value="Find pipeline">#}
+{#            </form>#}
+{#        </div>#}
+{#    </div>#}
+{#    <hr style="color: #ddd;">#}
+
+{% endblock %}

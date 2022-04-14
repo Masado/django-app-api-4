@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Post-RNA-Seq Tutorial{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <div class="ml-4 float-right">
+            <p>
+            <div class="input-group">
+                <label class="input-group-text" id="id_archive_form">You can download the files<br> used in this example
+                    as a .zip or .tar.gz archive:</label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_archive_form_zip" class="form-check-input" type="radio" name="archive_form"
+                               value="zip" checked>
+                        <label class="form-check-label" for="id_archive_form_zip">ZIP</label>
+                    </div>
+                    <div>
+                        <input id="id_archive_form_tar" class="form-check-input" type="radio" name="archive_form"
+                               value="tar">
+                        <label class="form-check-label" for="id_archive_form_tar">TAR</label>
+                    </div>
+                </div>
+            </div>
+            </p>
+            <div class="center-text">
+                <button type="submit" name="tutorial_post_rnaseq">
+                    Download examples
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <p>
+        This page contains the tutorial for the Post-RNA-Seq analysis. For every input on the actual analysis-page a
+        more detailed description of what is required by the user is given.<br>
+        To the right of this text you will also be able to download all the files that were used in this example if
+        you would like to take a closer look at how they are structured or want to try to start a run yourself.
+    </p>
+
+
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_orgname.png' %}" alt="Post-RNA-Seq Organism name">
+        <small>
+            <figcaption>
+                The "Organism name"-input field requires you to enter the name of the organism from which the samples
+                were
+                originally gathered with their scientific name (e.g.: Chicken - <i>Gallus gallus</i>, Baker's yeast -
+                <i>Saccharomyces cerevisiae</i>).
+            </figcaption>
+        </small>
+    </figure>
+    <hr>
+
+{#    <p>#}
+{#    <figure>#}
+{#        <img src="{% static 'images/tutorials/postrnaseq/prna_taxid.png' %}" alt="Post-RNA-Seq Taxonomy ID">#}
+{#        <small>#}
+{#            <figcaption>#}
+{#                The "Taxnomoy ID"-input field requires you to enter the Taxonomic ID of the organism from which#}
+{#                the samples were originally gathered (e.g.: Chicken - 9031, Baker's yeast - 4932).#}
+{#            </figcaption>#}
+{#        </small>#}
+{#    </figure>#}
+{#    <hr>#}
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_samplefile_2.png' %}" alt="Post-RNA-Seq Sample file">
+        <small>
+            <figcaption>
+                The "Sample file"-input field is the first input that requires you to upload a file containing the
+                information how the fastq files you used in your original RNA-Seq run are structured. Here you are
+                required to upload a txt- or tsv-file containing 2 columns of information. The first
+                column should be simply the name of the fastq-file, not including the "R1/2" of paired end reads (e.g.:
+                "185BS_01_AAAACT") and labeled as "run". The second column must be called "condition" and contain
+                information on the treatment of the file (e.g.: "WT1", "KO1", "WT2", "KO2").<br>
+                Note that these files can also contain a lot of additional columns with information, but these two
+                columns are required.
+            </figcaption>
+        </small>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_salmon.png' %}" alt="Post-RNA-Seq Salmon archive">
+        <figcaption><small>
+            The "salmon"-input field requires you to upload the entirety of the output folder of the salmon process.
+            Simply compress the folder to a .zip or .tar.gz archive and upload it.<br>
+            The archive used in this example, which you can download at the bottom of the page, contains a file
+            called "tx2gene.csv" which is no longer included in the results of the newest version of nf-core's RNA-Seq
+            pipeline.
+            If your archive does not contain the file it will be generated for you by the pipeline if possible.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_comparetsv.png' %}"
+             alt="Post-RNA-Seq Comparison .tsv-file">
+        <figcaption><small>
+            The "Comparison tsv file"-input field also requires you to upload a file, in this case a .tsv file
+            containing
+            the information which comparisons you would like DeSeq2 to run. It should contain two columns, and a row
+            for each comparison. Please note that the single entries must the same as the conditions in the file you
+            uploaded in the "Sample file"-input.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+{#    <p>#}
+{#    <figure>#}
+{#        <img src="{% static 'images/tutorials/postrnaseq/prna_annofile.png' %}" alt="Post-RNA-Seq Annotation file">#}
+{#        <figcaption><small>#}
+{#            The "Annotation file"-input field needs you to upload an annotation file in .gtf-format. This gtf-file#}
+{#            will need to contain the additional attribute columns "gene_id", "transcript_id" and, in the case of#}
+{#            CDS, "protein_id". Files in this format can be, among others, obtained from ensembl.#}
+{#        </small></figcaption>#}
+{#    </figure>#}
+{#    <hr>#}
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_networkfile.png' %}" alt="Post-RNA-Seq Network file">
+        <figcaption><small>
+            The "Network file"-input field requires a file upload as well. The pipeline needs a .sif file containing
+            a protein interaction network for the species you obtained your data from. <br>
+            Such a network can be easily obtained from the Cytoscape app. It will require you to install the additional
+            app "stringApp" (Apps &#8594; App Manager &#8594; Search: stringApp &#8594; Install). <br>
+            Once the installation is finished you can Import the interaction network in File &#8594; Import &#8594;
+            Network from Public Databases and select Data Source: "STRING: protein query". Under "Species:" enter
+            the name of the species you are looking for (e.g.: <i>Gallus gallus</i>), check "All proteins of this species"
+            and press "Import". <br>
+            After the Import is finished you can export the network as a .sif file (File &#8594; Export &#8594;
+            Network to File).
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    {#    <p>#}
+    {#    <figure>#}
+    {#        <img src="{% static 'images/tutorials/postrnaseq/prna_kpm.png' %}" alt="Post-RNA-Seq KeyPathwayMiner">#}
+    {#        <figcaption><small>#}
+    {#            The Section "KeyPathwayMiner" has many inputs that require you to enter numbers. These numbers are#}
+    {#            parameters for the KeyPathwayMiner. <br>#}
+    {#            The "Number of pathways" input determines how many different solutions will be created. <br>#}
+    {#            The K-value represents the number of allowed exception genes to be added to a potential solution.<br>#}
+    {#            The L-value sets the number of case exceptions, so the number of non-active samples allowed for each#}
+    {#            gene.<br>#}
+    {#            For both K- and L-value a minimum, maximum and step value can be assigned. Both start at the minimum#}
+    {#            value and go up by the step-value until the maximum is reached.#}
+    {#        </small></figcaption>#}
+    {#    </figure>#}
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_kpm_pathways.png' %}"
+             alt="Post-RNA-Seq KeyPathwayMiner Pathways">
+        <figcaption><small>
+            The "KeyPathwayMiner" section requires you to enter numbers as input for the keypathwayminer process to use.<br>
+            The "Number of pathways" input determines how many different solutions the keypathwayminer will create.
+        </small></figcaption>
+    </figure>
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_kpm_k.png' %}"
+             alt="Post-RNA-Seq KeyPathwayMiner Node exceptions">
+        <figcaption><small>
+            The K-value represents the number of allowed exception genes to be added to a potential solution.<br>
+            The K-min and K-max values determine the how many minimum or maximum node exceptions will be allowed. The
+            K-step value adjusts the amount at which the K-value is increased, from K-min to K-max.
+        </small></figcaption>
+    </figure>
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/postrnaseq/prna_kpm_l.png' %}"
+             alt="Post-RNA-Seq KeyPathwayMiner Case exceptions">
+        <figcaption><small>
+            The L-value sets the number of case exceptions, so the number of non-active samples allowed for each
+            gene.<br>
+            The L-min and L-max values determine the how many minimum or maximum case exceptions will be allowed. The
+            L-step value adjusts the amount at which the L-value is increased, from L-min to L-max.
+        </small></figcaption>
+    </figure>
+    </p>
+
+
+
+    <form>
+        {% csrf_token %}
+
+
+        <div>
+
+            <input class="back-button" type="button" onclick="history.back()" ; value="Back">
+        </div>
+    </form>
+
+    {#    <p style="padding: 0 7em 2em 0;"><input class="back-button" type="button" onclick="history.back()"; value="Back"></p>#}
+
+
+{% endblock %}

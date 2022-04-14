@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Pipeline-Finder{% endblock %}
+
+{% block content %}
+
+    {% if reason == "no Problem" %}
+        <div>
+            <p>You shouldn't be seeing this. Something is probably wrong?</p>
+        </div>
+    {% elif reason == "csv" %}
+        <div id="id_reason_csv">
+            <h2>CSV input file produced errors</h2>
+            <p>
+                We encountered a problem while reading the spreadsheet CSV file you provided.<br>
+                Please ensure that the file contains the correct headers and try again.
+            </p>
+        </div>
+    {% elif reason == "tsv" %}
+        <div id="id_reason_tsv">
+            <h2>CSV input file produced errors</h2>
+            <p>
+                We encountered a problem while reading the spreadsheet TSV file you provided.<br>
+                Please ensure that the file contains the correct headers and try again.
+            </p>
+        </div>
+    {% elif reason == "bed" %}
+        <div id="id_reason_bed">
+            <h2>BED input file produced errors</h2>
+            <p>
+                We encountered a problem while reading the BED file you provided.<br>
+                Please ensure that the file is looks correct and try again.
+            </p>
+        </div>
+    {% elif reason == "gtf" %}
+        <div id="id_reason_gtf">
+            <h2>BED input file produced errors</h2>
+            <p>
+                We encountered a problem while reading the GTF file you provided.<br>
+                Please ensure that the file looks correct and try again.
+            </p>
+        </div>
+    {% elif reason == "fasta" %}
+        <div id="id_reason_fasta">
+            <h2>FASTA input file produced errors</h2>
+            <p>
+                We encountered a problem while reading the FASTA file you provided.<br>
+                Please ensure that the file contains the correct headers and try again.
+            </p>
+        </div>
+    {% else %}
+        <div>
+            <p>
+                This text means there was no context. Which in turn means something is very broken.
+            </p>
+        </div>
+    {% endif %}
+
+    <p style="padding: 0 7em 2em 0;">
+        <input class="back-button" type="button" onclick="history.back();" value="Back">
+    </p>
+
+{% endblock %}

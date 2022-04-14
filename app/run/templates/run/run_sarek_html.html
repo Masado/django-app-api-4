@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}Sarek Pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2>
+
+    <input type="hidden" name="sarek_id" value="{{ new_id }}">
+
+    <h4></h4>
+
+    <form action="{% url 'run:SarekTutorial' %}">
+        <input class="submit-button float-right" type="submit" value="Explanation">
+    </form>
+
+    <form action="." method="post" onsubmit="return check_db();" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+        {#        <p>#}
+        {#            <label for="id_organism_name">Organism name:</label>#}
+        {##}
+        {#            <input id="id_organism_name" type="text" name="organism_name" required="">#}
+        {#        </p>#}
+        {##}
+        {#        <p title="When writing your design.tsv, if you upload your referenced data, please consider that both will end up in the same location">#}
+        {#            <label for="id_tsv_file">Input tsv-file:</label>#}
+        {##}
+        {#            <input id="id_tsv_file" type="file" class="ml-4" name="tsv_file" accept=".tsv" required="required">#}
+        {#            <br>#}
+        {#            <small><em>When writing your design.tsv, if you upload your referenced data, please consider that both will#}
+        {#                end#}
+        {#                up in#}
+        {#                the same location.</em></small>#}
+        {#        </p>#}
+        {##}
+        {#        <p title="If you are not providing your data from an internet source, please upload the data in form of a .zip or .tar.gz archive">#}
+        {#            <label for="id_file_folder">File folder:</label>#}
+        {##}
+        {#            <input id="id_file_folder" type="file" class="ml-4" accept=".zip, .tar.gz" name="file_folder">#}
+        {#            <br>#}
+        {#            <small><em>If you are not providing your data from an internet source, please upload the data in form of a#}
+        {#                .zip#}
+        {#                or .tar.gz archive.</em></small>#}
+        {#        </p>#}
+        {##}
+        {#        <p title="Please enter your iGenome reference (e.g.: 'GRCh38'). If you are not using an iGenome reference, please upload your own reference files.">#}
+        {#            <label for="id_igenome_reference">iGenome reference name:</label>#}
+        {##}
+        {#            <input id="id_igenome_reference" class="ml-4" type="text" name="igenome_reference" value="">#}
+        {#            <br>#}
+        {#            <small><em>#}
+        {#                Please enter your iGenome reference (e.g.: "GRCh38").<br>#}
+        {#                If you are not using an iGenome reference, please upload your own reference files.<br>#}
+        {#                A full list of iGenome references available for nf-core pipelines can be found <a#}
+        {#                    href="https://github.com/nf-core/chipseq/blob/master/conf/igenomes.config" target="_blank">here</a>.#}
+        {#            </em></small>#}
+        {#        </p>#}
+        {##}
+        {#        <p title="If you do not have a genome reference available you can upload a FASTA file and the pipeline will build a genome reference for you">#}
+        {#            <label for="id_fasta_file">Fasta genome reference:</label>#}
+        {##}
+        {#            <input id="id_fasta_file" type="file" class="ml-4" accept=".fa,.fasta" name="fasta_file" title="If you do not have a genome reference available you can upload a FASTA file and the pipeline will build a genome reference for you">#}
+        {#            <br>#}
+        {#            <small><em>If you do not have a genome reference available you can upload a FASTA file and the pipeline will#}
+        {#                build a#}
+        {#                genome reference for you.</em></small>#}
+        {#        </p>#}
+        {##}
+        {#        <p title="Please upload a dbsnp file for the pipeline to use. This should end in .vcf.gz and can be obtained from NCBI">#}
+        {#            <label for="id_dbsnp_file">Dbsnp file:</label>#}
+        {##}
+        {#            <input id="id_dbsnp_file" type="file" class="ml-4" accept=".vcf.gz" name="dbsnp_file" title="Please upload a dbsnp file for the pipeline to use. This should end in .vcf.gz and can be obtained from NCBI">#}
+        {#            <br>#}
+        {#            <small><em>Please upload a dbsnp file for the pipeline to use. This should end in .vcf.gz and can be#}
+        {#                obtained#}
+        {#                from NCBI.</em></small>#}
+        {#        </p>#}
+        {#        <p title="If you uploaded a dbsnp file, please also upload the corresponding index file. The file should have the same name as the dbsnp, but end in .vcf.gz.tbi and should be in the same location as the dbsnp file on NCBI.">#}
+        {#            <label for="id_dbsnp_index">Dbsnp index file:</label>#}
+        {##}
+        {#            <input id="id_dbsnp_index" type="file" class="ml-4" accept=".vcf.gz.tbi" name="dbsnp_index" title="If you uploaded a dbsnp file, please also upload the corresponding index file. The file should have the same name as the dbsnp, but end in .vcf.gz.tbi and should be in the same location as the dbsnp file on NCBI.">#}
+        {#            <br>#}
+        {#            <small><em>#}
+        {#                If you uploaded a dbsnp file, please also upload the corresponding index file. The file should have#}
+        {#                the same name as the dbsnp, but end in .vcf.gz.tbi and should be in the same location as the dbsnp file#}
+        {#                on#}
+        {#                NCBI.#}
+        {#            </em></small>#}
+        {#        </p>#}
+
+        <table>
+            <tbody>
+            <tr>
+                <td class="noBorder"><label for="id_tsv_file" class="float-right">Input tsv-file:</label></td>
+                <td class="noBorder"><input id="id_tsv_file" type="file" class="ml-4" name="tsv_file" accept=".tsv"
+                                            required="required"></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Your input file tells the analysis where to find your input data and how said data is structured and must be in .tsv format. This data can be located in an online database or locally on your machine. In the latter case please upload your data in form of an archive at the 'File folder' input. Also, when writing your input file, please ensure that all data is stored inside of a folder that is also part of the file name (e.g.:'path/to/example.fastq.gz')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3"><em><small>A tool to help you create the input spreadsheet file can be
+                    found
+                    <a href="http://localhost:8000/run/sheets/" target="_blank">here</a>.</small></em></td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_file_folder" class="float-right">File folder:</label></td>
+                <td class="noBorder"><input id="id_file_folder" type="file" class="ml-4" accept=".zip, .tar.gz"
+                                            name="file_folder"></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="If your data is not provided through an internet source, please store the data inside of a folder, that must be included in the columns describing your fastq.gz files in the input file you upload at the 'Input tsv-file'-input. Then compress said folder into a .zip or .tar.gz archive and upload it here.">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_igenome_reference" class="float-right">iGenome reference
+                    name:</label></td>
+                <td class="noBorder"><input id="id_igenome_reference" class="ml-4" type="text" name="igenome_reference"
+                                            value=""></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please enter your iGenome reference (e.g.: 'GRCh38'). If you are not using an iGenome reference, please upload your own reference files.">
+                </td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td colspan="3" class="noBorder"><small><em>
+                    A full list of iGenome references available for nf-core pipelines can be found <a
+                        href="http://0.0.0.0:8000/run/igenome/" target="_blank">here</a>.
+                </em></small></td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td colspan="3" class="noBorder">
+                    <label for="id_own_genome">Specify and upload your own references here: </label>
+                    <input type="checkbox" id="id_own_genome" name="own_genome" onclick="extend_genome_options()">
+                </td>
+            </tr>
+            </tbody>
+            <tbody id="id_reference_genome_options" style="display: none">
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <em><small>
+                        If you need help obtaining one or more of the required reference files you can try using our
+                        <br>
+                        <a href="http://0.0.0.0:8000/run/references/" target="_blank">reference loader</a> to obtain
+                        the latest Ensembl data for the species you used.
+                    </small></em>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_fasta_file" class="float-right">Fasta genome reference:</label></td>
+                <td class="noBorder"><input id="id_fasta_file" type="file" class="ml-4" accept=".fa,.fasta"
+                                            name="fasta_file"></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="If you do not have a genome reference available you can upload a FASTA file and the pipeline will build a genome reference for you">
+                </td>
+            </tr>
+            </tbody>
+            <tbody>
+            <tr>
+                <td class="noBorder"><label for="id_dbsnp_file" class="float-right">Dbsnp file:</label></td>
+                <td class="noBorder"><input id="id_dbsnp_file" type="file" class="ml-4" accept=".vcf.gz"
+                                            name="dbsnp_file"></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload a dbsnp file for the pipeline to use. This should end in .vcf.gz and can be obtained from NCBI">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_dbsnp_index" class="float-right">Dbsnp index file:</label></td>
+                <td class="noBorder"><input id="id_dbsnp_index" type="file" class="ml-4" accept=".vcf.gz.tbi"
+                                            name="dbsnp_index"></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="If you uploaded a dbsnp file, please also upload the corresponding index file. The file should have the same name as the dbsnp, but end in .vcf.gz.tbi and should be in the same location as the dbsnp file on NCBI.">
+                </td>
+            </tr>
+            {#            <tr class="bottom-borderless">#}
+            {#                <td class="noBorder"><label for="id_vc_tools">Variant calling tools:</label></td>#}
+            {#                <td class="noBorder"><select id="id_vc_tools" name="vc_tools" multiple>#}
+            {#                    <option value="FreeBayes">FreeBayes</option>#}
+            {#                    <option value="HaplotypeCaller">HaplotypeCaller</option>#}
+            {#                    <option value="Manta">Manta</option>#}
+            {#                    <option value="mpileup">mpileup</option>#}
+            {#                    <option value="Strelka">Strelka</option>#}
+            {#                    <option value="TIDDIT">TIDDIT</option>#}
+            {#                    <option value="ASCAT">ASCAT</option>#}
+            {#                    <option value="Control-FREEC">Control-FREEC</option>#}
+            {#                    <option value="MSIsensor">MSIsensor</option>#}
+            {#                    <option value="Mutect2">Mutect2</option>#}
+            {#                </select></td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="You can select multiple tools for variant calling.">#}
+            {#                </td>#}
+            {#            </tr>#}
+            <tr>
+                <td colspan="3" class="noBorder" style="padding-top: 1em">Please select all variant calling tools you
+                    would like to use:
+                </td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td class="noBorder" colspan="2">
+                    <div id="id_vc_tools" class="inline-group">
+                        <table>
+                            <tr>
+                                <td class="noBorder"><label for="id_vc_freebayes" class="ml-4">FreeBayes</label></td>
+                                <td class="noBorder"><input id="id_vc_freebayes" class="checkbox-row" type="checkbox"
+                                                            name="FreeBayes"></td>
+                                <td class="noBorder"><label for="id_vc_haplotypecaller"
+                                                            class="ml-4">HaplotypeCaller</label></td>
+                                <td class="noBorder"><input id="id_vc_haplotypecaller" class="checkbox-row"
+                                                            type="checkbox" name="HaplotypeCaller"></td>
+                                <td class="noBorder"><label for="id_vc_manta" class="ml-4">Manta</label></td>
+                                <td class="noBorder"><input id="id_vc_manta" class="checkbox-row" type="checkbox"
+                                                            name="Manta"></td>
+                                <td class="noBorder"><label for="id_vc_mpileup" class="ml-4">mpileup</label></td>
+                                <td class="noBorder"><input id="id_vc_mpileup" class="checkbox-row" type="checkbox"
+                                                            name="mpileup"></td>
+                                <td class="noBorder"><label for="id_vc_strelka" class="ml-4">Strelka</label></td>
+                                <td class="noBorder"><input id="id_vc_strelka" class="checkbox-row" type="checkbox"
+                                                            name="Strelka"></td>
+                            </tr>
+                            <tr>
+                                <td class="noBorder"><label for="id_vc_tiddit" class="ml-4">TIDDIT</label></td>
+                                <td class="noBorder"><input id="id_vc_tiddit" class="checkbox-row" type="checkbox"
+                                                            name="TIDDIT"></td>
+                                <td class="noBorder"><label for="id_vc_ascat" class="ml-4">ASCAT</label></td>
+                                <td class="noBorder"><input id="id_vc_ascat" class="checkbox-row" type="checkbox"
+                                                            name="ASCAT"></td>
+                                <td class="noBorder"><label for="id_vc_control-freec" class="ml-4">Control-FREEC</label>
+                                </td>
+                                <td class="noBorder"><input id="id_vc_control-freec" class="checkbox-row"
+                                                            type="checkbox" name="Control-FREEC"></td>
+                                <td class="noBorder"><label for="id_vc_msisensor" class="ml-4">MSIsensor</label></td>
+                                <td class="noBorder"><input id="id_vc_msisensor" class="checkbox-row" type="checkbox"
+                                                            name="MSIsensor"></td>
+                                <td class="noBorder"><label for="id_vc_mutect2" class="ml-4">MUTECT2</label></td>
+                                <td class="noBorder"><input id="id_vc_mutect2" class="checkbox-row" type="checkbox"
+                                                            name="Mutect2"></td>
+                            </tr>
+                        </table>
+                        {#                        <label for="id_vc_freebayes" class="ml-4">FreeBayes</label><input id="id_vc_freebayes" class="checkbox-row" type="checkbox" name="FreeBayes">#}
+                        {#                        <label for="id_vc_haplotypecaller" class="ml-4">HaplotypeCaller</label><input id="id_vc_haplotypecaller" class="checkbox-row" type="checkbox" name="HaplotypeCaller">#}
+                        {#                        <label for="id_vc_manta" class="ml-4">Manta</label><input id="id_vc_manta" class="checkbox-row" type="checkbox" name="Manta">#}
+                        {#                        <label for="id_vc_mpileup" class="ml-4">mpileup</label><input id="id_vc_mpileup" class="checkbox-row" type="checkbox" name="mpileup">#}
+                        {#                        <label for="id_vc_strelka" class="ml-4">Strelka</label><input id="id_vc_strelka" class="checkbox-row" type="checkbox" name="Strelka"><br>#}
+                        {#                        <label for="id_vc_tiddit" class="ml-4">TIDDIT</label><input id="id_vc_tiddit" class="checkbox-row" type="checkbox" name="TIDDIT">#}
+                        {#                        <label for="id_vc_ascat" class="ml-4">ASCAT</label><input id="id_vc_ascat" class="checkbox-row" type="checkbox" name="ASCAT">#}
+                        {#                        <label for="id_vc_control-freec" class="ml-4">Control-FREEC</label><input id="id_vc_control-freec" class="checkbox-row" type="checkbox" name="Control-FREEC">#}
+                        {#                        <label for="id_vc_msisensor" class="ml-4">MSIsensor</label><input id="id_vc_msisensor" class="checkbox-row" type="checkbox" name="MSIsensor">#}
+                        {#                        <label for="id_vc_mutect2" class="ml-4">MUTECT2</label><input id="id_vc_mutect2" class="checkbox-row" type="checkbox" name="Mutect2">#}
+                    </div>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="You can select multiple tools for the pipeline to run.">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="noBorder">Please select all annotation tools you would like to use:</td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td class="noBorder" colspan="2">
+                    <table>
+                        <tr>
+                            <td class="noBorder"><label for="id_vc_snpeff" class="ml-4">snpEff</label></td>
+                            <td class="noBorder"><input id="id_vc_snpeff" class="checkbox-row" type="checkbox"
+                                                        name="snpEff"></td>
+                            <td class="noBorder"><label for="id_vc_vep" class="ml-4">VEP</label></td>
+                            <td class="noBorder"><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">
+                            </td>
+                        </tr>
+                    </table>
+                    {#                    <div id="id_vc_tools" class="inline-group">#}
+                    {#                        <label for="id_vc_snpeff" class="ml-4">snpEff</label><input id="id_vc_snpeff" class="checkbox-row" type="checkbox" name="snpEff">#}
+                    {#                        <label for="id_vc_vep" class="ml-4">VEP</label><input id="id_vc_vep" class="checkbox-row" type="checkbox" name="VEP">#}
+                    {#                    </div>#}
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="You can select both tools to run them consecutively.">
+                </td>
+            </tr>
+            {#            <tr class="bottom-borderless">#}
+            {#                <td class="noBorder"><label for="id_anno_tools">Annotation tools:</label></td>#}
+            {#                <td class="noBorder"><select id="id_anno_tools" name="anno_tools[]" multiple style="height: 3.5em">#}
+            {#                    <option value="snpEff">snpEff</option>#}
+            {#                    <option value="VEP">VEP</option>#}
+            {#                </select></td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="You can select both tools to run them consecutively.">#}
+            {#                </td>#}
+            {#            </tr>#}
+            </tbody>
+        </table>
+
+        <br><br>
+        <button type="submit"
+                name="run_sarek">Start Run
+        </button>
+    </form>
+
+    <script>
+        function check_db() {
+            let dbsnp = document.getElementById('id_dbsnp_file');
+            let dbsnp_index = document.getElementById('id_dbsnp_index');
+            if (dbsnp.files.length !== 0 && dbsnp_index.files.length === 0) {
+                alert("Please also upload a dbsnp index file!");
+                return false;
+            } else if (dbsnp.files.length === 0 && dbsnp_index.files.length !== 0) {
+                alert("Please also upload a dbsnp file!");
+                return false;
+            } else {
+                alert("The pipeline will now start. This may take some time, so you can close this page and find your " +
+                    "results later using the 'Find Results' tag.");
+                return true;
+            }
+        }
+
+        function extend_genome_options() {
+            // get checkbox
+            const checkbox = document.getElementById("id_own_genome");
+            // get tbody
+            const tbody = document.getElementById("id_reference_genome_options");
+
+            if (checkbox.checked === true) {
+                tbody.style.display = "";
+            } else {
+                tbody.style.display = "none";
+            }
+        }
+    </script>
+
+
+{% endblock %}

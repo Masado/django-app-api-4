@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Pipeline failed{% endblock %}
+{% load static %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <p><h2>The Run-ID for this pipeline-run is '{{ run_id }}'</h2></p>
+
+    <p>
+        The pipeline has finished with a non-zero exit code: '{{ result }}'.<br>
+        You can download the log-file below if you would like to figure out what went wrong.
+    </p>
+     <form method="post">
+         {% csrf_token %}
+         <button type="submit" name="download_log">Download nextflow-log</button>
+     </form>
+
+
+
+    <p style="padding: 0 7em 2em 0;"><input class="back-button" type="button" onclick="history.back()"; value="Back"></p>
+
+{% endblock %}

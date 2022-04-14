@@ -1,0 +1,19 @@
+name: post-rnaseq-1.0
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - conda-forge::r-base=4.1.0
+  - conda-forge::r-tidyselect=1.1.1
+  - conda-forge::r-gprofiler2=0.2.1
+  - conda-forge::r-readr=2.1.1
+  - conda-forge::r-jsonlite=1.7.2
+  - conda-forge::r-rjson=0.2.20
+  - conda-forge::r-foreach=1.5.1
+  - bioconda::bioconductor-deseq2=1.34.0
+  - bioconda::bioconductor-tximport=1.22.0
+  - bioconda::bioconductor-netresponse=1.54.0
+  

@@ -1,0 +1,472 @@
+{% extends 'base.html' %}
+
+{% block title %}ChIP-seq Pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2>
+
+    <form action="{% url 'run:ChIPTutorial' %}">
+        <input class="submit-button float-right" type="submit" value="Explanation">
+    </form>
+
+    <form action="." method="post" enctype="multipart/form-data" onsubmit="return check_inputs_chipseq()">
+        {% csrf_token %}
+
+        <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+        {#        <p>#}
+        {#            <label id="id_organism_name">Organism name:</label>#}
+        {##}
+        {#            <input id="id_organism_name" type="text" name="organism_name" required="">#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_design_file">Design-file:</label>#}
+        {##}
+        {#            <input id="id_design_file" type="file" class="ml-4" name="design_file" accept=".csv" required="required"#}
+        {#                   title="When writing your design.tsv, if you upload your referenced data, please consider that both will end up in the same location">#}
+        {#            <br>#}
+        {#            <small><em>When writing your design.tsv, if you upload your referenced data, please consider that both will#}
+        {#                end#}
+        {#                up in#}
+        {#                the same location</em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_file_folder">File folder:</label>#}
+        {##}
+        {#            <input id="id_file_folder" type="file" class="ml-4" accept=".zip, .tar.gz" name="file_folder"#}
+        {#                   title="If you are not getting your data from an internet source, please upload the data in form of a .zip or .tar.gz archive">#}
+        {#            <br>#}
+        {#            <small><em>If you are not providing your data from an internet source, please upload the data in form of a#}
+        {#                .zip#}
+        {#                or .tar.gz archive</em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#        <div class="input-group">#}
+        {#            <label class="input-group-text" id="id_single_end">Is your input single-end reads?</label>#}
+        {#            <div class="form-control radio-inline pl-4">#}
+        {#                <div class="form-check form-check-inline mr-4">#}
+        {#                    <input id="id_single_end_true" class="form-check-input" type="radio" name="single_end" value="true">#}
+        {#                    <label class="form-check-label" for="id_single_end_true">True</label>#}
+        {#                </div>#}
+        {#                <div>#}
+        {#                    <input id="id_single_end_false" class="form-check-input" type="radio" name="single_end"#}
+        {#                           value="false" checked>#}
+        {#                    <label class="form-check-label" for="id_single_end_false">False</label>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#        </div>#}
+        {#        </p>#}
+        {##}
+        {#        <p>#}
+        {#            <label id="id_igenome_reference">iGenome reference:</label>#}
+        {##}
+        {#            <input id="id_igenome_reference" type="text" class="ml-4" name="igenome_reference" value="" title="Please enter your iGenome reference (e.g.: 'GRCh38').#}
+        {#If you are not using an iGenome reference, please upload your own reference files">#}
+        {#            <br>#}
+        {#            <small><em>#}
+        {#                Please enter your iGenome reference (e.g.: "GRCh38").<br>#}
+        {#                If you are not using an iGenome reference, please upload your own reference files.<br>#}
+        {#                A full list of iGenome references available for nf-core pipelines can be found <a#}
+        {#                    href="https://github.com/nf-core/chipseq/blob/master/conf/igenomes.config" target="_blank">here</a>.#}
+        {#            </em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_fasta_file">Fasta reference:</label>#}
+        {##}
+        {#            <input id="id_fasta_file" type="file" class="ml-4" accept=".fa" name="fasta_file" value=NULL#}
+        {#                   title="Please upload your fasta reference">#}
+        {#            <br>#}
+        {#            <small><em>Please upload your fasta reference</em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_gtf_file">GTF annotation:</label>#}
+        {##}
+        {#            <input id="id_gtf_file" type="file" class="ml-4" accept=".gtf" name="gtf_file" value=NULL#}
+        {#                   title="Please upload your gtf annotation">#}
+        {#            <br>#}
+        {#            <small><em>Please upload your gtf annotation</em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_bed_file">Genome bed file:</label>#}
+        {##}
+        {#            <input id="id_bed_file" type="file" class="ml-4" accept=".bed" name="bed_file" value=NULL#}
+        {#                   title="Please upload your gene bed file">#}
+        {#            <br>#}
+        {#            <small><em>Please upload your gene bed file</em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_macs_size">MACS2 genome size:</label>#}
+        {##}
+        {#            <input id="id_macs_size" type="text" class="ml-4" accept="" name="macs_size" value=""#}
+        {#                   title="If you are not using an iGenome reference you can enter your MACS2 genome size. If this is not specified the MACS2 processes will be skipped.">#}
+        {#            <br>#}
+        {#            <small><em>If you are not using an iGenome reference you can enter your MACS2 genome size.#}
+        {#                <br> If this is not specified the MACS2 processes will be skipped.#}
+        {#            </em></small>#}
+        {#        </p>#}
+        {#        <p>#}
+        {#            <label id="id_narrow_peaks">Would you like MACS2 to be run in narrowPeak mode?</label>#}
+        {##}
+        {#            <input id="id_narrow_peaks" type="checkbox" name="narrow_peaks">#}
+        {#        </p>#}
+        {##}
+        {#        ########################################################################################################### #}
+        {##}
+        {#        <hr>#}
+        {#        <p>#}
+        {#            <label for="id_post_chipseq">#}
+        {#                Would you like to run the Post-ChIP-Seq pipeline immediately after this pipeline?#}
+        {#            </label>#}
+        {#            <input id="id_post_chipseq" type="checkbox" name="post_chipseq" onclick="post_chipseq_addition()">#}
+        {#        </p>#}
+        {##}
+        {#        <div id="id_post_chipseq_extras" style="display: none">#}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label id="id_ext_chr">Chromosomes:</label>#}
+        {##}
+        {#                <input id="id_ext_chr" type="text" name="ext_chr">#}
+        {#            </div>#}
+        {##}
+        {#            <small><em>#}
+        {#                If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass#}
+        {#                them here.<br>#}
+        {#                You can request multiple chromosomes by separating them with a comma (e.g. "IV,VII,X").#}
+        {#            </em></small>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div class="input-group">#}
+        {#                <label class="input-group-text" id="id_single_end">Computation method: </label>#}
+        {#                <div class="form-control radio-inline pl-4">#}
+        {#                    <div class="form-check form-check-inline mr-4">#}
+        {#                        <input id="id_cm_rp" class="form-check-input" type="radio" name="computation_method"#}
+        {#                               value="reference_point" checked>#}
+        {#                        <label class="form-check-label" for="id_cm_rp">Reference-Point</label>#}
+        {#                    </div>#}
+        {#                    <div>#}
+        {#                        <input id="id_cm_sr" class="form-check-input" type="radio" name="computation_method"#}
+        {#                               value="scale_regions">#}
+        {#                        <label class="form-check-label" for="id_cm_sr">Scale-Regions</label>#}
+        {#                    </div>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#            <small><em>Please select a computation method for the matrix generation.</em></small>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div class="input-groups">#}
+        {#                <div class="form-control text-inline">#}
+        {#                    <div class="form-check form-check-inline mr-4">#}
+        {#                        <label for="id_upstream">Upstream: </label>#}
+        {#                        <input type="text" id="id_upstream" placeholder="2000">#}
+        {#                    </div>#}
+        {#                    <br>#}
+        {#                    <div class="form-check form-check-inline mr-4">#}
+        {#                        <label for="id_downstream">Downstream: </label>#}
+        {#                        <input type="text" id="id_downstream" placeholder="2000">#}
+        {#                    </div>#}
+        {#                    <br>#}
+        {#                    <div class="form-check form-check-inline">#}
+        {#                        <label for="id_region_length">Region Length: </label>#}
+        {#                        <input type="text" id="id_region_length" placeholder="2000">#}
+        {#                    </div>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#            </p> <br>#}
+        {##}
+        {#            <p><small><em>Please insert the base pairs upstream and downstream, and in case of the scale-regions#}
+        {#                method also the length of that region,<br>#}
+        {#                you would like to include in your heatmap.</em></small></p>#}
+        {##}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_ref_point">Reference-Point: </label>#}
+        {#                <input id="id_ref_point" type="text" name="ref_point" placeholder="TSS">#}
+        {#            </div>#}
+        {#            <small><em>If you are using the reference-point method, select which reference point you would like to#}
+        {#                use ("TSS"(default), "TES" or "center").</em></small>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label id="id_collect">Generate png containing all heatmaps?</label>#}
+        {##}
+        {#                <input id="id_collect" name="collect" type="checkbox">#}
+        {#            </div>#}
+        {##}
+        {#            </p>#}
+        {#        </div>#}
+
+        <table>
+            <tbody>
+            <tr>
+                <td class="noBorder"><label for="id_design_file" class="float-right">Design file:</label></td>
+                <td class="noBorder"><input id="id_design_file" type="file" name="design_file" required="required">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Your design file tells the analysis where to find your input data and how said data is structured and must be in .csv format. This data can also be located in an online database or locally on your machine. In the latter case please upload your data in form of an archive at the 'File folder' input. Also, when writing your design-file, please ensure that all data is stored inside of a folder that is also part of the file name (e.g.:'path/to/example.fastq.gz')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3"><em><small>A tool to help you create the input spreadsheet file can be
+                    found
+                    <a href="http://localhost:8000/run/sheets/" target="_blank">here</a>.</small></em></td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_file_folder" class="float-right">File folder:</label></td>
+                <td class="noBorder"><input id="id_file_folder" type="file" accept=".zip, .tar.gz"
+                                            name="file_folder">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If your data is not provided through an internet source, please store the data inside of a folder, that must be included in the 'fastq_1' and 'fastq_2' columns in the design file you upload at the 'Design file'-input. Then compress said folder into a .zip or .tar.gz archive and upload it here.">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <div class="input-group">
+                        <label class="input-group-text" id="id_single_end">Is your input single-end reads?</label>
+                        <div class="form-control radio-inline pl-4">
+                            <div class="form-check form-check-inline mr-4">
+                                <input id="id_single_end_true" class="form-check-input" type="radio"
+                                       name="single_end"
+                                       value="true">
+                                <label class="form-check-label" for="id_single_end_true">True</label>
+                            </div>
+                            <div>
+                                <input id="id_single_end_false" class="form-check-input" type="radio"
+                                       name="single_end"
+                                       value="false" checked>
+                                <label class="form-check-label" for="id_single_end_false">False</label>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_igenome_reference" class="float-right">iGenome reference:</label>
+                </td>
+                <td class="noBorder"><input id="id_igenome_reference" type="text" name="igenome_reference" value="">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please enter your iGenome reference (e.g.: 'GRCh38'). If you are not using an iGenome reference, please upload your own reference files">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3"><small><em>
+                    A full list of iGenome references available for nf-core pipelines can be found <a
+                        href="http://0.0.0.0:8000/run/igenome/"
+                        target="_blank">here</a>.
+                </em></small></td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td colspan="3" class="noBorder">
+                    <label for="id_own_genome">Specify and upload your own references here: </label>
+                    <input type="checkbox" id="id_own_genome" name="own_genome" onclick="extend_genome_options()">
+                </td>
+            </tr>
+
+            </tbody>
+            <tbody id="id_reference_genome_options" style="display: none">
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <em><small>
+                        If you need help obtaining one or more of the required reference files you can try using our
+                        <br>
+                        <a href="http://0.0.0.0:8000/run/references/" target="_blank">reference loader</a> to obtain
+                        the latest Ensembl data for the species you used.
+                    </small></em>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_fasta_file" class="float-right">Fasta reference:</label></td>
+                <td class="noBorder"><input id="id_fasta_file" type="file" accept=".fa" name="fasta_file"
+                                            value=NULL>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please upload your fasta reference">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_gtf_file" class="float-right">GTF annotation:</label></td>
+                <td class="noBorder"><input id="id_gtf_file" type="file" accept=".gtf" name="gtf_file"
+                                            value=NULL>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please upload your gtf annotation">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_bed_file" class="float-right">Genome bed file:</label></td>
+                <td class="noBorder"><input id="id_bed_file" type="file" accept=".bed" name="bed_file" value=NULL>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please upload your gene bed file">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_macs_size" class="float-right">MACS2 genome size:</label></td>
+                <td class="noBorder"><input id="id_macs_size" type="text" name="macs_size" value="">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If you are not using an iGenome reference you can enter your MACS2 genome size. If this is not specified the MACS2 processes will be skipped.">
+                </td>
+            </tr>
+            </tbody>
+            <tbody>
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <label for="id_narrow_peaks">Would you like MACS2 to be run in narrowPeak mode?</label>
+
+                    <input id="id_narrow_peaks" type="checkbox" name="narrow_peaks">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        {#        ########################################################################################################### #}
+
+        <hr>
+        <p>
+            <label for="id_post_chipseq">
+                Would you like to run the Post-ChIP-Seq pipeline immediately after this pipeline?
+            </label>
+            <input id="id_post_chipseq" type="checkbox" name="post_chipseq" onclick="post_chipseq_addition()">
+        </p>
+
+        <table id="id_post_chipseq_extras" style="display: none">
+            <tr>
+                <td class="noBorder"><label for="id_ext_chr" class="float-right">Chromosomes:</label></td>
+                <td class="noBorder"><input id="id_ext_chr" type="text" name="ext_chr"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass them here. You can request multiple chromosomes by separating them with a comma (e.g. 'IV,VII,X')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label class="input-group-text float-right" id="id_single_end">Computation
+                    method: </label></td>
+                <td class="noBorder">
+                    <div class="form-control radio-inline pl-4">
+                        <div class="form-check form-check-inline mr-4">
+                            <input id="id_cm_rp" class="form-check-input" type="radio" name="computation_method"
+                                   value="reference_point" checked>
+                            <label class="form-check-label" for="id_cm_rp">Reference-Point</label>
+                        </div>
+                        <div>
+                            <input id="id_cm_sr" class="form-check-input" type="radio" name="computation_method"
+                                   value="scale_regions">
+                            <label class="form-check-label" for="id_cm_sr">Scale-Regions</label>
+                        </div>
+                    </div>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please select a computation method for the matrix generation">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_upstream" class="float-right">Upstream: </label></td>
+                <td class="noBorder"><input type="text" id="id_upstream" placeholder="2000"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please insert the number of base pairs upstream of the region or reference point you would like to include in your heatmap">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_downstream" class="float-right">Downstream: </label></td>
+                <td class="noBorder"><input type="text" id="id_downstream" placeholder="2000"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please insert the number of base pairs downstream of the region or reference point you would like to include in your heatmap">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_region_length" class="float-right">Region Length: </label></td>
+                <td class="noBorder"><input type="text" id="id_region_length" placeholder="2000"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="In case you are using the scale-regions computation method you can insert the length in base pairs of said region here">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_ref_point" class="float-right">Reference-Point: </label></td>
+                <td class="noBorder"><input id="id_ref_point" type="text" name="ref_point" placeholder="TSS"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If you are using the reference-point method, select which reference point you would like to use ('TSS'(default), 'TES' or 'center')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_collect" class="float-right">Generate png containing all
+                    heatmaps?</label></td>
+                <td class="noBorder"><input id="id_collect" name="collect" type="checkbox"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="When checking this box the pipeline will generate a picture containing all heatmaps, in addition to any individual heatmaps">
+                </td>
+            </tr>
+
+        </table>
+
+        <br><br>
+        <button type="submit" name="run_chipseq">Start Run</button>
+    </form>
+
+
+    <script>
+
+        function post_chipseq_addition() {
+            // get checkbox
+            var checkBox = document.getElementById("id_post_chipseq");
+            // get post_chipseq_div
+            var post_chipseq_div = document.getElementById("id_post_chipseq_extras");
+
+            if (checkBox.checked === true) {
+                post_chipseq_div.style.display = "block";
+            } else {
+                post_chipseq_div.style.display = "none";
+            }
+        }
+
+
+        function extend_genome_options() {
+            // get checkbox
+            const checkbox = document.getElementById("id_own_genome");
+            // get tbody
+            const tbody = document.getElementById("id_reference_genome_options");
+
+            if (checkbox.checked === true) {
+                tbody.style.display = "";
+            } else {
+                tbody.style.display = "none";
+            }
+        }
+
+
+        function check_inputs_chipseq() {
+
+            var genome_reference = document.getElementById("id_genome_reference");
+            var gtf_file = document.getElementById("id_gtf_file");
+
+            if (genome_reference.value === "" && gtf_file.files.length === 0) {
+                alert("If you are not using an iGenome reference please upload an annotation file in gtf-format at the" +
+                    "'GTF annotation' input");
+                return false;
+            }
+
+            var post_chipseq_checkbox = document.getElementById("id_post_chipseq");
+
+            {#if (post_chipseq_checkbox.checked) {#}
+            {#    var gtf_annotation = document.getElementById("id_gtf_file");#}
+            {#    if (gtf_annotation.files.length === 0) {#}
+            {#        alert("Please upload an annotation file at the 'GTF annotation' input. The Post-ChIP-Seq pipeline " +#}
+            {#            "requires the file in case that the genome bed file does not get passed properly.");#}
+            {#        return false;#}
+            {#    }#}
+            {# }#}
+            alert("The pipeline will now start. This may take some time, so you can close this page and find your " +
+                "results later using the 'Find Results' tag.");
+            return true;
+        }
+
+    </script>
+
+{% endblock %}

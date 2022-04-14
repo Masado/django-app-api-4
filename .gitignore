@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Environments
+.env.prod
+.env.prod.db
+
+# media root
+app/mediafiles/spreadsheets
+app/mediafiles/run
+
+# database backups
+db/db-backup-*.sql
+pg_dump.txt
+

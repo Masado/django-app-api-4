@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ run.run_id }}{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">
+
+    <style>
+        td {
+            padding: 1em 0.625em;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    {% if run %}
+        <table>
+            <tbody>
+                <tr>
+                    <td>Run ID:</td>
+                    <td>{{ run.run_id }}</td>
+                </tr>
+                <tr>
+                    <td>Pipeline:</td>
+                    <td>{{ run.pipeline }}</td>
+                </tr>
+                <tr>
+                    <td>Pipeline command:</td>
+                    <td>{{ run.pipeline_command }}</td>
+                </tr>
+                <tr>
+                    <td>Exit status:</td>
+                    <td>{{ run.exit_status }}</td>
+                </tr>
+                <tr>
+                    <td class="noBorder">Duration:</td>
+                    <td class="noBorder">{{ run.duration }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    <br><br>
+    <input type="button" class="back-button" onclick="history.back()" ; value="Back">
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% block content %}
+    <form action="{% url "upload" %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="id_image_file">Image file:</label>
+        <input id="id_image_file" type="file" name="image_file">
+        <br>
+        <label for="id_archive-file">Archive file:</label>
+        <input id="id_archive-file" type="file" accept=".zip,.tar.gz" name="archive_file">
+        <br>
+        <input type="submit" value="submit" />
+     </form>
+
+    {% if image_url %}
+        <p>File uploaded at: <a href="{{ image_url }}">{{ image_url }}</a></p>
+    {% endif %}
+    {% if archive_url %}
+        <p>File uploaded at: <a href="{{ archive_url }}">{{ archive_url }}</a></p>
+    {% endif %}
+
+{% endblock %}

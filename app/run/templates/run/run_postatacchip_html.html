@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Post-ChIP-Seq/ATAC-Seq{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <p><h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2></p>
+
+    <form action="{% url 'run:PACSTutorial' %}">
+        <input class="submit-button float-right" type="submit" value="Explanation">
+    </form>
+    {#    <button class="float-right" type="submit" name="tutorial_redirect">Explanation</button>#}
+
+    <form action="." method="post" enctype="multipart/form-data" name="ac_form">
+        {% csrf_token %}
+        <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+
+
+        {#        <div>#}
+        {#            <label id="id_organism_name">Organism name:</label>#}
+        {##}
+        {#            <input id="id_organism_name" type="text" name="organism_name">#}
+        {#        </div><br>#}
+{#        <p>#}
+{#        <div class="form-group"#}
+{#             title="Please upload your BED-file or the BED-file from the genome folder in your results">#}
+{#            <label id="id_bed_file">Gene bed: </label>#}
+{##}
+{#            <input id="id_bed_file" class="form-control" type="file" class="ml-4" accept=".bed" name="bed_file"#}
+{#                   title="Please upload your BED-file or the BED-file from the genome folder in your results">#}
+{#        </div>#}
+        {#        <small><em>Please upload your BED-file or the BED-file from the genome folder in your results.</em></small><br>#}
+{#        </p>#}
+{##}
+{#        <p>#}
+{#        <div class="form-group">#}
+{#            <label id="id_gtf_file">GTF-file: </label>#}
+{##}
+{#            <input id="id_gtf_file" class="form-control" type="file" class="ml-4" accept=".gtf" name="gtf_file"#}
+{#                   title="If you cannot find the file in the results folder you can also upload a GTF-file and the required file will be generated">#}
+{#        </div>#}
+        {#        <small><em>If you cannot find the file in the results folder you can also upload a GTF-file and the required file will be generated.</em></small>#}
+{#        </p>#}
+{##}
+{#        <p>#}
+{#        <div>#}
+{#            <label id="id_bw_archive">BigWig-Archive: </label>#}
+{##}
+{#            <input id="id_bw_archive" type="file" class="ml-4" accept=".zip,.tar.gz" name="bw_archive" required#}
+{#                   title="Please upload the bigwig-folder located at 'results/bwa/*/bigwig' of your results folder in form of a ZIP or Tar.gz archive">#}
+{#        </div>#}
+        {#        <small><em>Please upload the bigwig-folder located at "results/bwa/*/bigwig" of your results folder in form of a ZIP or Tar.gz archive.</em></small>#}
+{#        </p>#}
+{##}
+{#        <hr style="width:50%;text-align:left;margin-left:1%">#}
+{##}
+{#        <p>#}
+{#        <div title="If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass them here. You can request multiple chromosomes by separating them with a comma (e.g. 'IV,VII,X')">#}
+{#            <label id="id_ext_chr">Chromosomes:</label>#}
+{##}
+{#            <input id="id_ext_chr" type="text" class="ml-4" name="ext_chr">#}
+{#        </div>#}
+{##}
+        {#        <small><em>#}
+        {#            If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass them here.<br>#}
+        {#            You can request multiple chromosomes by separating them with a comma (e.g. "IV,VII,X").#}
+        {#        </em></small>#}
+{#        </p>#}
+{##}
+{#        <p>#}
+{#        <div class="input-group" title="Please select a computation method for the matrix generation">#}
+{#            <label class="input-group-text" id="id_single_end">Computation method: </label>#}
+{#            <div class="form-control radio-inline pl-4">#}
+{#                <div class="form-check form-check-inline mr-4">#}
+{#                    <input id="id_cm_rp" class="form-check-input" type="radio" name="computation_method"#}
+{#                           value="reference_point" checked>#}
+{#                    <label class="form-check-label" for="id_cm_rp">Reference-Point</label>#}
+{#                </div>#}
+{#                <div>#}
+{#                    <input id="id_cm_sr" class="form-check-input" type="radio" name="computation_method"#}
+{#                           value="scale_regions">#}
+{#                    <label class="form-check-label" for="id_cm_sr">Scale-Regions</label>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+        {#        <small><em>Please select a computation method for the matrix generation.</em></small>#}
+{#        </p>#}
+{##}
+{#        <p>#}
+{#        <div class="input-groups"#}
+{#             title="Please insert the base pairs upstream and downstream, and in case of the scale-regions method also the length of that region, you would like to include in your heatmap">#}
+{#            <div class="form-control text-inline">#}
+{#                <div class="form-check form-check-inline mr-4">#}
+{#                    <label for="id_upstream">Upstream: </label>#}
+{#                    <input type="text" class="ml-4" id="id_upstream" placeholder="2000">#}
+{#                </div>#}
+{#                <br>#}
+{#                <div class="form-check form-check-inline mr-4">#}
+{#                    <label for="id_downstream">Downstream: </label>#}
+{#                    <input type="text" class="ml-4" id="id_downstream" placeholder="2000">#}
+{#                </div>#}
+{#                <br>#}
+{#                <div class="form-check form-check-inline">#}
+{#                    <label for="id_region_length">Region Length: </label>#}
+{#                    <input type="text" class="ml-4" id="id_region_length" placeholder="2000">#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        </p> <br>#}
+{##}
+        {#        <p><small><em>Please insert the base pairs upstream and downstream, and in case of the scale-regions method also the length of that region,<br>#}
+        {#            you would like to include in your heatmap.</em></small></p>#}
+{##}
+{##}
+{#        <p>#}
+{#        <div title="If you are using the reference-point method, select which reference point you would like to use ('TSS'(default), 'TES' or 'center')">#}
+{#            <label for="id_ref_point">Reference-Point: </label>#}
+{#            <input id="id_ref_point" type="text" class="ml-4" name="ref_point" placeholder="TSS">#}
+{#        </div>#}
+        {#            <small><em>If you are using the reference-point method, select which reference point you would like to use ("TSS"(default), "TES" or "center").</em></small>#}
+{#        </p>#}
+{##}
+{#        <p>#}
+{#        <div>#}
+{#            <label id="id_collect">Generate png containing all heatmaps?</label>#}
+{##}
+{#            <input id="id_collect" name="collect" type="checkbox">#}
+{#        </div>#}
+{##}
+{#        </p>#}
+
+        <table>
+            <tr>
+                <td class="noBorder"><label for="id_bed_file" class="float-right">Gene bed: </label></td>
+                <td class="noBorder"><input id="id_bed_file" type="file" accept=".bed" name="bed_file"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please upload your BED-file or the BED-file from the genome folder in your results">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_gtf_file" class="float-right">GTF-file: </label></td>
+                <td class="noBorder"><input id="id_gtf_file" type="file" accept=".gtf" name="gtf_file"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If you cannot find the file in the results folder you can also upload a GTF-file and the required file will be generated">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_bw_archive" class="float-right">BigWig-Archive: </label></td>
+                <td class="noBorder"><input id="id_bw_archive" type="file" accept=".zip,.tar.gz" name="bw_archive"
+                                            required></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please upload the bigwig-folder located at 'results/bwa/*/bigwig' of your results folder in form of a ZIP or Tar.gz archive">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_bam_archive" class="float-right">BAM-Archive: </label></td>
+                <td class="noBorder"><input id="id_bam_archive" type="file" accept=".zip,.tar.gz" name="bam_archive"
+                                            ></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please upload the all the .bam and .bam.bai files located at 'results/bwa/mergedLibrary' of your results folder in a folder named 'bam' in form of a ZIP or Tar.gz archive">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <hr style="margin-left:1%">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_ext_chr" class="float-right">Chromosomes:</label></td>
+                <td class="noBorder"><input id="id_ext_chr" type="text" name="ext_chr"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass them here. You can request multiple chromosomes by separating them with a comma (e.g. 'IV,VII,X', '1,4,X,Y,19'). The names of the chromosomes you can specify can be found in the first column of your bed-file">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label class="input-group-text float-right" id="id_single_end">Computation
+                    method: </label></td>
+                <td class="noBorder">
+                    <div class="form-control radio-inline pl-4">
+                        <div class="form-check form-check-inline mr-4">
+                            <input id="id_cm_rp" class="form-check-input" type="radio" name="computation_method"
+                                   value="reference_point" checked>
+                            <label class="form-check-label" for="id_cm_rp">Reference-Point</label>
+                        </div>
+                        <div>
+                            <input id="id_cm_sr" class="form-check-input" type="radio" name="computation_method"
+                                   value="scale_regions">
+                            <label class="form-check-label" for="id_cm_sr">Scale-Regions</label>
+                        </div>
+                    </div>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please select a computation method for the matrix generation">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_upstream" class="float-right">Upstream: </label></td>
+                <td class="noBorder"><input type="text" id="id_upstream" placeholder="2000"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please insert the number of base pairs upstream of the region or reference point you would like to include in your heatmap">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_downstream" class="float-right">Downstream: </label></td>
+                <td class="noBorder"><input type="text" id="id_downstream" placeholder="2000"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="Please insert the number of base pairs downstream of the region or reference point you would like to include in your heatmap">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_region_length" class="float-right">Region Length: </label></td>
+                <td class="noBorder"><input type="text" id="id_region_length" placeholder="2000"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="In case you are using the scale-regions computation method you can insert the length in base pairs of said region here">
+                </td>
+            </tr>
+{#            <tr>#}
+{#                <td class="noBorder"><label for="id_ref_point" class="float-right">Reference-Point: </label></td>#}
+{#                <td class="noBorder"><input id="id_ref_point" type="text" name="ref_point" placeholder="TSS"></td>#}
+{#                <td class="noBorder"><input type="button" class="help-button" value="?"#}
+{#                                            title="If you are using the reference-point method, select which reference point you would like to use ('TSS'(default), 'TES' or 'center')">#}
+{#                </td>#}
+{#            </tr>#}
+            <tr>
+                <td class="noBorder"><label for="id_ref_point" class="float-right">Reference-Point: </label></td>
+                <td class="noBorder">
+                    <select id="id_ref_point" name="ref_point">
+                        <option value="TSS">TSS</option>
+                        <option value="TES">TES</option>
+                        <option value="center">center</option>
+                    </select>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="If you are using the reference-point method, select which reference point you would like to use ('TSS'(default), 'TES' or 'center')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_collect" class="float-right">Generate png containing all heatmaps?</label></td>
+                <td class="noBorder"><input id="id_collect" name="collect" type="checkbox"></td>
+                <td class="noBorder"><input type="button" class="help-button" value="?"
+                                            title="When checking this box the pipeline will generate a picture containing all heatmaps, in addition to any individual heatmaps">
+                </td>
+            </tr>
+        </table>
+        <br>
+
+        <button type="submit" name="run_post_atac_chip">Start pipeline</button>
+    </form>
+
+{% endblock %}
+
+{% block extrascript %}
+    document.addEventListener('DOMContentLoaded', function () {
+    const inputs = Array.from(document.querySelectorAll('input[name=bed_file], input[name=gtf_file]'));
+    const inputListener = e => inputs.filter(i => i !== e.target).forEach(i => i.required = !e.target.value.length);
+
+    inputs.forEach(i => i.addEventListener('input', inputListener));
+    });
+{% endblock %}

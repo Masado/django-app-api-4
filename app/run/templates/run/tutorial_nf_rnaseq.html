@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}RNA-Seq Tutorial{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <div class="ml-4 float-right">
+            <p>
+            <div class="input-group">
+                <label class="input-group-text" id="id_archive_form">You can download the files<br> used in this example
+                    as a .zip or .tar.gz archive:</label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_archive_form_zip" class="form-check-input" type="radio" name="archive_form"
+                               value="zip" checked>
+                        <label class="form-check-label" for="id_archive_form_zip">ZIP</label>
+                    </div>
+                    <div>
+                        <input id="id_archive_form_tar" class="form-check-input" type="radio" name="archive_form"
+                               value="tar">
+                        <label class="form-check-label" for="id_archive_form_tar">TAR</label>
+                    </div>
+                </div>
+            </div>
+            </p>
+            <div class="center-text">
+                <button class="ml-4 mb-4" type="submit" name="tutorial_rnaseq">
+                    Download examples
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <p>
+        This page contains the tutorial for nf-core's RNA-Seq analysis. For every input on the actual analysis-page a
+        more detailed description of what is required by the user is given.<br>
+        To the right side of this text you will also be able to download all the files that were used in this example if
+        you
+        would like to take a closer look at how they are structured or want to try it yourself.
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_samplesheet.png' %}" alt="RNA-Seq samplesheet file">
+        <figcaption><small>
+            The "Input csv-file" field requires you to upload a samplesheet containing information how your data is
+            set up. It has to contain four columns with "sample", "fastq_1", "fastq_2" and "strandedness" as the file
+            header.
+            If you are using single-end reads, you can leave the "fastq_2" column empty except for the header.<br>
+            If you are providing your data from a git-repository or through s3, you can skip the "File folder" upload.
+            If
+            you are referencing data on you system in the samplesheet, please store said data in a folder, compress said
+            folder
+            to a .zip or .tar.gz archive and upload that archive. Also please consider that the samplesheet and the
+            folder
+            containing your data will end up in the same location when writing your samplesheet.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_umi.png' %}" alt="RNA-Seq UMI">
+        <figcaption><small>
+            Determines if UMI-based read deduplication will be enabled for the pipeline run.
+        </small></figcaption>
+    </figure>
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_umi_method.png' %}" alt="RNA-Seq UMI method">
+        <figcaption><small>
+            If you decide to use the UMI-based read deduplication, the "UMI method"-field determines which extraction
+            method will be used, 'string' (default) or 'regex.
+        </small></figcaption>
+    </figure>
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_umi_pattern.png' %}" alt="RNA-Seq UMI pattern">
+        <figcaption><small>
+            If you use the UMI-based read deduplication, you will need to enter a pattern for the pipeline to use
+            (e.g.: 'NNNNNN' indicates the first 6 nucleotides of the read are part of the UMI). The pattern should
+            consist of the Symbols 'N' (= UMI position(<i>required</i>)), 'C' (= cell barcode position) and 'X' (=
+            sample position).<br>
+            The extracted Ns and Cs will be added to the read name and the corresponding sequences removed from the
+            read.
+            Bases with X will be reattached to the read.<br>
+            Additional information can be found in the
+            <a href="https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method" target="_blank">UMI-tools
+                documentation</a>.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_igenome.png' %}" alt="RNA-Seq iGenome-reference">
+        <figcaption><small>
+            The "iGenome reference" allows you to enter one of the references found <a
+                href="https://github.com/nf-core/chipseq/blob/master/conf/igenomes.config" target="_blank">here</a>.<br>
+            Entering one of the supported iGenome references will cause the pipeline to load all the relevant reference
+            files listed below from the iGenome reference and you do not need to upload any references yourself.<br>
+            Please note that if you DO enter an iGenome reference and still upload your own reference files,
+            <b>the pipeline will prioritize your uploaded data</b>.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_fasta.png' %}" alt="RNA-Seq Fasta-file">
+        <figcaption><small>
+            The "FASTA genome file" allows you to upload a fasta file containing the nucleotide sequences of the species
+            your data was obtained from.<br>
+            Please note that this is mandatory if you did not enter an iGenome reference.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_gtf_annotation.png' %}" alt="RNA-Seq GTF-file">
+        <figcaption><small>
+            In the "GTF annotation file"-input you can upload an annotation file in .gtf format.<br>
+            Please note that this is mandatory if you did not enter an iGenome reference. You can also upload a gff-file
+            in the "GFF annotation file"-input and the .gtf file will be generated by the pipeline.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_gff_annotation.png' %}" alt="RNA-Seq GFF-file">
+        <figcaption><small>
+            The "GFF3 annotation file"-input lets you upload an annotation file in .gff format.<br>
+            Please not that you must upload this file if you did not enter an iGenome reference and did not upload a
+            file in the "GTF annotation file"-input.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_bed.png' %}" alt="RNA-Seq BED-file">
+        <figcaption><small>
+            At the "BED file"-input you can upload a file in .bed format containing information on the gene intervals of
+            the species your data was obtained from.<br>
+            This file can be generated by the pipeline from the .gtf file of the "GTF annotation file"-input if not
+            provided.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_transcript_fasta.png' %}" alt="RNA-Seq Transcriptome fasta">
+        <figcaption><small>
+            At the "Transcriptome fasta"-input you can upload a file in fasta format containing information on the
+            transcriptome of the species your data was obtained from.<br>
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_index_archives.png' %}" alt="RNA-Seq Index-archives">
+        <figcaption><small>
+            The "index file"-inputs allow you to upload a pre-built index for the alignment algorithm you want to be
+            used
+            in the run.<br>
+            The dropdown menu below the inputs allows you to choose between 'star_salmon' (default), 'star_rsem' and
+            'hisat2' as your aligner.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/rnaseq/rna_pseudoaligner.png' %}" alt="RNA-Seq Pseudoaligner">
+        <figcaption><small>
+            Here you can decide if you would like to run Salmon as a pseudo aligner in addition to the aligner selected
+            above.<br>
+            Please note that the Salmon pseudo aligner is necessary for the Post-RNA-Seq pipeline to function if you
+            wish to use the pipeline after the RNA-Seq pipeline is finished.<br>
+            Running salmon in addition to the alignment algorithm provides additional quality control metrics for the
+            alignment.
+        </small></figcaption>
+    </figure><br><br>
+
+
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <div>
+            <input class="back-button" type="button" onclick="history.back()" ; value="Back">
+        </div>
+    </form>
+
+
+{% endblock %}

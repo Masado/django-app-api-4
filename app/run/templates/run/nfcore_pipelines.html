@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block extrahead %}
+<link rel="stylesheet" href="{% static "run/style.css" %}">
+{% endblock %}
+
+{% block title %}nf-core{% endblock %}
+
+{% block content %}
+
+    <h3>nf-core pipelines</h3>
+
+    <p>On this page all integrated nf-core pipelines are displayed. Click the button next to the pipeline you wish to
+    deploy and you will be taken to a corresponding page.</p>
+
+    <table>
+        <tr>
+            <th><h4>Name</h4></th>
+            <th><h4>Description</h4></th>
+            <th></th>
+        </tr>
+        <tr>
+            <td>Sarek</td>
+            <td>Analysis pipeline to detect germline or somatic variants (pre-processing, variant calling and
+                annotation) from WGS / targeted sequencing.</td>
+            <td>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="choose_sarek" value="sarek">Sarek</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>RNA-seq</td>
+            <td>RNA sequencing analysis pipeline using STAR, RSEM, HISAT2 or Salmon with gene/isoform counts and
+                extensive quality control.</td>
+            <td>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="choose_rnaseq" value="rnaseq">RNA-seq</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>ATAC-seq</td>
+            <td>ATAC-seq peak-calling, QC and differential analysis pipeline.</td>
+            <td>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="choose_atacseq" value="atacseq">ATAC-seq</button>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>ChIP-seq</td>
+            <td>ChIP-seq peak-calling, QC and differential analysis pipeline.</td>
+            <td>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="choose_chipseq" value="chipseq">ChIP-seq</button>
+                </form>
+            </td>
+        </tr>
+
+    </table>
+
+
+
+{#    <p style="padding: 0 7em 2em 0;"><input class="back-button" type="button" onclick="history.back()"; value="Back"></p>#}
+
+{% endblock %}

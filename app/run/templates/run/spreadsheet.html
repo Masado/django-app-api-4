@@ -1,0 +1,343 @@
+{% extends 'base.html' %},
+
+{% block title %}Spreadsheets{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            text-align: center;
+            background: white;
+        }
+
+        table {
+            padding: 1em 1.8em;
+        }
+
+        td {
+            min-width: 1em;
+            {#max-width: 40vw;#}
+            max-width: 12em;
+            padding: 0.1em 0.1em 0.1em 0.1em;
+        }
+
+        table {
+            margin: 0.5em 0.5em;
+        {#white-space: nowrap;#}
+        }
+
+        select {
+            margin: 0.5em 0.5em;
+        }
+        input {
+            border: none;
+            outline: none;
+            max-width: 12em;
+        }
+        input[type="text"], textarea{
+            background-color: white;
+        }
+        input[type="text"].no-w-bg {
+            background-color: #d1d1d1;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div style="display: block; max-width: 100%; margin-top: 1em">
+
+        <form action="." method="post" name="spreadsheet_gen" enctype="multipart/form-data" onsubmit="set_rows_and_cols()">
+            {% csrf_token %}
+            <label for="id_sheet_name">Enter a name for your spreadsheet or leave it empty for a default name: </label>
+            <input id="id_sheet_name" name="sheet_name" type="text" class="ml-4 no-w-bg" style="border: 2px inset #EBE9ED; outline: black">
+            <br>
+
+            <label style="margin-top: 1em" for="id_select">For what kind of analysis would you like to generate the
+                input file? </label>
+            <select id="id_select" name="sheet_type">
+                <option value="rna_samplesheet">RNA-Seq samplesheet</option>
+                <option value="atac_design">ATAC-Seq design file</option>
+                <option value="chip_design">ChIP-Seq design file</option>
+                <option value="sarek_input">Sarek input file</option>
+            </select>
+
+            <br>
+            <div class="inline-group mt-2">
+                <label for="id_row_num">Number of rows:</label>
+                <input id="id_row_num" class="mr-4 ml-2 no-w-bg" style="border: 2px inset #EBE9ED; outline: black" type="number" name="row_num" min="1" value="2">
+                <button type="button" onclick="add_row()">Add row</button>
+                <button type="button" class="ml-4" onclick="remove_row()">Remove row</button>
+            </div>
+            <div id="id_sarek_buttons" class="inline-group mt-2" style="display: none">
+                <br>
+                <label for="id_cols_num">Number of columns:</label>
+                <input id="id_cols_num" class="mr-4 ml-2 no-w-bg" style="border: 2px inset #EBE9ED; outline: black" type="number" name="row_num" min="1" value="6">
+                <button type="button" onclick="add_col()">Add column</button>
+                <button type="button" class="ml-4" onclick="remove_col()">Remove column</button>
+            </div>
+            <br>
+            <table id="id_table_spreadsheet" class="table-collapse">
+                <thead id="id_thead">
+                <tr>
+                    <th>sample</th>
+                    <th>fastq_1</th>
+                    <th>fastq_2</th>
+                    <th>strandedness</th>
+                </tr>
+                </thead>
+                <tbody id="id_tbody">
+                <tr>
+                    <td><input type="text" id="id_r0_c0" name="r0_c0"></td>
+                    <td><input type="text" id="id_r0_c1" name="r0_c1"></td>
+                    <td><input type="text" id="id_r0_c2" name="r0_c2"></td>
+                    <td><input type="text" id="id_r0_c3" name="r0_c3"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" id="id_r1_c0" name="r1_c0"></td>
+                    <td><input type="text" id="id_r1_c1" name="r1_c1"></td>
+                    <td><input type="text" id="id_r1_c2" name="r1_c2"></td>
+                    <td><input type="text" id="id_r1_c3" name="r1_c3"></td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <br>
+            <input id="id_rows" name="rows" type="number" value="0" hidden>
+            <input id="id_cols" name="cols" type="number" value="0" hidden>
+            <br>
+            <button type="submit" name="spreadsheet_load">Generate spreadsheet</button>
+        </form>
+    </div>
+    <script>
+        function add_row() {
+            const table = document.getElementById("id_table_spreadsheet");
+            const tb = document.getElementById("id_tbody");
+            const rowNum = table.querySelectorAll("tbody tr").length;
+            const colNum = table.querySelectorAll("tbody tr td").length / table.querySelectorAll("tbody tr").length;
+
+            const rowSelector = document.getElementById("id_row_num");
+            rowSelector.value ++;
+
+            const newRow = tb.insertRow(rowNum);
+            for (let c = 0; c < colNum; c++) {
+                {#alert("ping");#}
+                let cell = newRow.insertCell(c);
+                cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
+                {#cell.classList.add("no-white-space");#}
+            }
+        }
+
+        function remove_row() {
+            const table = document.getElementById("id_table_spreadsheet");
+            const tb = document.getElementById("id_tbody");
+            const rowNum = table.querySelectorAll("tbody tr").length;
+
+            const rowSelector = document.getElementById("id_row_num");
+            if (rowSelector.value != 1) {
+                rowSelector.value = rowSelector.value - 1;
+            } else {
+                rowSelector.value = 1;
+            }
+
+            if (rowNum > 1) {
+                tb.deleteRow(rowNum - 1);
+            } else {
+                const colNum = tb.rows[0].cells.length;
+                tb.deleteRow(rowNum - 1);
+                const row = tb.insertRow(0);
+                for (let c = 0; c < colNum; c++) {
+                    let cell = row.insertCell(c);
+                    cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
+                }
+            }
+        }
+
+        function add_col() {
+            const tb = document.getElementById("id_tbody");
+            const colNum = tb.rows[0].cells.length;
+
+            const colSelector = document.getElementById("id_cols_num");
+            colSelector.value ++
+
+            tb.querySelectorAll("tr").forEach(Row => {
+                let rowNum = Row.rowIndex;
+                const cell = Row.insertCell();
+                cell.innerHTML = '<input id="id_r' + rowNum + '_c' + colNum + '" name="r' + rowNum + '_c' + colNum + '" type="text">'
+            })
+
+        }
+
+        function remove_col() {
+            const tb = document.getElementById("id_tbody");
+            const colNum = tb.rows[0].cells.length;
+
+            const colSelector = document.getElementById("id_cols_num");
+            if (colSelector.value != 1) {
+                colSelector.value = colSelector.value - 1;
+            } else {
+                colSelector.value = 1;
+            }
+            if (colNum > 1) {
+                tb.querySelectorAll("tr").forEach(Row => {
+                    Row.deleteCell(colNum - 1);
+                })
+            }
+
+        }
+
+        const selector = document.getElementById("id_select");
+        const rowSelector = document.getElementById("id_row_num");
+        const colSelector = document.getElementById("id_cols_num");
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const table = document.getElementById("id_table_spreadsheet")
+            const select = document.getElementById("id_select")
+
+            select.addEventListener("change", () => {
+                table.deleteTHead();
+
+                const header = table.createTHead();
+                header.id = "id_thead";
+                const row = header.insertRow(0);
+
+                const value = select.value;
+                if (value === "rna_samplesheet") {
+                    document.getElementById("id_sarek_buttons").style.display = "none";
+                    const list = ['sample', 'fastq_1', 'fastq_2', 'strandedness'];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                        cell.style.padding = "10px";
+                    }
+                }
+                if (value === "atac_design") {
+                    document.getElementById("id_sarek_buttons").style.display = "none";
+                    const list = ['group', 'replicate', 'fastq_1', 'fastq_2'];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                        cell.style.padding = "10px";
+                    }
+                }
+                if (value === "chip_design") {
+                    document.getElementById("id_sarek_buttons").style.display = "none";
+                    const list = ['group', 'replicate', 'fastq_1', 'fastq_2', 'antibody', 'control'];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                        cell.style.padding = "10px";
+                    }
+                }
+                if (value === "sarek_input") {
+                    document.getElementById("id_sarek_buttons").style.display = "block";
+                    document.getElementById("id_cols_num").value = 6;
+                    const list = ['', '', '', '', '', ''];
+
+                    let txt = "";
+                    for (let x in list) {
+                        const cell = row.insertCell();
+                        txt = list[x]
+                        cell.innerHTML = "<b>" + txt + "</b>";
+                    }
+                }
+                const tbod = document.getElementById("id_tbody");
+                const colNum = table.querySelectorAll("thead td").length;
+
+                let rowNum = tbod.querySelectorAll("tr").length;
+                for (let i = tbod.rows.length - 1; i >= 0; i--) {
+                    tbod.deleteRow(i)
+                }
+
+                for (let r = 0; r < rowSelector.value; r++) {
+                    let rowNum = tbod.querySelectorAll("tr").length;
+                    const row = tbod.insertRow(r);
+                    for (let c = 0; c < colNum; c++) {
+                        let cell = row.insertCell(c);
+                        cell.innerHTML = '<input id="id_r' + rowNum + '_c' + c + '" name="r' + rowNum + '_c' + c + '" type="text">'
+
+                    }
+                }
+                if (value === "sarek_input") {
+                    table.deleteTHead();
+                }
+            })
+            rowSelector.addEventListener("change", () => {
+                if (rowSelector.value < 1){
+                    rowSelector.value = 1;
+                }
+                const table = document.getElementById("id_table_spreadsheet");
+                const tb = document.getElementById("id_tbody");
+                const rowNum = table.querySelectorAll("tbody tr").length;
+                const colNum = table.querySelectorAll("tbody tr td").length / table.querySelectorAll("tbody tr").length;
+                if (rowSelector.value > rowNum) {
+                    for (let r = rowNum; r < rowSelector.value; r++) {
+                        let newRow = tb.insertRow(r)
+                        for (let c = 0; c < colNum; c++) {
+                            let cell = newRow.insertCell(c);
+                            cell.innerHTML = '<input id="id_r' + r + '_c' + c + '" name="r' + r + '_c' + c + '" type="text">';
+                        }
+                    }
+                } else if (rowSelector.value < rowNum) {
+                    let difference = rowNum - rowSelector.value;
+                    for (let d = 0; d < difference; d++) {
+                        let rows_at_the_moment = table.querySelectorAll("tbody tr").length;
+                        tb.deleteRow(rows_at_the_moment - 1)
+                    }
+                }
+            })
+            colSelector.addEventListener("change", () => {
+                const tb = document.getElementById("id_tbody");
+                let colNum = tb.rows[0].cells.length;
+                if (colSelector.value > colNum) {
+                    for (let c = colNum; c < colSelector.value; c++) {
+                        tb.querySelectorAll("tr").forEach(Row => {
+                        let rowNum = Row.rowIndex;
+                        const cell = Row.insertCell();
+                        cell.innerHTML = '<input id="id_r' + rowNum + '_c' + colNum + '" name="r' + rowNum + '_c' + colNum + '" type="text">'
+                        })
+                    }
+                } else if (colSelector.value < colNum) {
+                    let difference = colNum - colSelector.value;
+                    for (let d = 0; d < difference; d++) {
+                        const tb = document.getElementById("id_tbody");
+                        const colNum = tb.rows[0].cells.length;
+                        
+                        if (colNum > 1) {
+                            tb.querySelectorAll("tr").forEach(Row => {
+                                Row.deleteCell(colNum - 1);
+                            })
+                        }
+                    }
+                }
+            })
+        })
+
+        function set_rows_and_cols() {
+            const tbod = document.getElementById("id_tbody");
+            const rowNum = tbod.querySelectorAll("tr").length;
+            const colNum = tbod.rows[0].cells.length;
+
+            const rows =  document.getElementById("id_rows");
+            const cols =  document.getElementById("id_cols");
+
+            rows.value = rowNum;
+            cols.value = colNum;
+
+            {#return true;#}
+
+        }
+
+    </script>
+
+{% endblock %}

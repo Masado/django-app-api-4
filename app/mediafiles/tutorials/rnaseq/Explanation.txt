@@ -1,0 +1,34 @@
+Input-csv files: 
+	- samplesheet_full.csv
+	- samplesheet_test.csv
+	- samplesheet_test_local.csv
+You may use any of the three samplesheet files. The first two will provide their .fastq.gz files through git-hub or s3. The "samplesheet_test_local.csv" will require you to upload the testdata.tar.gz folder as well, as it references files stored in the archive.
+
+File folder:
+	- testdata.tar.gz
+The "testdata.tar.gz" archive contains a folder called "testdata", which in turn contains the .fastq.gz files referenced in the "samplesheet_test_local.csv" design file.
+	
+iGenome reference:
+The iGenome reference for all examples is "R64-1-1".
+
+Fasta genome file:
+	- reference/genome.fa
+You can find the fasta reference file in the reference folder.
+
+GTF annotation file:
+	- reference/genes.gtf
+You can find the GTF annotation file in the reference folder.
+
+BED genome file:
+	- reference/genes.bed
+You can find the BED genome file in the refrence folder.
+
+Transcriptome fasta:
+	- reference/transcriptome.fasta
+You can find the Transcriptome fasta file in the reference folder.
+
+Index archives:
+	- reference/hisat2.tar.gz
+	- reference/star.tar.gz
+The index archives can be found in the reference folder. If you choose an alignment algorithm you should upload the corresponding index archive (e.g.: alignment algorithm: hisat2, you upload "hisat2.tar.gz")
+No example indices exist for salmon and rsem. 

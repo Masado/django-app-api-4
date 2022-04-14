@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pipeline.pipeline_name }}{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">
+
+    <style>
+        td {
+            padding: 1em 0.625em;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <p><b>Name:</b><br> <b>{{ pipeline.pipeline_name }}</b></p>
+
+    <br>
+
+    <p><b>Description:</b><br> {{ pipeline.description }}</p>
+
+    <br>
+
+    <p><b>Uploaded:</b><br> {{ pipeline.pub_date }}</p>
+
+{#    <table>#}
+{#        <thead>#}
+{#            <th class="">Name</th>#}
+{#            <th class="">Description</th>#}
+{#            <th class="">First uploaded</th>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#        <td class="">{{ pipeline.pipeline_name }}</td>#}
+{#        <td class="">{{ pipeline.description }}</td>#}
+{#        <td class="">{{ pipeline.pub_date }}</td>#}
+{#        </tbody>#}
+{#    </table>#}
+
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+    {#<form action="{% url 'annotation:index' %}" method="post">#}
+    {#    {% csrf_token %}#}
+    {#    <input type="submit" value="Go back">#}
+    {#</form>#}
+
+    <br><br>
+    <input type="button" class="back-button" onclick="history.back()"; value="Back">
+
+{#    <a href="/pipelines">Go back</a>#}
+
+{% endblock %}

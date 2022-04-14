@@ -1,0 +1,19 @@
+# You can use this file to create a conda environment for this pipeline
+#   conda env create -f environment.yml
+name: crispr-cas-1.0
+channels:
+  - conda-forge
+  - bioconda
+  - biobuilds
+  - defaults
+dependencies:
+  - bioconda::crisper_recognition_tool==1.2
+  - bioconda::clustalw==2.1
+  - bioconda::newick_utils==1.6
+  - bioconda::cd-hit==4.8.1
+  - bioconda::blast==2.12.0
+  
+  - conda-forge::biopython==1.79
+  - conda-forge::parallel==20210622
+  
+

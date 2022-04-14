@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}CRISPR/Cas-detection-pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2>
+
+    <form action="{% url 'run:CrisprCasTutorial' %}">
+        <input class="submit-button float-right" type="submit" value="Explanation">
+    </form>
+
+    <form method="post" enctype="multipart/form-data" onsubmit="checkFileList(this)">
+        {% csrf_token %}
+        <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+{#        <p>#}
+{#            <label for="id_data_folder">Data-Archive: </label>#}
+{##}
+{#            <input id="id_data_folder" type="file" class="ml-4" name="data_folder" accept=".zip,.tar.gz" required>#}
+{#            <br>#}
+{#            <small><em>Please upload a folder named "data" containing your .fna.gz files in form of a zip- or#}
+{#                tar.gz-archive</em></small>#}
+{#        </p>#}
+
+        {#        <p>#}
+        {#            <label for="id_data_base">Database-Archive: </label>#}
+        {##}
+        {#            <input id="id_data_base" name="data_base_folder" type="file" accept=".zip,.tar.gz">#}
+        {#        </p>#}
+        {#        <small><em>#}
+        {#            Please upload the BLAST database in a folder called "db" from which to search for spacer target sequences in form of a zip- or tar.gz-archive.<br>#}
+        {#            You can generate a database from a FASTA file using the command [makeblastdb].#}
+        {#        </em></small>#}
+
+{#        <p>#}
+{#            <label for="id_data_base_fasta">Database-FASTA: </label>#}
+{#            <input id="id_data_base_fasta" name="data_base_fasta" type="file" class="ml-4"#}
+{#                   accept=".fna,.fsa,.fa,.faa,.fasta" required>#}
+{##}
+{#        <div class="input-group">#}
+{#            <label class="input-group-text" id="id_db_type">What kind of database do you want to create?</label>#}
+{#            <div class="form-control radio-inline pl-4">#}
+{#                <div class="form-check form-check-inline mr-4">#}
+{#                    <input id="id_db_type_string" class="form-check-input" type="radio" name="db_type" value="string">#}
+{#                    <label class="form-check-label" for="id_db_type_string">String</label>#}
+{#                </div>#}
+{#                <div class="form-check form-check-inline mr-4">#}
+{#                    <input id="id_db_type_nucl" class="form-check-input" type="radio" name="db_type" value="nucl"#}
+{#                           checked>#}
+{#                    <label class="form-check-label" for="id_db_type_nucl">Nucleotide</label>#}
+{#                </div>#}
+{#                <div>#}
+{#                    <input id="id_db_type_prot" class="form-check-input" type="radio" name="db_type" value="prot">#}
+{#                    <label class="form-check-label" for="id_db_type_prot">Protein</label>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <br>#}
+{#        <small><em>Please upload a FASTA file from which the pipeline can build a BLAST database and check the type of#}
+{#            your sequence.</em></small>#}
+{#        </p>#}
+
+        <table>
+            <tr>
+                <td class="noBorder"><label for="id_data_folder" class="float-right">Data-Archive: </label></td>
+                <td class="noBorder"><input id="id_data_folder" type="file" name="data_folder" accept=".zip,.tar.gz"
+                                            required></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please place all sequenes of interest in form of .fna.gz files in a folder, compress it to a .zip or .tar.gz archive and upload it here"></td>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_data_base_fasta" class="float-right">Database-FASTA: </label></td>
+                <td class="noBorder"><input id="id_data_base_fasta" name="data_base_fasta" type="file"
+                                            accept=".fna,.fsa,.fa,.faa,.fasta" required></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="The analysis requires a BLAST database that will be generated for you. Please upload a FASTA file to create the database and specify the kind of database to create below"></td>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <div class="input-group">
+                        <label class="input-group-text" id="id_db_type">What kind of database do you want to
+                            create?</label>
+                        <div class="form-control radio-inline pl-4">
+                            <div class="form-check form-check-inline mr-4">
+                                <input id="id_db_type_string" class="form-check-input" type="radio" name="db_type"
+                                       value="string">
+                                <label class="form-check-label" for="id_db_type_string">String</label>
+                            </div>
+                            <div class="form-check form-check-inline mr-4">
+                                <input id="id_db_type_nucl" class="form-check-input" type="radio" name="db_type"
+                                       value="nucl"
+                                       checked>
+                                <label class="form-check-label" for="id_db_type_nucl">Nucleotide</label>
+                            </div>
+                            <div>
+                                <input id="id_db_type_prot" class="form-check-input" type="radio" name="db_type"
+                                       value="prot">
+                                <label class="form-check-label" for="id_db_type_prot">Protein</label>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <br><br>
+        <button type="submit" name="run_criprcas">Start Run</button>
+    </form>
+
+{% endblock %}

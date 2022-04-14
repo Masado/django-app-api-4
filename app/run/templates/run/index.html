@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Choose Run-method{% endblock %}
+
+{% block content %}
+
+    <h4>Start a new run</h4>
+
+    <form action="/run/postrna_{{ run_id }}/">
+        <input class="submit-button" type="submit" value="Start new Run">
+    </form>
+    <br>
+    <form action="/run/postacs_{{ run_id }}/">
+        <input class="submit-button" type="submit" value="Post-A/C-Run">
+    </form>
+
+    <h4>Or find a pipeline to run</h4>
+
+    <form action="/run/pipe_path/">
+        <input class="submit-button" type="submit" value="Find pipeline">
+    </form>
+
+{% endblock %}

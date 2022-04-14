@@ -1,0 +1,270 @@
+###########
+# BUILDER #
+###########
+
+# pull official base image
+# FROM python:3.9.6-alpine as builder
+
+# set work directory
+# WORKDIR /usr/src/app
+
+# set environment variables
+# ENV PYTHONDONTWRITEBYTECODE 1
+# ENV PYTHONUNBUFFERED 1
+# ENV DEBIAN_FRONTEND=noninteractive
+
+
+# install psycopg2 dependencies
+# RUN apk update \
+#     && apk add postgresql-dev gcc python3-dev musl-dev
+
+# lint
+# RUN pip install --upgrade pip
+# RUN pip install flake8==3.9.2
+# COPY . .
+# RUN flake8 --ignore=E501,F401 .
+
+# install dependencies
+# COPY ./requirements.txt .
+# RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+
+
+#########
+# FINAL #
+#########
+
+# pull official base image
+FROM ubuntu:20.04
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN useradd app
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME && mkdir $APP_HOME/bin
+RUN mkdir $APP_HOME/staticfiles
+RUN mkdir $APP_HOME/mediafiles
+WORKDIR $APP_HOME
+
+# add $APP_HOME/bin to PATH
+ENV PATH $PATH:/$APP_HOME/bin
+
+# install python and apt dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      apt-utils \
+      bash \
+      python3.8 \
+      python3-pip \
+      python3-setuptools \
+      python3-dev \
+      python-is-python3 \
+      netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# install additional dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ed \
+	  less \
+	  locales \
+	  vim-tiny \
+	  wget \
+	  ca-certificates \
+	  apt-transport-https \
+	  gsfonts \
+	  gnupg2 \
+	  zip \
+	  unzip \
+	  tar \
+	  texlive-latex-base texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra \
+	  docker \
+	  curl \
+	  git \
+	  perl \
+	  default-jre \
+      libgfortran4 \
+      build-essential \
+      libssl-dev \
+      uuid-dev \
+      libgpgme11-dev \
+      squashfs-tools \
+      libseccomp-dev \
+      pkg-config \
+      gawk \
+      gzip \
+      rsync \
+      cryptsetup \
+      graphviz \
+    && rm -rf /var/lib/apt/lists/*
+
+# install psycopg2 dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      postgresql \
+      gcc \
+      musl \
+    && rm -rf /var/lib/apt/lists/*
+##############################
+## install conda
+# add conda bin to PATH
+ENV PATH="${HOME}/miniconda3/bin:${PATH}"
+ARG PATH="${HOME}/miniconda3/bin:${PATH}"
+
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && mkdir /root/.conda \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh
+
+RUN conda --version
+##############################
+## install conda environments
+RUN conda config --add channels bioconda \
+    && conda config --add channels conda-forge \
+    && conda list
+
+COPY nfscripts/nfcore/sarek_environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    rm environment.yml
+
+#ENV PATH=$PATH:/root/miniconda3/envs/nf-core-sarek-2.7/bin
+#RUN echo $PATH
+
+COPY nfscripts/nfcore/chipseq_atacseq_environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    rm environment.yml
+
+#ENV PATH=$PATH:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin
+#RUN echo $PATH
+# test if packages are available
+#RUN multiqc --help
+
+COPY nfscripts/nfcore/rnaseq_environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    rm environment.yml
+
+#ENV PATH=$PATH:/root/miniconda3/envs/nf-core-rnaseq-3.4/bin
+#RUN echo $PATH
+#RUN multiqc --help
+
+COPY nfscripts/crispr_cas/environment.yml environment.yml
+RUN conda env create -f environment.yml && \
+    rm environment.yml
+
+#ENV PATH=$PATH:/root/miniconda3/envs/crispr-cas-1.0/bin
+#RUN echo $PATH
+#RUN blastn -help
+###################################################
+## nf-core bins
+
+COPY ./nfscripts/nfcore/atacseq/bin /nfscripts/nfcore/atacseq/bin
+ENV PATH $PATH:/nfscripts/nfcore/atacseq/bin
+COPY ./nfscripts/nfcore/sarek/bin /nfscripts/nfcore/sarek/bin
+ENV PATH $PATH:/nfscripts/nfcore/sarek/bin
+###################################################
+## install nextflow
+RUN curl -s https://get.nextflow.io | bash \
+    && mv nextflow $APP_HOME/bin \
+    && nextflow info
+##############################
+## install r-base
+# configure default locale
+# RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+# 	&& locale-gen en_US.utf8 \
+# 	&& /usr/sbin/update-locale LANG=en_US.UTF-8
+
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" > /etc/apt/sources.list.d/cran.list
+
+# note proxy for gpg
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+
+# set r-base version
+ENV R_BASE_VERSION 4.1.0
+
+## r-base
+# install R and littler and set default CRAN repository
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		littler\
+		r-cran-littler \
+        r-base \
+        r-base-core \
+		r-base-dev \
+		r-recommended \
+    && echo 'options(repos = c(CRAN = "https://cloud.r-project.org/"), download.file.method = "libcurl")' >> /etc/R/Rprofile.site \
+    && echo 'source("/etc/R/Rprofile.site")' >> /etc/littler.r \
+	&& ln -s /usr/share/doc/littler/examples/install.r /usr/local/bin/install.r \
+	&& ln -s /usr/share/doc/littler/examples/install2.r /usr/local/bin/install2.r \
+	&& ln -s /usr/share/doc/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
+	&& ln -s /usr/share/doc/littler/examples/testInstalled.r /usr/local/bin/testInstalled.r \
+	&& install.r docopt \
+	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		libcurl4-openssl-dev \
+		libssl-dev \
+		libxml2 \
+		libxml2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# check R version (should be 4.1.0)
+RUN Rscript --version
+
+##############################
+
+# install dependencies
+# RUN pip install --upgrade pip
+# COPY ./requirements.txt .
+# RUN pip install -r requirements.txt
+
+# install R dependencies
+RUN Rscript -e "install.packages('BiocManager')"
+RUN Rscript -e "BiocManager::install('netresponse')"
+COPY ./requirements.r .
+RUN Rscript requirements.r --vanilla
+
+# install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
+# COPY --from=builder /usr/src/app/wheels /wheels
+# COPY --from=builder /usr/src/app/requirements.txt .
+COPY ./requirements.txt .
+RUN pip install --no-cache -r requirements.txt  # /wheels/*
+
+# setup NCBI database
+COPY ./ncbi_setup.py .
+RUN python ncbi_setup.py && \
+    rm ncbi_setup.py
+
+# copy entrypoint.prod.sh
+COPY ./entrypoint.prod.sh .
+RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.prod.sh
+RUN chmod +x  $APP_HOME/entrypoint.prod.sh
+
+# COPY Gunicorn config into $APP_HOME/bin
+# COPY ./gunicorn.conf.py $APP_HOME/bin
+
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+RUN chown -R app.app $HOME/.nextflow/
+
+# change to the app user
+USER app
+
+# run entrypoint.prod.sh
+ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]
+

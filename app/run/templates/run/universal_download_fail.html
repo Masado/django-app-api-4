@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Download{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-Id for this pipeline-run is '{{ run_id }}'</h2>
+
+    See, this is weird, because such a run doesn't exist on our end.
+
+{% endblock %}

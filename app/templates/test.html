@@ -1,0 +1,15 @@
+
+
+{% block content %}
+
+  <form action="{% url "test" %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+{#    <input type="file" name="image_file">#}
+      <button type="submit" name="base_dir" value="base_dir">base_dir</button>
+  </form>
+
+  {% if base_dir %}
+    <p>Base directory: {{ base_dir }}</p>
+  {% endif %}
+
+{% endblock %}

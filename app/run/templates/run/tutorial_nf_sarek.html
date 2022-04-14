@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Sarek Tutorial{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <form action="." method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="ml-4 float-right">
+            <p>
+            <div class="input-group">
+                <label class="input-group-text" id="id_archive_form">You can download the files<br> used in this example
+                    as a .zip or .tar.gz archive:</label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_archive_form_zip" class="form-check-input" type="radio" name="archive_form"
+                               value="zip" checked>
+                        <label class="form-check-label" for="id_archive_form_zip">ZIP</label>
+                    </div>
+                    <div>
+                        <input id="id_archive_form_tar" class="form-check-input" type="radio" name="archive_form"
+                               value="tar">
+                        <label class="form-check-label" for="id_archive_form_tar">TAR</label>
+                    </div>
+                </div>
+            </div>
+            </p>
+
+            <div class="center-text">
+                <button class="ml-4 mb-4" type="submit"
+                        name="tutorial_sarek">
+                    Download examples
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <p>
+        This page contains the tutorial for nf-core's Sarek analysis. For every input on the actual analysis-page a more
+        detailed description of what is required by the user is given.<br>
+        To the right of this text you will also be able to download all the files that were used in this example if you
+        would like to take a closer look at how they are structured or want to try it yourself.
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_input_tsv.png' %}" alt="Sarek input .tsv-file">
+        <figcaption><small>
+            In the "Input tsv-file"-input you are required to upload a .tsv-file containing the information of your
+            project setup. There are multiple ways such a tsv-file can be designed, but the columns that you are able to
+            use are "subject", which should be the ID of the subject, "sex", in form of the subjects chromosomes
+            (e.g.: "XX", "XY"...), "status", status of the measured sample (0 for normal, 1 for Tumor), "sample",
+            designates the sample and should be the ID of the sample, "lane", is used when the sample is multiplexed in
+            several lanes (must be unique for every lane in the same sample), "fastq1", path to the first pair of the
+            FASTQ file, "fastq2", path to the second pair of the FASTQ file, "bam", path to the BAM file, "bai", path to
+            the BAM index file, "recaltable", path to recalibration table, "mpileup", path to mpileup file.<br>
+            These parameters can be combined in many ways, the most simple being "subject", "sex", "status", "sample",
+            "lane", "fastq_1", "fastq_2". Other combinations are also possible. The full documentation for the sarek tsv
+            file with different configuration options can be found
+            <a href="https://nf-co.re/sarek/2.7.1/usage#tsv-file" target="_blank">here</a>
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_file_folder.png' %}" alt="Sarek file folder">
+        <figcaption><small>
+            In case your fastq-files are not provided through github or a s3-link, you will have to upload your data to
+            the webapp. Please do so in form of a .zip- or .tar.gz-archive.<br>
+            If you do so, when writing your Input-tsv-file please consider that both the content of your archive as well
+            as the file will end up in the same location.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_igenome.png' %}" alt="Sarek iGenome reference">
+        <figcaption><small>
+            The "iGenome reference" allows you to enter one of the references found <a
+                href="https://github.com/nf-core/chipseq/blob/master/conf/igenomes.config" target="_blank">here</a>.<br>
+            For testing of the sarek pipeline, please use the "GRCh38" iGenome reference.<br>
+            Entering one of the supported iGenome references will cause the pipeline to load all the relevant reference
+            files listed below from the iGenome reference and you do not need to upload any references yourself.<br>
+            Please note that if you DO enter an iGenome reference and still upload your own reference files,
+            <b>the pipeline will prioritize your uploaded data</b>.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_tools.png' %}" alt="Sarek tools">
+        <figcaption><small>
+            Sarek allows for the selection of a many tools for variant calling and annotation. Tools focus on different
+            variants they focus on and you are allowed to select one or more. The same is true for the annotation tools.
+            <table>
+                <thead>
+                <th>Tool</th>
+                <th>Somatic/Germline</th>
+                <th>Focus</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Manta</td>
+                    <td>Germline & Somatic</td>
+                    <td>structural variants, medium-sized indels, large insertions</td>
+                </tr>
+                <tr>
+                    <td>TIDDIT</td>
+                    <td>Germline & Somatic</td>
+                    <td>translocations, deletions, tandem-duplications, inversions</td>
+                </tr>
+                <tr>
+                    <td>GATK Mutect2</td>
+                    <td>Somatic</td>
+                    <td>SNVs, indels</td>
+                </tr>
+                <tr>
+                    <td>GATK HaplotypeCaller</td>
+                    <td>Germline</td>
+                    <td>SNVs, indels</td>
+                </tr>
+                <tr>
+                    <td>Strelka2</td>
+                    <td>Germline & Somatic</td>
+                    <td>G: small cohort variations, S: small tumor/normal read-pair variation</td>
+                </tr>
+                <tr>
+                    <td>MSIsensor</td>
+                    <td>Germline & Somatic</td>
+                    <td>microsatellite instability in tumor/normal read-pairs</td>
+                </tr>
+                <tr>
+                    <td>ASCAT</td>
+                    <td>Somatic</td>
+                    <td>tumor ploidy, gains, losses and copy events of tumors</td>
+                </tr>
+                <tr>
+                    <td>FreeBayes</td>
+                    <td>Germline</td>
+                    <td>small SNPs, indels, MNPs</td>
+                </tr>
+                <tr>
+                    <td>Control-FREEC</td>
+                    <td>Somatic</td>
+                    <td>copy-number changes and allelic imbalances of tumors</td>
+                </tr>
+                </tbody>
+            </table>
+            <br>
+            Both snpEff and VEP annotate the variants and predict coding effects. snpEff uses multiple databases while
+            VEP is based on Ensembl.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_fasta.png' %}" alt="Sarek fasta file">
+        <figcaption><small>
+            The "FASTA genome file" allows you to upload a fasta file containing the nucleotide sequences of the species
+            your data was obtained from.<br>
+            Please note that this is mandatory if you did not enter an iGenome reference.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_dbsnp.png' %}" alt="Sarek dnsnp file">
+        <figcaption><small>
+            The "dbsnp file" allows you to upload a dbsnp file in .vcf.gz format providing information on genetic
+            variation.<br>
+            NCBI provides vcf files <a href="https://ftp.ncbi.nih.gov/snp/" target="_blank">here</a>.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/sarek/sarek_dbsnp_index.png' %}" alt="Sarek dbsnp index">
+        <figcaption><small>
+            The "dbsnp index" requires you to upload a dbsnp index file, only if you also uploaded a dbsnp file. You
+            should be able to obtain the index file at the same location as the dbsnp file and it should have the same
+            name as that file, except that it is in ".vcf.gz.tbi" format.
+        </small></figcaption>
+    </figure>
+
+    <br><br>
+    <form action="." method="post">
+        <div>
+            <input class="back-button" type="button" onclick="history.back()" ; value="Back">
+        </div>
+    </form>
+
+
+{% endblock %}

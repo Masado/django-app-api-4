@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}ChIP-Seq Tutorial{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <form action="." method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="ml-4 float-right">
+            <p>
+            <div class="input-group">
+                <label class="input-group-text" id="id_archive_form">You can download the files<br> used in this example
+                    as a .zip or .tar.gz archive:</label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_archive_form_zip" class="form-check-input" type="radio" name="archive_form"
+                               value="zip" checked>
+                        <label class="form-check-label" for="id_archive_form_zip">ZIP</label>
+                    </div>
+                    <div>
+                        <input id="id_archive_form_tar" class="form-check-input" type="radio" name="archive_form"
+                               value="tar">
+                        <label class="form-check-label" for="id_archive_form_tar">TAR</label>
+                    </div>
+                </div>
+            </div>
+            </p>
+
+            <div class="center-text">
+                <button class="ml-4 mb-4" type="submit"
+                        name="tutorial_chipseq">
+                    Download examples
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <p>
+        This page contains the tutorial for nf-core's ChIP-Seq analysis. For every input on the actual analysis-page a
+        more detailed description of what is required by the user is given.<br>
+        To the right of this text you will also be able to download all the files that were used in this example if you
+        would like to take a closer look at how they are structured or want to try it yourself.
+    </p>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_design.png' %}" alt="ChIP-Seq design file">
+        <figcaption><small>
+            The "Design-file"-input requires you to upload a file in .csv format containing information how your data
+            is set up. It has to contain 6 columns labeled "group", "replicate", "fastq_1", "fastq_2", "antibody" and
+            "control". "group" and "replicate" should contain information about the origin of your data. the "fastq_1"
+            and "fastq_2" columns provide the path, or link, to the fastq.gz files containing your data. "antibody" and
+            "control" columns contain information about the treatment of your data. "antibody" should contain the
+            antibody used in the generation of your data, "control" which of your fastq-files is the corresponding
+            control to the fastq-files.<br>
+            Some of the columns do not have to be filled. If you are using single-end data you do not have to provide a
+            path in the "fastq_2" column. If a row contains information of the control treatment neither "antibody" nor
+            "control" column should contain anything.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_file_folder.png' %}" alt="ChIP-Seq file folder">
+        <figcaption><small>
+            In case your fastq-files are not provided through github or a s3-link, you will have to upload your data to
+            the webapp. Please do so in form of a .zip- or .tar.gz-archive.<br>
+            If you do so, when writing your design-file please consider that both the content of your archive as well
+            as the file will end up in the same location.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_singlereads.png' %}" alt="ChIP-Seq single-end reads">
+        <figcaption><small>
+            Using this selection you can tell the pipeline whether or not the data you are providing contains single-end
+            reads.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_igenome.png' %}" alt="ChIP-Seq iGenome reference">
+        <figcaption><small>
+            The "iGenome reference" allows you to enter one of the references found <a
+                href="https://github.com/nf-core/chipseq/blob/master/conf/igenomes.config" target="_blank">here</a>.<br>
+            Entering one of the supported iGenome references will cause the pipeline to load all the relevant reference
+            files listed below from the iGenome reference and you do not need to upload any references yourself.<br>
+            Please note that if you DO enter an iGenome reference and still upload your own reference files,
+            <b>the pipeline will prioritize your uploaded data</b>.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_fasta.png' %}" alt="ChIP-Seq FASTA reference">
+        <figcaption><small>
+            The "FASTA genome file" allows you to upload a fasta file containing the nucleotide sequences of the species
+            your data was obtained from.<br>
+            Please note that this is mandatory if you did not enter an iGenome reference.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_gtf_annotation.png' %}" alt="ChIP-Seq GTF annotation">
+        <figcaption><small>
+            In the "GTF annotation file"-input you can upload an annotation file in .gtf format.<br>
+            Please note that this is mandatory if you did not enter an iGenome reference.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_bed.png' %}" alt="ChIP-Seq BED file">
+        <figcaption><small>
+            At the "BED file"-input you can upload a file in .bed format containing information on the gene intervals of
+            the species your data was obtained from.<br>
+            This file can be generated by the pipeline from the .gtf file of the "GTF annotation file"-input if not
+            provided.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_macs2.png' %}" alt="ChIP-Seq MACS2 genome size">
+        <figcaption><small>
+            If you do not enter an iGenome reference you can enter the effective genome size of the species your data
+            was obtained from. Methods to obtain your genome size can be found
+            <a href="https://deeptools.readthedocs.io/en/develop/content/feature/effectiveGenomeSize.html"
+               target="_blank">here</a>.
+        </small></figcaption>
+    </figure>
+    <hr>
+
+    <p>
+    <figure>
+        <img src="{% static 'images/tutorials/chipseq/chipseq_narrowpeaks.png' %}" alt="ChIP-Seq narrowPeak mode">
+        <figcaption><small>
+            Determines whether or not MACS2 will run in narrowPeak mode.
+        </small></figcaption>
+    </figure>
+
+
+    <form action="." method="post">
+        <div>
+            <input class="back-button" type="button" onclick="history.back()" ; value="Back">
+        </div>
+    </form>
+
+
+{% endblock %}

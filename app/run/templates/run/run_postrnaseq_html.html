@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+
+{% block title %}Post-RNA-Seq{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <p><h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2></p>
+
+
+
+    <form action="{% url 'run:PRSTutorial' %}">
+        <input class="submit-button float-right" type="submit" value="Explanation">
+    </form>
+
+    <form id="submit_form" action="." method="post" enctype="multipart/form-data"
+          onsubmit="return test();">
+        {% csrf_token %}
+
+        <label for="id_run_id" hidden></label>
+        <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+
+        {#        <p id="error" hidden>Please fill out </p>#}
+        {##}
+        {#        <p>#}
+        {#        <div>#}
+        {#            <label for="id_organism_name">Organism name:</label>#}
+        {##}
+        {#            <input id="id_organism_name" class="ml-4" type="text" name="organism_name" placeholder="Gallus gallus"#}
+        {#                   required>#}
+        {##}
+        {#            <input id="id_organism_name_expl_button" type="button" class="ml-4 help-button" value="?"#}
+        {#                   title="Please type in the scientific name of the species you obtained your samples from. eg.:'Gallus gallus'">#}
+        {#        </div>#}
+        {##}
+        {##}
+        {#        <p>#}
+        {#        <div>#}
+        {#            <label for="id_species_id">Taxonomy ID:</label>#}
+        {##}
+        {#            <input id="id_species_id" class="ml-4 text-like" type="number" name="species_id" placeholder="9031"#}
+        {#                   required>#}
+        {##}
+        {#            <input type="button" class="help-button ml-4" value="?"#}
+        {#                   title="Please enter the Taxonomy ID. e.g: 9031 for Gallus gallus">#}
+        {#        </div>#}
+        {##}
+        {##}
+        {#        <p>#}
+        {#        <div>#}
+        {#            <label for="id_sample_file">Sample file: </label>#}
+        {##}
+        {#            <input id="id_sample_file" type="file" name="sample_file" required#}
+        {#                   title="Please upload a txt file containing the setup according to the pattern: 'run' (names of the folders in the salmon output) and 'condition' (Wildtype/control)">#}
+        {##}
+        {#            <input type="button" class="help-button ml-2" value="?"#}
+        {#                   title="Please upload a txt file containing the setup according to the pattern: 'run' (names of the folders in the salmon output) and 'condition' (Wildtype/control)">#}
+        {#        </div>#}
+        {#        <small><em>#}
+        {#            Please upload a txt file containing the setup according to the pattern: 'run' (names of the folders in the salmon output) and 'condition' (Wildtype/control).#}
+        {#        </em></small>#}
+        {#        </p>#}
+        {##}
+        {#        <p>#}
+        {#        <div>#}
+        {#            <label for="id_salmon_file">Salmon archive: </label>#}
+        {##}
+        {#            <input id="id_salmon_file" class="ml-4" type="file" accept=".tar.gz, .zip" name="salmon_file" required>#}
+        {##}
+        {#            <input type="button" class="help-button ml-2" value="?"#}
+        {#                   title="Please upload the salmon output folder in form of a ZIP or TAR archive">#}
+        {#        </div>#}
+        {#        </p>#}
+        {##}
+        {#        <div>#}
+        {##}
+        {#            <div>#}
+        {#                <label for="id_compare_tsv">Comparison tsv file: </label>#}
+        {##}
+        {#                <input id="id_compare_tsv" class="ml-4" type="file" accept=".tsv" name="compare_tsv_file" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-2" value="?"#}
+        {#                       title="Please upload a tsv file containing the comparisons you would like to run (e.g.: Row 1: 'Wildtype1', 'Control1')">#}
+        {#            </div>#}
+        {#        </div>#}
+        {##}
+        {#        <p>#}
+        {#        <div>#}
+        {#            <label for="id_annotation_file">Annotation file: </label>#}
+        {##}
+        {#            <input id="id_annotation_file" class="ml-4" type="file" accept=".gtf" name="annotation_file" required>#}
+        {##}
+        {#            <input type="button" class="help-button ml-2" value="?"#}
+        {#                   title="Please upload a gtf-annotation file">#}
+        {#        </div>#}
+        {#        </p>#}
+        {##}
+        {#        <p>#}
+        {#        <div>#}
+        {#            <label for="id_network_file">Network file: </label>#}
+        {##}
+        {#            <input id="id_network_file" class="ml-4" type="file" accept=".sif" name="network_file" required>#}
+        {##}
+        {#            <input type="button" class="help-button" value="?" title="Please upload a network file">#}
+        {#        </div>#}
+        {#        </p>#}
+        {##}
+        {#        <hr style="width:50%;text-align:left;margin-left:1%">#}
+        {##}
+        {#        <div>#}
+        {#            <p><h4>Key Pathway Miner</h4></p>#}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_pathways_number">Number of pathways: </label><br/>#}
+        {##}
+        {#                <input id="id_pathways_number" type="number" name="pathways_number" value="3" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The number of solutions KeyPathwayMiner will generate">#}
+        {#            </div>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_kmin">K-min: </label><br/>#}
+        {##}
+        {#                <input id="id_kmin" type="number" name="kmin" value="0" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The minimum value of allowed gene exceptions">#}
+        {#            </div>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_kmax">K-max: </label><br/>#}
+        {##}
+        {#                <input id="id_kmax" type="number" name="kmax" value="5" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The maximum value of allowed gene exceptions">#}
+        {#            </div>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_kstep">K-step: </label><br/>#}
+        {##}
+        {#                <input id="id_kstep" type="number" name="kstep" value="1" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The amount by which the allowed gene exceptions are increased">#}
+        {#            </div>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_lmin">L-min: </label><br/>#}
+        {##}
+        {#                <input id="id_lmin" type="number" name="lmin" value="0" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The minimum value of allowed case exceptions">#}
+        {#            </div>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_lmax">L-max: </label><br/>#}
+        {##}
+        {#                <input id="id_lmax" type="number" name="lmax" value="3" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The maximum value of allowed case exceptions">#}
+        {#            </div>#}
+        {#            </p>#}
+        {##}
+        {#            <p>#}
+        {#            <div>#}
+        {#                <label for="id_lstep">L-step: </label><br/>#}
+        {##}
+        {#                <input id="id_lstep" type="number" name="lstep" value="1" required>#}
+        {##}
+        {#                <input type="button" class="help-button ml-4" value="?"#}
+        {#                       title="The amount by which the allowed case exceptions are increased">#}
+        {#            </div>#}
+        {#            </p>#}
+        {#        </div>#}
+
+        <table>
+            <tr>
+                <td class="noBorder"><label for="id_organism_name" class="float-right">Organism name:</label></td>
+                <td class="noBorder">
+                    <input id="id_organism_name" type="text" name="organism_name"
+                           placeholder="Gallus gallus" required></td>
+                <td class="noBorder">
+                    <input id="id_organism_name_expl_button" type="button" class="ml-4 help-button"
+                           value="?"
+                           title="Please type in the scientific name of the species you obtained your samples from. eg.:'Gallus gallus'">
+                </td>
+            </tr>
+{#            <tr>#}
+{#                <td class="noBorder"><label for="id_species_id" class="float-right">Taxonomy ID:</label></td>#}
+{#                <td class="noBorder">#}
+{#                    <input id="id_species_id" class="text-like" type="number" name="species_id" placeholder="9031"#}
+{#                           required>#}
+{#                </td>#}
+{#                <td class="noBorder">#}
+{#                    <input type="button" class="help-button ml-4" value="?"#}
+{#                           title="Please enter the Taxonomy ID. e.g: 9031 for Gallus gallus"></td>#}
+{#            </tr>#}
+            <tr>
+                <td class="noBorder"><label for="id_sample_file" class="float-right">Sample file:</label></td>
+                <td class="noBorder">
+                    <input id="id_sample_file" type="file" name="sample_file" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="Please upload a txt file containing the setup according to the pattern: 'run' (names of the folders in the salmon output) and 'condition' (Wildtype/control)">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_salmon_file" class="float-right">Salmon archive: </label></td>
+                <td class="noBorder"><input id="id_salmon_file" type="file" accept=".tar.gz, .zip"
+                                            name="salmon_file" required></td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-2" value="?"
+                           title="Please upload the salmon output folder in form of a ZIP or TAR archive">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_compare_tsv" class="float-right">Comparison tsv file: </label></td>
+                <td class="noBorder"><input id="id_compare_tsv" type="file" accept=".tsv"
+                                            name="compare_tsv_file" required></td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-2" value="?"
+                           title="Please upload a tsv file containing the comparisons you would like to run (e.g.: Row 1: 'Wildtype1', 'Control1')">
+                </td>
+            </tr>
+{#            <tr>#}
+{#                <td class="noBorder"><label for="id_annotation_file" class="float-right">Annotation file: </label></td>#}
+{#                <td class="noBorder">#}
+{#                    <input id="id_annotation_file" type="file" accept=".gtf"#}
+{#                           name="annotation_file" required></td>#}
+{#                <td class="noBorder">#}
+{#                    <input type="button" class="help-button ml-2" value="?"#}
+{#                           title="Please upload a gtf-annotation file">#}
+{#                </td>#}
+{#            </tr>#}
+            <tr>
+                <td class="noBorder"><label for="id_network_file" class="float-right">Network file: </label></td>
+                <td class="noBorder">
+                    <input id="id_network_file" type="file" accept=".sif" name="network_file" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button" value="?" title="Please upload a protein-protein interaction network file obtainable from the Cytoscape App">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="noBorder">
+                    <hr style="text-align:left;margin-left:1%">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="noBorder center-text"><h4>KeyPathwayMiner</h4></td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_pathways_number" class="float-right">Number of pathways: </label>
+                </td>
+                <td class="noBorder">
+                    <input id="id_pathways_number" type="number" name="pathways_number" value="3" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The number of solutions KeyPathwayMiner will generate">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_kmin" class="float-right">K-min: </label></td>
+                <td class="noBorder">
+                    <input id="id_kmin" type="number" name="kmin" value="0" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The minimum number of allowed gene exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_kmax" class="float-right">K-max: </label></td>
+                <td class="noBorder">
+                    <input id="id_kmax" type="number" name="kmax" value="5" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The maximum number of allowed gene exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_kstep" class="float-right">K-step: </label></td>
+                <td class="noBorder">
+                    <input id="id_kstep" type="number" name="kstep" value="1" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The amount by which the allowed gene exceptions are increased">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_lmin" class="float-right">L-min: </label></td>
+                <td class="noBorder">
+                    <input id="id_lmin" type="number" name="lmin" value="0" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The minimum number of allowed case exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_lmax" class="float-right">L-max: </label></td>
+                <td class="noBorder">
+                    <input id="id_lmax" type="number" name="lmax" value="3" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The maximum number of allowed case exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_lstep" class="float-right">L-step: </label></td>
+                <td class="noBorder">
+                    <input id="id_lstep" type="number" name="lstep" value="1" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The amount by which the allowed case exceptions are increased">
+                </td>
+            </tr>
+        </table>
+
+        <br><br>
+        <button type="submit"
+                name="run_post_rnaseq">Submit
+        </button>
+    </form>
+
+    <script>
+        function organism_name_help() {
+            var text = document.getElementById("id_organism_name_expl_text");
+
+            if (text.style.display === "none") {
+                text.style.display = "block";
+            } else if (text.style.display === "block") {
+                text.style.display = "none";
+            }
+        }
+
+        function extend_help(target) {
+            var text = document.getElementById(target);
+
+            if (text.style.display === "none") {
+                text.style.display = "block";
+            } else if (text.style.display === "block") {
+                text.style.display = "none";
+            }
+        }
+    </script>
+
+{% endblock %}
+
+<script>
+    function test() {
+        let org_name = document.getElementById("id_organism_name").value;
+        {#let tax_id = document.getElementById("id_species_id").value;#}
+
+        let org_name_re = new RegExp("^[A-Za-z]+ {1}[a-z]+$");
+        {#let tax_id_re = new RegExp("^[0-9]+$");#}
+
+        if (org_name_re.test(org_name)
+            {#&& tax_id_re.test(tax_id)#}
+        ) {
+            alert("The pipeline will now start. This may take some time, so you can close this page and find your " +
+                "results later using the 'Find Results' tag.");
+            return true;
+        } else {
+            alert("Validation failed. Please check your 'Organism name' again.");
+            {#alert(org_name_re.test(org_name));#}
+            return false;
+        }
+    }
+
+    function handler() {
+        document.getElementById("submit_form").addEventListener("click", function (event))
+        {
+            test()
+        }
+    }
+
+    {#$('#submit_form').submit(function() {#}
+    {#    let result = test();#}
+    {##}
+    {#    if result{#}
+    {#        alert("Ping");#}
+    {#        return true;#}
+    {#    }#}
+    {#    else{#}
+    {#        alert("Validation failed. Please check your 'Organism name' again.");#}
+    {#        return false;#}
+    {#    }#}
+    {#})
+        ;
+    #}
+</script>
+
+{% block extrascript %}
+
+    function test(){
+    let org_name = document.getElementById("id_organism_name").value;
+    let tax_id = document.getElementById("id_species_id").value;
+
+    let org_name_re = new RegExp("^[A-Za-z]+ {1}[a-z]+$");
+    let tax_id_re = new RegExp("^[0-9]+$");
+
+    if(org_name_re.test(org_name) && tax_id_re.test(tax_id)){
+    alert("The pipeline will now start. This may take a while, so feel free to close the page and check in on your
+    results later");
+    return true;
+    }
+    else {
+    alert("Validation failed. Please check your 'Organism name' again.");
+    return false;
+    }
+
+    }
+
+{% endblock %}

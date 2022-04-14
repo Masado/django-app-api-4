@@ -1,0 +1,1148 @@
+{% extends 'base.html' %}
+
+{% block title %}ATAC-seq Pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <!-- tab-header -->
+    <div class="tab">
+        <button class="tablink" onclick="openTab('Basic', this)" id="defaultOpen">Basic</button>
+        <button class="tablink" onclick="openTab('Advanced', this)">Advanced</button>
+    </div>
+
+    <h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2>
+
+    <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+
+    <!-- tab-content Basic -->
+    <div class="tabcontent" id="Basic">
+
+        <form action="{% url 'run:ATACTutorial' %}">
+            <input class="submit-button float-right" type="submit" value="Explanation">
+        </form>
+
+        <form action="." method="post" enctype="multipart/form-data" onsubmit="return check_inputs_atacseq()">
+            {% csrf_token %}
+
+            <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+            {#            <p>#}
+            {#                <label for="id_organism_name">Organism name:</label>#}
+            {##}
+            {#                <input id="id_organism_name" type="text" name="organism_name" required="">#}
+            {#            </p>#}
+            {#            <p>#}
+            {#                <label for="id_design_file">Design file:</label>#}
+            {##}
+            {#                <input id="id_design_file" type="file" class="ml-4" name="design_file" required="required"#}
+            {#                       title="When writing your design.tsv, if you upload your referenced data, please consider that both will end up in the same location">#}
+            {#                <br>#}
+            {#                <small><em>When writing your design.tsv, if you upload your referenced data, please consider that both will end up in the same location</em></small>#}
+            {#            </p>#}
+            {#            <p>#}
+            {#                <label for="id_file_folder">File folder:</label>#}
+            {##}
+            {#                <input id="id_file_folder" type="file" class="ml-4" accept=".zip, .tar.gz" name="file_folder"#}
+            {#                       title="If you are not getting your data from an internet source, please upload the data in form of a .zip or .tar.gz archive">#}
+            {#                <br>#}
+            {#                <small><em>If you are not getting your data from an internet source, please upload the data in form of a#}
+            {#                    .zip or .tar.gz archive</em></small>#}
+            {#            </p>#}
+            {#            <p>#}
+            {#            <div class="input-group">#}
+            {#                <label class="input-group-text" id="id_single_end">Is your input single-end reads?</label>#}
+            {#                <div class="form-control radio-inline pl-4">#}
+            {#                    <div class="form-check form-check-inline mr-4">#}
+            {#                        <input id="id_single_end_true" class="form-check-input" type="radio" name="single_end"#}
+            {#                               value="true">#}
+            {#                        <label class="form-check-label" for="id_single_end_true">True</label>#}
+            {#                    </div>#}
+            {#                    <div>#}
+            {#                        <input id="id_single_end_false" class="form-check-input" type="radio" name="single_end"#}
+            {#                               value="false" checked>#}
+            {#                        <label class="form-check-label" for="id_single_end_false">False</label>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#            </div>#}
+            {#            </p>#}
+            {#        <p>#}
+            {#            <label for="id_genome_or_fasta">Do you provide your own reference files or use an iGenome reference?</label>#}
+            {##}
+            {#            <select id="id_genome_or_fasta" name="genome_or_fasta">#}
+            {#                <option value="iGenome">iGenome reference</option>#}
+            {#                <option value="own_reference">Own reference</option>#}
+            {#            </select>#}
+            {#        </p>#}
+            {#            <p>#}
+            {#                <label for="id_genome_reference">iGenome reference:</label>#}
+            {##}
+            {#                <input id="id_genome_reference" type="text" class="ml-4" name="genome_reference" value="" title="Please enter your iGenome reference (e.g.: 'GRCh38').#}
+            {#If you are not using an iGenome reference, please upload your own reference files">#}
+            {#                <br>#}
+            {#                <small><em>#}
+            {#                    Please enter your iGenome reference (e.g.: "GRCh38").<br>#}
+            {#                    If you are not using an iGenome reference, please upload your own reference files.<br>#}
+            {#                    A full list of iGenome references available for nf-core pipelines can be found <a#}
+            {#                        href="https://github.com/nf-core/chipseq/blob/master/conf/igenomes.config"#}
+            {#                        target="_blank">here</a>.#}
+            {#                </em></small>#}
+            {#            </p>#}
+            {#            <p>#}
+            {#                <label for="id_fasta_file">Fasta reference:</label>#}
+            {##}
+            {#                <input id="id_fasta_file" type="file" class="ml-4" accept=".fa" name="fasta_file" value=NULL#}
+            {#                       title="Please upload your fasta reference">#}
+            {#                <br>#}
+            {#                <small><em>Please upload your fasta reference</em></small>#}
+            {#            </p>#}
+            {#            <p>#}
+            {#                <label for="id_gtf_annotation">GTF annotation:</label>#}
+            {##}
+            {#                <input id="id_gtf_annotation" type="file" class="ml-4" accept=".gtf" name="gtf_annotation" value=NULL#}
+            {#                       title="Please upload your gtf annotation">#}
+            {#                <br>#}
+            {#                <small><em>Please upload your gtf annotation</em></small>#}
+            {#            </p>#}
+            {#            <p>#}
+            {#                <label for="id_bed_file">Genome bed file:</label>#}
+            {##}
+            {#                <input id="id_bed_file" type="file" class="ml-4" accept=".bed" name="bed_file" value=NULL#}
+            {#                       title="Please upload your gene bed file">#}
+            {#                <br>#}
+            {#                <small><em>Please upload your gene bed file</em></small>#}
+            {#            </p>#}
+            {#            <p>#}
+            {#                <label for="id_macs_size">MACS2 genome size:</label>#}
+            {##}
+            {#                <input id="id_macs_size" type="text" class="ml-4" name="macs_size" value=""#}
+            {#                       title="If you are not using an iGenome reference you can enter your MACS2 genome size. If this is not specified the MACS2 processes will be skipped.">#}
+            {#                <br>#}
+            {#                <small><em>If you are not using an iGenome reference you can enter your MACS2 genome size. <br>#}
+            {#                    If this is not specified the MACS2 processes will be skipped.<br>#}
+            {#                </em></small>#}
+            {#            </p>#}
+            {##}
+            {#            <p>#}
+            {#                <label for="id_narrow_peaks">Would you like MACS2 to be run in narrowPeak mode?</label>#}
+            {##}
+            {#                <input id="id_narrow_peaks" type="checkbox" name="narrow_peaks">#}
+            {#            </p>#}
+            {##}
+            {#        ########################################################################################################### #}
+            {##}
+            {#            <hr>#}
+            {#            <p>#}
+            {#                <label for="id_post_atacseq">#}
+            {#                    Would you like to run the Post-ATAC-Seq pipeline immediately after this pipeline?#}
+            {#                </label>#}
+            {#                <input id="id_post_atacseq" type="checkbox" name="post_atacseq" onclick="post_atacseq_addition()">#}
+            {#            </p>#}
+            {##}
+            {#            <div id="id_post_atacseq_extras" style="display: none">#}
+            {#                <p>#}
+            {#                <div>#}
+            {#                    <label for="id_ext_chr">Chromosomes:</label>#}
+            {##}
+            {#                    <input id="id_ext_chr" type="text" name="ext_chr">#}
+            {#                </div>#}
+            {##}
+            {#                <small><em>#}
+            {#                    If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass#}
+            {#                    them here.<br>#}
+            {#                    You can request multiple chromosomes by separating them with a comma (e.g. "IV,VII,X").#}
+            {#                </em></small>#}
+            {#                </p>#}
+            {##}
+            {#                <p>#}
+            {#                <div class="input-group">#}
+            {#                    <label class="input-group-text" id="id_single_end">Computation method: </label>#}
+            {#                    <div class="form-control radio-inline pl-4">#}
+            {#                        <div class="form-check form-check-inline mr-4">#}
+            {#                            <input id="id_cm_rp" class="form-check-input" type="radio" name="computation_method"#}
+            {#                                   value="reference_point" checked>#}
+            {#                            <label class="form-check-label" for="id_cm_rp">Reference-Point</label>#}
+            {#                        </div>#}
+            {#                        <div>#}
+            {#                            <input id="id_cm_sr" class="form-check-input" type="radio" name="computation_method"#}
+            {#                                   value="scale_regions">#}
+            {#                            <label class="form-check-label" for="id_cm_sr">Scale-Regions</label>#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#                <small><em>Please select a computation method for the matrix generation.</em></small>#}
+            {#                </p>#}
+            {##}
+            {#                <p>#}
+            {#                <div class="input-groups">#}
+            {#                    <div class="form-control text-inline">#}
+            {#                        <div class="form-check form-check-inline mr-4">#}
+            {#                            <label for="id_upstream">Upstream: </label>#}
+            {#                            <input type="text" id="id_upstream" placeholder="2000">#}
+            {#                        </div>#}
+            {#                        <br>#}
+            {#                        <div class="form-check form-check-inline mr-4">#}
+            {#                            <label for="id_downstream">Downstream: </label>#}
+            {#                            <input type="text" id="id_downstream" placeholder="2000">#}
+            {#                        </div>#}
+            {#                        <br>#}
+            {#                        <div class="form-check form-check-inline">#}
+            {#                            <label for="id_region_length">Region Length: </label>#}
+            {#                            <input type="text" id="id_region_length" placeholder="2000">#}
+            {#                        </div>#}
+            {#                    </div>#}
+            {#                </div>#}
+            {#                </p> <br>#}
+            {##}
+            {#                <p><small><em>Please insert the base pairs upstream and downstream, and in case of the scale-regions#}
+            {#                    method also the length of that region,<br>#}
+            {#                    you would like to include in your heatmap.</em></small></p>#}
+            {##}
+            {##}
+            {#                <p>#}
+            {#                <div>#}
+            {#                    <label for="id_ref_point">Reference-Point: </label>#}
+            {#                    <input id="id_ref_point" type="text" name="ref_point" placeholder="TSS">#}
+            {#                </div>#}
+            {#                <small><em>If you are using the reference-point method, select which reference point you would like to#}
+            {#                    use ("TSS"(default), "TES" or "center").</em></small>#}
+            {#                </p>#}
+            {##}
+            {#                <p>#}
+            {#                <div>#}
+            {#                    <label for="id_collect">Generate png containing all heatmaps?</label>#}
+            {##}
+            {#                    <input id="id_collect" name="collect" type="checkbox">#}
+            {#                </div>#}
+            {##}
+            {#                </p>#}
+            {#            </div>#}
+
+
+            <table>
+                <tbody>
+                <tr>
+                    <td class="noBorder"><label for="id_design_file" class="float-right">Design file:</label></td>
+                    <td class="noBorder"><input id="id_design_file" type="file" name="design_file" required="required">
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Your design file tells the analysis where to find your input data and how said data is structured and must be in .csv format. This data can also be located in an online database or locally on your machine. In the latter case please upload your data in form of an archive at the 'File folder' input. Also, when writing your design-file, please ensure that all data is stored inside of a folder that is also part of the file name (e.g.:'path/to/example.fastq.gz')">
+                        {#                                                title="When writing your design.tsv, if you upload your referenced data, please consider that both will end up in the same location">#}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder" colspan="3"><em><small>A tool to help you create the input spreadsheet file can be found
+                        <a href="http://localhost:8000/run/sheets/" target="_blank">here</a>.</small></em></td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_file_folder" class="float-right">File folder:</label></td>
+                    <td class="noBorder"><input id="id_file_folder" type="file" accept=".zip, .tar.gz"
+                                                name="file_folder">
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="If your data is not provided through an internet source, please store the data inside of a folder, that must be included in the 'fastq_1' and 'fastq_2' columns in the design file you upload at the 'Design file'-input. Then compress said folder into a .zip or .tar.gz archive and upload it here.">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder" colspan="3">
+                        <div class="input-group">
+                            <label class="input-group-text" id="id_single_end">Is your input single-end reads?</label>
+                            <div class="form-control radio-inline pl-4">
+                                <div class="form-check form-check-inline mr-4">
+                                    <input id="id_single_end_true" class="form-check-input" type="radio"
+                                           name="single_end"
+                                           value="true">
+                                    <label class="form-check-label" for="id_single_end_true">True</label>
+                                </div>
+                                <div>
+                                    <input id="id_single_end_false" class="form-check-input" type="radio"
+                                           name="single_end"
+                                           value="false" checked>
+                                    <label class="form-check-label" for="id_single_end_false">False</label>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_genome_reference" class="float-right">iGenome reference:</label>
+                    </td>
+                    <td class="noBorder"><input id="id_genome_reference" type="text" name="genome_reference" value="">
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please enter your iGenome reference (e.g.: 'GRCh38'). If you are not using an iGenome reference, please upload your own reference files">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="noBorder" colspan="3"><small><em>
+                        A full list of iGenome references available for nf-core pipelines can be found <a
+                            href="http://0.0.0.0:8000/run/igenome/"
+                            target="_blank">here</a>.
+                    </em></small></td>
+                </tr>
+
+                <tr class="bottom-borderless">
+                    <td colspan="3" class="noBorder">
+                        <label for="id_own_genome">Specify and upload your own references here: </label>
+                        <input type="checkbox" id="id_own_genome" name="own_genome" onclick="extend_genome_options()">
+                    </td>
+                </tr>
+
+                </tbody>
+                <tbody id="id_reference_genome_options" style="display: none">
+                <tr>
+                    <td class="noBorder" colspan="3">
+                        <em><small>
+                            If you need help obtaining one or more of the required reference files you can try using our <br>
+                            <a href="http://0.0.0.0:8000/run/references/" target="_blank">reference loader</a> to obtain
+                            the latest Ensembl data for the species you used.
+                        </small></em>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_fasta_file" class="float-right">Fasta reference:</label></td>
+                    <td class="noBorder"><input id="id_fasta_file" type="file" accept=".fa" name="fasta_file"
+                                                value=NULL>
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please upload your fasta reference">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_gtf_annotation" class="float-right">GTF annotation:</label></td>
+                    <td class="noBorder"><input id="id_gtf_annotation" type="file" accept=".gtf" name="gtf_annotation"
+                                                value=NULL>
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please upload your gtf annotation">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_bed_file" class="float-right">Genome bed file:</label></td>
+                    <td class="noBorder"><input id="id_bed_file" type="file" accept=".bed" name="bed_file" value=NULL>
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please upload your gene bed file">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_macs_size" class="float-right">MACS2 genome size:</label></td>
+                    <td class="noBorder"><input id="id_macs_size" type="text" name="macs_size" value="">
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="If you are not using an iGenome reference you can enter your MACS2 genome size. If this is not specified the MACS2 processes will be skipped.">
+                    </td>
+                </tr>
+                </tbody>
+                <tbody>
+                <tr>
+                    <td class="noBorder" colspan="3">
+                        <label for="id_narrow_peaks">Would you like MACS2 to be run in narrowPeak mode?</label>
+
+                        <input id="id_narrow_peaks" type="checkbox" name="narrow_peaks">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            {#        ########################################################################################################### #}
+
+            <hr>
+            <p>
+                <label for="id_post_atacseq">
+                    Would you like to run the Post-ATAC-Seq pipeline immediately after this pipeline?
+                </label>
+                <input id="id_post_atacseq" type="checkbox" name="post_atacseq" onclick="post_atacseq_addition()">
+            </p>
+
+            <table id="id_post_atacseq_extras" style="display: none">
+                <tr>
+                    <td class="noBorder"><label for="id_ext_chr" class="float-right">Chromosomes:</label></td>
+                    <td class="noBorder"><input id="id_ext_chr" type="text" name="ext_chr"></td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="If you would like specific chromosomes to be extracted from the BED-file and visualized you can pass them here. You can request multiple chromosomes by separating them with a comma (e.g. 'IV,VII,X')">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label class="input-group-text float-right" id="id_single_end">Computation
+                        method: </label></td>
+                    <td class="noBorder">
+                        <div class="form-control radio-inline pl-4">
+                            <div class="form-check form-check-inline mr-4">
+                                <input id="id_cm_rp" class="form-check-input" type="radio" name="computation_method"
+                                       value="reference_point" checked>
+                                <label class="form-check-label" for="id_cm_rp">Reference-Point</label>
+                            </div>
+                            <div>
+                                <input id="id_cm_sr" class="form-check-input" type="radio" name="computation_method"
+                                       value="scale_regions">
+                                <label class="form-check-label" for="id_cm_sr">Scale-Regions</label>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please select a computation method for the matrix generation">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_upstream" class="float-right">Upstream: </label></td>
+                    <td class="noBorder"><input type="text" id="id_upstream" placeholder="2000"></td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please insert the number of base pairs upstream of the region or reference point you would like to include in your heatmap">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_downstream" class="float-right">Downstream: </label></td>
+                    <td class="noBorder"><input type="text" id="id_downstream" placeholder="2000"></td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="Please insert the number of base pairs downstream of the region or reference point you would like to include in your heatmap">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_region_length" class="float-right">Region Length: </label></td>
+                    <td class="noBorder"><input type="text" id="id_region_length" placeholder="2000"></td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="In case you are using the scale-regions computation method you can insert the length in base pairs of said region here">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label for="id_ref_point" class="float-right">Reference-Point: </label></td>
+                    <td class="noBorder"><input id="id_ref_point" type="text" name="ref_point" placeholder="TSS"></td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="If you are using the reference-point method, select which reference point you would like to use ('TSS'(default), 'TES' or 'center')">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="noBorder"><label id="id_collect" class="float-right">Generate png containing all
+                        heatmaps?</label></td>
+                    <td class="noBorder"><input id="id_collect" name="collect" type="checkbox"></td>
+                    <td class="noBorder"><input type="button" class="help-button" value="?"
+                                                title="When checking this box the pipeline will generate a picture containing all heatmaps, in addition to any individual heatmaps">
+                    </td>
+                </tr>
+            </table>
+
+
+            <br><br>
+            <button type="submit"
+                    name="run_atacseq">Start Run
+            </button>
+        </form>
+
+    </div>
+
+
+    <!-- ########################################################################################################### -->
+
+
+    <!-- tab-content Advanced -->
+    <div class="tabcontent" id="Advanced">
+        Here be dragons
+        <form action="." method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <h4>Nextflow command-line flags</h4>
+
+            <p>
+                <label for="id_run_name" class="text-monospace">-name: </label>
+                <input id="id_run_name" type="text" name="run_name">
+                <br><small><em>Unique name for this nextflow run</em></small>
+            </p>
+
+            <p>
+                <label for="id_config_file" class="text-monospace">-profile: </label>
+                <input id="id_config_file" type="file" name="config_file">
+                <br><small><em>Custom configuration profile</em></small>
+            </p>
+
+            <hr>
+            <h4>Input/Output options</h4>
+            <p>
+                <label for="id_design_file" class="text-monospace">--input: </label>
+                <input id="id_design_file" type="file" name="design_file" required>
+                <br><small><em>Comma-separated file containing information about samples in the experiment</em></small>
+            </p>
+            <p>
+                <label for="id_file_folder" class="text-monospace">File folder: </label>
+                <input id="id_file_folder" type="file" accept=".zip, .tar.gz" name="file_folder">
+                <br><small><em>If you are not getting your data from an internet source, please upload your data in a
+                folder and compressed in form of a .zip or .tar.gz archive.</em></small>
+            </p>
+
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_single_end">--single_end: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_single_end_true" class="form-check-input" type="radio" name="single_end"
+                               value="true">
+                        <label class="form-check-label" for="id_single_end_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_single_end_false" class="form-check-input" type="radio" name="single_end"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_single_end_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Specifies that the input is single-end reads.</em></small>
+            </p>
+            <p>
+                <label for="id_fragment_size" class="text-monospace">--fragment_size: </label>
+                <input id="id_fragment_size" type="number" name="fragment_size">
+                <br><small><em>Estimated fragment size used to extend single-end reads.</em></small>
+            </p>
+            <p>
+                <label for="id_seq_center" class="text-monospace">--seq_center: </label>
+                <input id="id_seq_center" type="text" name="seq_center">
+                <br><small><em>Sequencing center information to be added to read group of BAM files.</em></small>
+            </p>
+            <p>
+                <label for="id_email" class="text-monospace">--email: </label>
+                <input id="id_email" type="text" name="email">
+                <br><small><em>Email address for completion summary.</em></small>
+            </p>
+
+            {#     --------------------------------------------------------------------------------------------       #}
+            <hr>
+            <h4>Reference genome options</h4>
+
+            <p>
+                <label for="id_genome_reference" class="text-monospace">--genome: </label>
+                <input id="id_genome_reference" type="text" name="genome_reference" value="">
+                <br><small><em>Name of iGenomes reference.</em></small>
+            </p>
+            <p>
+                <label for="id_fasta_file" class="text-monospace">--fasta: </label>
+                <input id="id_fasta_name" type="file" accept=".fa" name="fasta_file" value=NULL>
+                <br><small><em>Please upload your Fasta reference file.</em></small>
+            </p>
+            <p>
+                <label for="id_gtf_annotation" class="text-monospace">--gtf: </label>
+                <input id="id_gtf_annotation" type="file" accept=".gtf" name="gtf_annotation" value=NULL>
+                <br><small><em>Please upload your GTF annotation file.</em></small>
+            </p>
+            <p>
+                <label for="id_bwa_index_archive" class="text-monospace">--bwa_index: </label>
+                <input id="id_bwa_index_archive" type="file" accept=".zip,.tar.gz" name="bwa_index_archive" value=NULL>
+                <br><small><em>Please upload an archive containing your bwa-index (i.e. /index/genome.fa).</em></small>
+            </p>
+            <p>
+                <label for="id_gene_bed" class="text-monospace">--gene_bed: </label>
+                <input id="id_gene_bed" type="file" accept=".bed" name="gene_bed" value=NULL>
+                <br><small><em>Please upload a BED file containing gene intervals. This will be created from the GTF
+                file if not specified.</em></small>
+            </p>
+            <p>
+                <label for="id_tss_bed" class="text-monospace">--tss_bed: </label>
+                <input id="id_tss_bed" type="file" accept=".bed" name="gene_bed" value=NULL>
+                <br><small><em>Please upload a BED file containing transcription start sites. This will be created from
+                the gene BED file if not specified.</em></small>
+            </p>
+            <p>
+                <label for="id_macs_gsize" class="text-monospace">--macs_gsize: </label>
+                <input id="id_macs_gsize" type="text" name="macs_gsize" value="">
+                <br><small><em></em>Effective genome size parameter required by MACS2.</small>
+            </p>
+            <p>
+                <label for="id_blacklist" class="text-monospace">--blacklist: </label>
+                <input id="id_blacklist" type="file" accept=".bed" name="blacklist" value=NULL>
+                <br><small><em>Please upload an BED file containing blacklist regions, used for filtering
+                alignments</em></small>
+            </p>
+            <p>
+                <label for="id_mito_name" class="text-monospace">--mito_name: </label>
+                <input id="id_mito_name" type="file" accept=".bed" name="mito_name" value=NULL>
+                <br><small><em>Name of Mitochondrial chomosome in reference assembly e.g. chrM.</em></small>
+            </p>
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_save_reference">--save_reference: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_save_reference_true" class="form-check-input" type="radio" name="save_reference"
+                               value="true">
+                        <label class="form-check-label" for="id_save_reference_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_save_reference_false" class="form-check-input" type="radio" name="save_reference"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_save_reference_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>If generated by the pipeline save the BWA index in the results directory.</em></small>
+            </p>
+
+            {#     --------------------------------------------------------------------------------------------       #}
+            <hr>
+            <h4>Adapter trimming options</h4>
+            <p>
+                <label for="id_clip_r1" class="text-monospace">--clip_r1: </label>
+                <input id="id_clip_r1" type="number" name="clip_r1">
+                <br><small><em>Instructs Trim Galore to remove bp from the 5' end of read 1 (or single-end reads).</em></small>
+            </p>
+            <p>
+                <label for="id_clip_r2" class="text-monospace">--clip_r2: </label>
+                <input id="id_clip_r2" type="number" name="clip_r2">
+                <br><small><em>Instructs Trim Galore to remove bp from the 5' end of read 2 (paired-end reads
+                only).</em></small>
+            </p>
+            <p>
+                <label for="id_three_prime_clip_r1" class="text-monospace">--three_prime_clip_r1: </label>
+                <input id="id_three_prime_clip_r1" type="number" name="three_prime_clip_r1">
+                <br><small><em>Instructs Trim Galore to remove bp from the 3' end of read 1 AFTER adapter/quality
+                trimming has been performed.</em></small>
+            </p>
+            <p>
+                <label for="id_three_prime_clip_r2" class="text-monospace">--three_prime_clip_r2: </label>
+                <input id="id_three_prime_clip_r2" type="number" name="three_prime_clip_r2">
+                <br><small><em>Instructs Trim Galore to remove bp from the 3' end of read 2 AFTER adapter/quality
+                trimming has been performed.</em></small>
+            </p>
+            <p>
+                <label for="id_trim_nextseq" class="text-monospace">--trim_nextseq: </label>
+                <input id="id_trim_nextseq" type="number" name="trim_nextseq">
+                <br><small><em>Instructs Trim Galore to apply the --nextseq=X option, to trim based on quality after
+                removing poly-G tails.</em></small>
+            </p>
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_trimming">--skip_trimming: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_trimming_true" class="form-check-input" type="radio" name="skip_trimming"
+                               value="true">
+                        <label class="form-check-label" for="id_skip_trimming_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_trimming_false" class="form-check-input" type="radio" name="skip_trimming"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_trimming_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip the adapter trimming step.</em></small>
+            </p>
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_save_trimmed">--save_trimmed: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_save_trimmed_true" class="form-check-input" type="radio" name="save_trimmed"
+                               value="true">
+                        <label class="form-check-label" for="id_save_trimmed_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_save_trimmed_false" class="form-check-input" type="radio" name="save_trimmed"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_save_trimmed_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Save the trimmed FastQ files in the results directory.</em></small>
+            </p>
+
+            {#     --------------------------------------------------------------------------------------------       #}
+            <hr>
+            <h4>Alignment options</h4>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_keep_mito">--keep_mito: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_keep_mito_true" class="form-check-input" type="radio" name="keep_mito"
+                               value="true">
+                        <label class="form-check-label" for="id_keep_mito_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_keep_mito_false" class="form-check-input" type="radio" name="keep_mito"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_keep_mito_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Reads mapping to mitochondrial contig are not filtered from alignments.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_keep_dups">--keep_dups: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_keep_dups_true" class="form-check-input" type="radio" name="keep_dups"
+                               value="true">
+                        <label class="form-check-label" for="id_keep_dups_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_keep_dups_false" class="form-check-input" type="radio" name="keep_dups"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_keep_dups_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Duplicate reads are not filtered from alignments.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_keep_multi_map">--keep_multi_map: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_keep_multi_map_true" class="form-check-input" type="radio" name="keep_multi_map"
+                               value="true">
+                        <label class="form-check-label" for="id_keep_multi_map_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_keep_multi_map_false" class="form-check-input" type="radio" name="keep_multi_map"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_keep_multi_map_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Reads mapping to multiple locations are not filtered from alignments.</em></small>
+            </p>
+
+            <p>
+                <label for="id_bwa_min_score" class="text-monospace">--bwa_min_score: </label>
+                <input id="id_bwa_min_score" type="number" name="bwa_min_score">
+                <br><small><em>Don’t output BWA MEM alignments with score lower than this parameter.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace"
+                       id="id_skip_merge_replicates">--skip_merge_replicates: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_merge_replicates_true" class="form-check-input" type="radio"
+                               name="skip_merge_replicates" value="true">
+                        <label class="form-check-label" for="id_skip_merge_replicates_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_merge_replicates_false" class="form-check-input" type="radio"
+                               name="skip_merge_replicates" value="false" checked>
+                        <label class="form-check-label" for="id_skip_merge_replicates_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Do not perform alignment merging and downstream analysis by merging replicates i.e. only do
+            this by merging resequenced libraries.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace"
+                       id="id_save_align_intermeds">--save_align_intermeds: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_save_align_intermeds_true" class="form-check-input" type="radio"
+                               name="save_align_intermeds" value="true">
+                        <label class="form-check-label" for="id_save_align_intermeds_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_save_align_intermeds_false" class="form-check-input" type="radio"
+                               name="save_align_intermeds" value="false" checked>
+                        <label class="form-check-label" for="id_save_align_intermeds_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Save the intermediate BAM files from the alignment step.</em></small>
+            </p>
+
+            {#     --------------------------------------------------------------------------------------------       #}
+            <hr>
+            <h4>Alignment options</h4>
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_narrow_peaks">--narrow_peak: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_narrow_peaks_true" class="form-check-input" type="radio" name="narrow_peaks"
+                               value="true">
+                        <label class="form-check-label" for="id_narrow_peaks_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_narrow_peaks_false" class="form-check-input" type="radio" name="narrow_peaks"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_narrow_peaks_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Run MACS2 in narrowPeak mode.</em></small>
+            </p>
+
+            <p>
+                <label for="id_broad_cutoff" class="text-monospace">--broad_cutoff: </label>
+                <input id="id_broad_cutoff" type="number" name="broad_cutoff" value="0.1">
+                <br><small><em>Specifies broad cutoff value for MACS2. Only used when --narrow_peak isnt specified.</em></small>
+            </p>
+
+            <p>
+                <label for="id_macs_fdr" class="text-monospace">--macs_fdr: </label>
+                <input id="id_macs_fdr" type="number" name="macs_fdr">
+                <br><small><em>Minimum FDR (q-value) cutoff for peak detection, --macs_fdr and --macs_pvalue are
+                mutually exclusive.</em></small>
+            </p>
+
+            <p>
+                <label for="id_macs_pvalue" class="text-monospace">--macs_pvalue: </label>
+                <input id="id_macs_pvalue" type="number" name="macs_pvalue">
+                <br><small><em>p-value cutoff for peak detection, --macs_fdr and --macs_pvalue are mutually exclusive.
+                If --macs_pvalue cutoff is set, q-value will not be calculated and<br> reported as -1 in the final .xls
+                file.</em></small>
+            </p>
+
+            <p>
+                <label for="id_min_reps_consensus" class="text-monospace">--min_reps_consensus: </label>
+                <input id="id_min_reps_consensus" type="number" name="min_reps_consensus">
+                <br><small><em>Number of biological replicates required from a given condition for a peak to contribute
+                to a consensus peak.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_save_macs_pileup">--save_macs_pileup: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_save_macs_pileup_true" class="form-check-input" type="radio"
+                               name="save_macs_pileup" value="true">
+                        <label class="form-check-label" for="id_save_macs_pileup_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_save_macs_pileup_false" class="form-check-input" type="radio"
+                               name="save_macs_pileup" value="false" checked>
+                        <label class="form-check-label" for="id_save_macs_pileup_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Instruct MACS2 to create bedGraph files normalised to signal per million reads.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_peak_qc">--skip_peak_qc: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_peak_qc_true" class="form-check-input" type="radio" name="skip_peak_qc"
+                               value="true">
+                        <label class="form-check-label" for="id_skip_peak_qc_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_peak_qc_false" class="form-check-input" type="radio" name="skip_peak_qc"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_peak_qc_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip MACS2 peak QC plot generation.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace"
+                       id="id_skip_peak_annotation">--skip_peak_annotation: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_peak_annotation_true" class="form-check-input" type="radio"
+                               name="skip_peak_annotation" value="true">
+                        <label class="form-check-label" for="id_skip_peak_annotation_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_peak_annotation_false" class="form-check-input" type="radio"
+                               name="skip_peak_annotation" value="false" checked>
+                        <label class="form-check-label" for="id_skip_peak_annotation_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip annotation of MACS2 and consensus peaks with HOMER.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace"
+                       id="id_skip_consensus_peaks">--skip_consensus_peaks: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_consensus_peaks_true" class="form-check-input" type="radio"
+                               name="skip_consensus_peaks" value="true">
+                        <label class="form-check-label" for="id_skip_consensus_peaks_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_consensus_peaks_false" class="form-check-input" type="radio"
+                               name="skip_consensus_peaks" value="false" checked>
+                        <label class="form-check-label" for="id_skip_consensus_peaks_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip consensus peak generation, annotation and counting.</em></small>
+            </p>
+
+
+            {#     --------------------------------------------------------------------------------------------       #}
+            <hr>
+            <h4>Differential analysis options</h4>
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_deseq2_vst">--deseq2_vst: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_deseq2_vst_true" class="form-check-input" type="radio" name="deseq2_vst"
+                               value="true">
+                        <label class="form-check-label" for="id_deseq2_vst_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_deseq2_vst_false" class="form-check-input" type="radio" name="deseq2_vst"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_deseq2_vst_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Use vst transformation instead of rlog with DESeq2.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_diff_analysis">--skip_diff_analysis: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_diff_analysis_true" class="form-check-input" type="radio"
+                               name="skip_diff_analysis" value="true">
+                        <label class="form-check-label" for="id_skip_diff_analysis_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_diff_analysis_false" class="form-check-input" type="radio"
+                               name="skip_diff_analysis" value="false" checked>
+                        <label class="form-check-label" for="id_skip_diff_analysis_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip differential accessibility analysis.</em></small>
+            </p>
+
+            {#     --------------------------------------------------------------------------------------------       #}
+            <hr>
+            <h4>Process skipping options</h4>
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_fastqc">--skip_fastqc: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_fastqc_true" class="form-check-input" type="radio" name="skip_fastqc"
+                               value="true">
+                        <label class="form-check-label" for="id_skip_fastqc_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_fastqc_false" class="form-check-input" type="radio" name="skip_fastqc"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_fastqc_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip FastQC.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace"
+                       id="id_skip_picard_metrics">--skip_picard_metrics: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_picard_metrics_true" class="form-check-input" type="radio"
+                               name="skip_picard_metrics" value="true">
+                        <label class="form-check-label" for="id_skip_picard_metrics_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_picard_metrics_false" class="form-check-input" type="radio"
+                               name="skip_picard_metrics" value="false" checked>
+                        <label class="form-check-label" for="id_skip_picard_metrics_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip Picard CollectMultipleMetrics.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_preseq">--skip_preseq: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_preseq_true" class="form-check-input" type="radio" name="skip_preseq"
+                               value="true">
+                        <label class="form-check-label" for="id_skip_preseq_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_preseq_false" class="form-check-input" type="radio" name="skip_preseq"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_preseq_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip Preseq.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_plot_profile">--skip_plot_profile: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_plot_profile_true" class="form-check-input" type="radio"
+                               name="skip_plot_profile" value="true">
+                        <label class="form-check-label" for="id_skip_plot_profile_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_plot_profile_false" class="form-check-input" type="radio"
+                               name="skip_plot_profile" value="false" checked>
+                        <label class="form-check-label" for="id_skip_plot_profile_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip deepTools plotProfile.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace"
+                       id="id_skip_plot_fingerprint">--skip_plot_fingerprint: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_plot_fingerprint_true" class="form-check-input" type="radio"
+                               name="skip_plot_fingerprint" value="true">
+                        <label class="form-check-label" for="id_skip_plot_fingerprint_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_plot_fingerprint_false" class="form-check-input" type="radio"
+                               name="skip_plot_fingerprint" value="false" checked>
+                        <label class="form-check-label" for="id_skip_plot_fingerprint_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip deepTools plotFingerprint.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_ataqv">--skip_ataqv: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_ataqv_true" class="form-check-input" type="radio" name="skip_ataqv"
+                               value="true">
+                        <label class="form-check-label" for="id_skip_ataqv_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_ataqv_false" class="form-check-input" type="radio" name="skip_ataqv"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_ataqv_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip Ataqv.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_igv">--skip_igv: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_igv_true" class="form-check-input" type="radio" name="skip_igv" value="true">
+                        <label class="form-check-label" for="id_skip_igv_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_igv_false" class="form-check-input" type="radio" name="skip_igv"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_igv_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip IGV.</em></small>
+            </p>
+
+            <p>
+            <div class="input-group">
+                <label class="input-group-text text-monospace" id="id_skip_multiqc">--skip_multiqc: </label>
+                <div class="form-control radio-inline pl-4">
+                    <div class="form-check form-check-inline mr-4">
+                        <input id="id_skip_multiqc_true" class="form-check-input" type="radio" name="skip_multiqc"
+                               value="true">
+                        <label class="form-check-label" for="id_skip_multiqc_true">True</label>
+                    </div>
+                    <div>
+                        <input id="id_skip_multiqc_false" class="form-check-input" type="radio" name="skip_multiqc"
+                               value="false" checked>
+                        <label class="form-check-label" for="id_skip_multiqc_false">False</label>
+                    </div>
+                </div>
+            </div>
+            <br><small><em>Skip MultiQC.</em></small>
+            </p>
+
+
+            <br><br>
+            <button type="submit" name="run_atacseq_advanced">Start Run</button>
+        </form>
+    </div>
+
+
+
+    <script>
+
+        function post_atacseq_addition() {
+            // get checkbox
+            var checkBox = document.getElementById("id_post_atacseq");
+            // get post_atacseq_div
+            var post_atacseq_div = document.getElementById("id_post_atacseq_extras");
+
+            if (checkBox.checked === true) {
+                post_atacseq_div.style.display = "block";
+            } else {
+                post_atacseq_div.style.display = "none";
+            }
+        }
+
+
+        function extend_genome_options() {
+            // get checkbox
+            const checkbox = document.getElementById("id_own_genome");
+            // get tbody
+            const tbody = document.getElementById("id_reference_genome_options");
+
+            if (checkbox.checked === true) {
+                tbody.style.display = "";
+            } else {
+                tbody.style.display = "none";
+            }
+        }
+
+
+        function check_inputs_atacseq() {
+
+            var genome_reference = document.getElementById("id_genome_reference");
+            var gtf_annotation = document.getElementById("id_gtf_annotation");
+
+            if (genome_reference.value === "" && gtf_annotation.files.length === 0) {
+                alert("If you are not using an iGenome reference please upload an annotation file in gtf-format at the" +
+                    "'GTF annotation' input");
+                return false;
+            }
+
+            {#var post_atacseq_checkbox = document.getElementById("id_post_atacseq");#}
+            {#if (post_atacseq_checkbox.checked) {#}
+            {#    var gtf_annotation = document.getElementById("id_gtf_annotation");#}
+            {#    if (gtf_annotation.files.length === 0) {#}
+            {#        alert("Please upload an annotation file at the 'GTF annotation' input. The Post-ATAC-Seq pipeline" +#}
+            {#            "requires the file in case that the genome bed file does not get passed properly.");#}
+            {#        return false;#}
+            {#    }#}
+            {# }#}
+            alert("The pipeline will now start. This may take some time, so you can close this page and find your " +
+                "results later using the 'Find Results' tag.");
+            return true;
+        }
+
+    </script>
+
+{% endblock %}

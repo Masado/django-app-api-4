@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}RNA-seq Pipeline{% endblock %}
+{% load static %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-ID for this analysis-run is '{{ run_id }}'</h2>
+
+    <form action="{% url 'run:RNASTutorial' %}">
+        <input class="submit-button float-right" type="submit" value="Explanation">
+    </form>
+
+    <form id="id_rnaseq_form" action="." method="post" onsubmit="return check_inputs()" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" id="id_run_id" name="run_id" value="{{ run_id }}" hidden>
+        <input type="text" id="id_new_id" name="new_id" value="" hidden>
+
+        <table>
+            <tbody>
+            <tr>
+                <td class="noBorder"><label for="id_csv_file" class="float-right">Input csv-file:</label></td>
+                <td class="noBorder"><input id="id_csv_file" type="file" name="csv_file" accept=".csv"
+                                            required="required"></td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Your samplesheet file tells the analysis where to find your input data and how said data is structured and must be in .csv format. This data can be located in an online database or locally on your machine. In the latter case please upload your data in form of an archive at the 'File folder' input. Also, when writing your samplesheet-file, please ensure that all data is stored inside of a folder that is also part of the file name (e.g.:'path/to/example.fastq.gz')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3"><em><small>A tool to help you create the input spreadsheet file can be
+                    found
+                    <a href="http://localhost:8000/run/sheets/" target="_blank">here</a>.</small></em></td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_file_folder" class="float-right">File folder:</label></td>
+                <td class="noBorder"><input id="id_file_folder" type="file" accept=".zip, .tar.gz" name="file_folder">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="If your data is not provided through an internet source, please store the data inside of a folder, that must be included in the 'fastq_1' and 'fastq_2' columns in the samplesheet file you upload at the 'Input csv-file'-input. Then compress said folder into a .zip or .tar.gz archive and upload it here.">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <div class="input-group">
+                        <label class="input-group-text" id="id_umi">Enable UMI-based read deduplication?</label>
+                        <div class="form-control radio-inline pl-4">
+                            <div class="form-check form-check-inline mr-4">
+                                <input id="id_umi_true" class="form-check-input" type="radio" name="umi_value"
+                                       value="true">
+                                <label class="form-check-label" for="id_umi_true">True</label>
+                            </div>
+                            <div>
+                                <input id="id_umi_false" class="form-check-input" type="radio" name="umi_value"
+                                       value="false"
+                                       checked>
+                                <label class="form-check-label" for="id_umi_false">False</label>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_umi_extract_method" class="float-right">UMI method: </label></td>
+                <td class="noBorder">
+                    <select id="id_umi_extract_method" name="umi_method">
+                        <option value="string">String</option>
+                        <option value="regex">Regex</option>
+                    </select>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Determines which method of extraction the read deduplication will use">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_umi_pattern" class="float-right">UMI pattern: </label></td>
+                <td class="noBorder"><input id="id_umi_pattern" type="text" name="umi_pattern">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please insert the UMI barcode pattern to us. 'NNNNNN' for example indicates the first 6 nucleotides of the read are from the UMI.">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder" colspan="3"><small><em>
+                    Additional information can be found in the
+                    <a href="https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method"
+                       target="_blank">UMI-tools
+                        documentation</a>.
+                </em></small></td>
+            </tr>
+            <tr>
+                <td class="noBorder center-text" colspan="3">
+                    <hr>
+                    <h4>Reference genome options</h4>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_genome_reference" class="float-right">iGenome reference:</label></td>
+                <td class="noBorder"><input id="id_genome_reference" type="text" name="igenome_reference" value="">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please enter your iGenome reference (e.g.: 'GRCh38'). If you are not using an iGenome reference, please upload your own reference files.">
+                </td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td colspan="3" class="noBorder"><small><em>
+                    A full list of iGenome references available for nf-core pipelines can be found <a
+                        href="http://0.0.0.0:8000/run/igenome/"
+                        target="_blank">here</a>.
+                </em></small></td>
+            </tr>
+            <tr class="bottom-borderless">
+                <td colspan="3" class="noBorder">
+                    <label for="id_own_genome">Specify and upload your own references here: </label>
+                    <input type="checkbox" id="id_own_genome" name="own_genome" onclick="extend_genome_options()">
+                </td>
+            </tr>
+            </tbody>
+            <tbody id="id_reference_genome_options" style="display: none">
+            <tr>
+                <td class="noBorder" colspan="3">
+                    <em><small>
+                        If you need help obtaining one or more of the required reference files you can try using our
+                        <br>
+                        <a href="http://0.0.0.0:8000/run/references/" target="_blank">reference loader</a> to obtain
+                        the latest Ensembl data for the species you used.
+                    </small></em>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_fasta_file" class="float-right">FASTA genome file:</label></td>
+                <td class="noBorder"><input id="id_fasta_file" type="file" accept=".fa" name="fasta_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload a genome file in fasta format">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_gtf_file" class="float-right">GTF annotation file:</label></td>
+                <td class="noBorder"><input id="id_gtf_file" type="file" accept=".gtf" name="gtf_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload an annotation file in .gtf format">
+                </td>
+            </tr>
+            {#            <tr>#}
+            {#                <td class="noBorder"><label id="id_gff_file" class="float-right">GFF3 annotation file:</label></td>#}
+            {#                <td class="noBorder"><input id="id_gff_file" type="file" accept=".gff" name="gff_file">#}
+            {#                </td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="Please upload an annotation file in .gff format">#}
+            {#                </td>#}
+            {#            </tr>#}
+            <tr>
+                <td class="noBorder"><label id="id_bed_file" class="float-right">BED file:</label></td>
+                <td class="noBorder"><input id="id_bed_file" type="file" accept=".bed" name="bed_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload a .bed file containing chromosome information. The file will be generated from the GTF file if not provided">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label id="id_transcript_fasta" class="float-right">Transcriptome fasta:</label>
+                </td>
+                <td class="noBorder"><input id="id_transcript_fasta" type="file" accept=".fasta,.fa"
+                                            name="transcript_fasta">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="You can upload a fasta file containing the transcriptome (Not necessary)">
+                </td>
+            </tr>
+            </tbody>
+            <tbody>
+            <tr>
+                <td class="noBorder center-text" colspan="3">
+                    <hr>
+                    <h4>Index archives</h4>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_aligner" class="float-right">Alignment algorithm: </label>
+                </td>
+                <td class="noBorder">
+                    <select id="id_aligner" name="aligner" onchange="index_archives_align()">
+                        <option value="star_salmon">star_salmon</option>
+                        <option value="star_rsem">star_rsem</option>
+                        <option value="hisat2">hisat2</option>
+                    </select>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Specifies the alignment algorithm to use">
+                </td>
+            </tr>
+            <tr id="id_star_index_tr">
+                <td class="noBorder"><label id="id_star_index_file" class="float-right">STAR index file:</label>
+                </td>
+                <td class="noBorder"><input id="id_star_index_file" type="file" accept=".tar.gz" name="star_index_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="tar.gz archive containing pre-built STAR index">
+                </td>
+            </tr>
+            <tr id="id_hisat2_index_tr" style="display: none">
+                <td class="noBorder"><label id="id_hisat2_index_file" class="float-right">HISAT2 index file:</label>
+                </td>
+                <td class="noBorder"><input id="id_hisat2_index_file" type="file" accept=".tar.gz"
+                                            name="hisat2_index_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="tar.gz archive containing pre-built HISAT2 index">
+                </td>
+            </tr>
+            <tr id="id_rsem_index_tr" style="display: none">
+                <td class="noBorder"><label id="id_rsem_index_file" class="float-right">RSEM index file:</label>
+                </td>
+                <td class="noBorder"><input id="id_rsem_index_file" type="file" accept=".tar.gz" name="rsem_index_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="tar.gz archive containing pre-built RSEM index">
+                </td>
+            </tr>
+            <tr id="id_salmon_index_tr">
+                <td class="noBorder"><label id="id_salmon_index_file" class="float-right">Salmon index file:</label>
+                </td>
+                <td class="noBorder"><input id="id_salmon_index_file" type="file" accept=".tar.gz"
+                                            name="salmon_index_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="tar.gz archive containing pre-built Salmon index">
+                </td>
+            </tr>
+
+            <tr>
+                <td class="noBorder" colspan="2">
+                    <div class="input-group"
+                         title="Determines whether or not to run the pipeline with the salmon pseudo-aligner (Runs in addition to the aligner)">
+                        <label class="input-group-text" id="id_pseudo_salmon">Run with Salmon as pseudo aligner?</label>
+                        <div class="form-control radio-inline pl-4">
+                            <div class="form-check form-check-inline mr-4">
+                                <input id="id_pseudo_salmon_true" class="form-check-input" type="radio"
+                                       name="pseudo_salmon_value" onclick="salmon_true()"
+                                       value="true" checked>
+                                <label class="form-check-label" for="id_pseudo_salmon_true">True</label>
+                            </div>
+                            <div>
+                                <input id="id_pseudo_salmon_false" class="form-check-input" type="radio"
+                                       name="pseudo_salmon_value" onclick="salmon_false()"
+                                       value="false">
+                                <label class="form-check-label" for="id_pseudo_salmon_false">False</label>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Determines whether or not to run the pipeline with the salmon pseudo-aligner (Runs in addition to the aligner)">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        {#        ########################################################################################################### #}
+
+        <hr>
+        <p>
+            <label for="id_post_rnaseq">
+                Would you like to run the Post-RNA-Seq pipeline immediately after this pipeline?
+            </label>
+            <input id="id_post_rnaseq" type="checkbox" name="post_rnaseq" onclick="post_rnaseq_addition()">
+        </p>
+
+        <table id="id_post_rnaseq_extras" style="display:none">
+            <tr>
+                <td class="noBorder center-text" colspan="3"><h4>Post-RNA-Seq additional arguments</h4></td>
+            </tr>
+
+            <tr>
+                <td class="noBorder"><label for="id_organism_name" class="float-right">Organism name:</label>
+                </td>
+                <td class="noBorder">
+                    <input id="id_organism_name" type="text" name="organism_name" placeholder="Gallus gallus">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please type in the scientific name of the species you obtained your samples from. eg.:'Gallus gallus'">
+                </td>
+            </tr>
+            {#            <tr>#}
+            {#                <td class="noBorder"><label for="id_species_id" class="float-right">Taxonomy ID:</label></td>#}
+            {#                <td class="noBorder">#}
+            {#                    <input id="id_species_id" type="number" class="text-like" name="species_id" placeholder="9031">#}
+            {#                </td>#}
+            {#                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"#}
+            {#                                            title="Please enter the Taxonomy ID. e.g: 9031 for Gallus gallus">#}
+            {#                </td>#}
+            {#            </tr>#}
+            <tr>
+                <td class="noBorder"><label for="id_sample_file" class="float-right">Sample file: </label></td>
+                <td class="noBorder">
+                    <input id="id_sample_file" type="file" name="sample_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload a txt file containing the setup according to the pattern: 'pop' (population) 'run' (names of your fastq files) 'rep' (repeat) 'condition' (Wildtype/control)">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_compare_tsv" class="float-right">Comparison tsv file: </label></td>
+                <td class="noBorder">
+                    <input id="id_compare_tsv" type="file" accept=".tsv" name="compare_tsv_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload a tsv file containing the comparisons you would like to run (e.g.: Row 1: 'Wildtype1', 'Control1')">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_gtf_annotation" class="float-right">Annotation GTF file: </label></td>
+                <td class="noBorder">
+                    <input id="id_gtf_annotation" type="file" accept=".gtf.gz" name="gtf_annotation_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload an annotation file in gtf.gz format">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_network_file" class="float-right">Network file: </label></td>
+                <td class="noBorder">
+                    <input id="id_network_file" type="file" accept=".sif" name="network_file">
+                </td>
+                <td class="noBorder"><input type="button" class="help-button ml-4" value="?"
+                                            title="Please upload a protein-protein interaction network file obtainable from the Cytoscape App">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="noBorder center-text">
+                    <hr>
+                    <h4>KeyPathwayMiner</h4>
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_pathways_number" class="float-right">Number of pathways: </label>
+                </td>
+                <td class="noBorder">
+                    <input id="id_pathways_number" type="number" name="pathways_number" value="3" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The number of solutions KeyPathwayMiner will generate">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_kmin" class="float-right">K-min: </label></td>
+                <td class="noBorder">
+                    <input id="id_kmin" type="number" name="kmin" value="0" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The minimum number of allowed gene exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_kmax" class="float-right">K-max: </label></td>
+                <td class="noBorder">
+                    <input id="id_kmax" type="number" name="kmax" value="5" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The maximum number of allowed gene exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_kstep" class="float-right">K-step: </label></td>
+                <td class="noBorder">
+                    <input id="id_kstep" type="number" name="kstep" value="1" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The amount by which the allowed gene exceptions are increased">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_lmin" class="float-right">L-min: </label></td>
+                <td class="noBorder">
+                    <input id="id_lmin" type="number" name="lmin" value="0" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The minimum number of allowed case exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_lmax" class="float-right">L-max: </label></td>
+                <td class="noBorder">
+                    <input id="id_lmax" type="number" name="lmax" value="3" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The maximum number of allowed case exceptions">
+                </td>
+            </tr>
+            <tr>
+                <td class="noBorder"><label for="id_lstep" class="float-right">L-step: </label></td>
+                <td class="noBorder">
+                    <input id="id_lstep" type="number" name="lstep" value="1" required>
+                </td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-4" value="?"
+                           title="The amount by which the allowed case exceptions are increased">
+                </td>
+            </tr>
+
+        </table>
+
+
+        <br><br>
+        <button type="submit"
+                name="run_rnaseq">Start Run
+        </button>
+    </form>
+
+    <script>
+        function post_rnaseq_addition() {
+            // get checkbox
+            var checkBox = document.getElementById("id_post_rnaseq");
+            // get post_rnaseq_div
+            var post_rnaseq_div = document.getElementById("id_post_rnaseq_extras");
+
+            if (checkBox.checked === true) {
+                post_rnaseq_div.style.display = "block";
+            } else {
+                post_rnaseq_div.style.display = "none";
+            }
+        }
+
+        function extend_genome_options() {
+            // get checkbox
+            const checkbox = document.getElementById("id_own_genome");
+            // get tbody
+            const tbody = document.getElementById("id_reference_genome_options");
+
+            if (checkbox.checked === true) {
+                tbody.style.display = "";
+            } else {
+                tbody.style.display = "none";
+            }
+        }
+
+        function check_inputs() {
+            var post_rnaseq_checkbox = document.getElementById("id_post_rnaseq");
+            const genome_reference = document.getElementById("id_genome_reference");
+            if (post_rnaseq_checkbox.checked) {
+                var gtf_annotation = document.getElementById("id_gtf_annotation");
+                if (gtf_annotation.files.length === 0 && genome_reference.value.length === 0) {
+                    alert("If you wish to use the Post-RNA-Seq pipeline directly after finishing this one, a " +
+                        "'GTF annotation file' is required. Please upload it or provide a reference genome " +
+                        "and try starting again.")
+                    return false;
+                }
+
+                var org_name = document.getElementById("id_organism_name");
+                if (org_name.value.length === 0) {
+                    alert("Please insert the name of the species you obtained your examples from into the " +
+                        "'Organism name' input.")
+                    return false;
+                }
+                var sample_file = document.getElementById("id_sample_file");
+                if (sample_file.files.length === 0) {
+                    alert("Please upload a sample file at the 'Sample file' input.");
+                    return false;
+                }
+                var comp_tsv_file = document.getElementById("id_compare_tsv");
+                if (comp_tsv_file.files.length === 0) {
+                    alert("Please upload a comparison file at the 'Comparison tsv file' input");
+                    return false;
+                }
+                var network_file = document.getElementById("id_network_file");
+                if (network_file.files.length === 0) {
+                    alert("Please upload a .sif network file at the 'Network file' input");
+                    return false;
+                }
+
+            }
+            alert("The pipeline will now start. This may take some time, so you can close this page and find your " +
+                "results later using the 'Find Results' tag.");
+            return true;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const select = document.getElementById("id_aligner");
+            select.addEventListener("change", () => {
+                const value = select.value;
+
+                const star_index = document.getElementById("id_star_index_tr");
+                const hisat2_index = document.getElementById("id_hisat2_index_tr");
+                const rsem_index = document.getElementById("id_rsem_index_tr");
+                const salmon_index = document.getElementById("id_salmon_index_tr");
+
+                const salmon_value = document.getElementById("id_pseudo_salmon_true");
+
+                if (value === "star_salmon") {
+                    star_index.style.display = "";
+                    hisat2_index.style.display = "none";
+                    rsem_index.style.display = "none";
+                    salmon_index.style.display = "";
+                }
+                if (value === "star_rsem") {
+                    star_index.style.display = "";
+                    hisat2_index.style.display = "none";
+                    rsem_index.style.display = "";
+                    if (salmon_value.checked === true) {
+                        salmon_index.style.display = "";
+                    } else {
+                        salmon_index.style.display = "none";
+                    }
+                }
+                if (value === "hisat2") {
+                    star_index.style.display = "none";
+                    hisat2_index.style.display = "";
+                    rsem_index.style.display = "none";
+                    if (salmon_value.checked === true) {
+                        salmon_index.style.display = "";
+                    } else {
+                        salmon_index.style.display = "none";
+                    }
+                }
+                if (salmon_value.checked === "true") {
+                    salmon_index.style.display = "";
+                }
+            })
+        })
+        document.addEventListener("DOMContentLoaded", () => {
+            const select = document.getElementById("id_aligner");
+            const salmon_value_true = document.getElementById("id_pseudo_salmon_true");
+            const salmon_value_false = document.getElementById("id_pseudo_salmon_false");
+            const salmon_index = document.getElementById("id_salmon_index_tr");
+            salmon_value_true.addEventListener("click", () => {
+                salmon_index.style.display = "";
+            })
+            salmon_value_false.addEventListener("click", () => {
+                salmon_index.style.display = "none";
+                if (select.value === "star_salmon") {
+                    salmon_index.style.display = "";
+                }
+            })
+        })
+
+    </script>
+
+{% endblock %}

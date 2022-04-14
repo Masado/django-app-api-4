@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Pipeline-Finder{% endblock %}
+
+{% block content %}
+
+    <h2>The Run-Id for this pipeline-run will be {{ run_id }}</h2>
+
+
+    <p>
+        Please enter the pipeline you used in your original run and the processes you would like done. <br>
+        We will then try to find an analysis pipeline that fits your input.
+    </p>
+
+
+    <form action="." method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="find_pipeline">Find Pipeline</button>
+    </form>
+{% endblock %}

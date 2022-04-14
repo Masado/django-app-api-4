@@ -1,0 +1,6 @@
+receiving incremental file list
+>f+++++++++ Gallus_gallus.GRCg6a.105.gtf.gz
+
+sent 43 bytes  received 11,699,284 bytes  2,599,850.44 bytes/sec
+total size is 11,696,319  speedup is 1.00
+

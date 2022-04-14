@@ -1,0 +1,5 @@
+name: post-rnaseq-1.0
+channels:
+  - conda-forge
+  - bioconda
+  - defaults

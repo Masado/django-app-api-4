@@ -1,0 +1,188 @@
+html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-weight: normal;
+}
+
+.navbar {
+    overflow: hidden;
+    background-color: #333;
+}
+
+.brand-logo {
+    float: left;
+}
+
+.navbar a {
+    font-size: 0.85vw;
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.navbar a.nav-a:hover{
+    background: #ddd;
+    color: black;
+}
+
+.navbar div.float-right{
+    float: right;
+    padding-right: 16px;
+}
+
+.container {
+    margin:0 auto;
+    max-width:1280px;
+    width:90%
+}
+
+.run-container{
+    margin:0 auto;
+}
+
+.float-right{
+    float: right;
+}
+
+.float-left {
+    float: left;
+}
+
+.container input.submit-button {
+    background-color: #e7e7e7;/* Gray */
+    border: 2px solid white;
+    color: black;
+    padding: 12px 21px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    width: 150px
+}
+
+.container input.submit-button:hover {
+    background-color: white;
+    color: black;
+    border: 2px solid #e7e7e7;
+}
+
+.container input.back-button {
+    background-color: #e7e7e7;/* Gray */
+    /*border: none;*/
+    border: 2px solid white;
+    color: black;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.container input.back-button:hover {
+    background-color: white;
+    color: black;
+    border: 2px solid #e7e7e7;
+}
+
+.container button {
+    background-color: #e7e7e7;/* Gray */
+    /*border: none;*/
+    border: 2px solid white;
+    color: black;
+    padding: 15px 21px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    width: 200px;
+}
+
+.container button:hover {
+    background-color: white;
+    color: black;
+    /*border: 2px solid #e7e7e7;*/
+}
+
+.container button.submit-button {
+    background-color: #e7e7e7;/* Gray */
+    border: none;
+    color: black;
+    padding: 12px 21px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    width: 150px
+}
+
+.start-button{
+    background-color: #e7e7e7;/* Gray */
+    border: 4px solid white;
+    color: black;
+    padding: 25px 35px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    width: 200px
+}
+
+.start-button:hover{
+    background-color: white;
+    color: black;
+    border: 4px solid #e7e7e7;
+}
+
+/*.input-group {*/
+/*    display: flex;*/
+/*}*/
+.input-group-append {
+    display: flex
+}
+
+body{
+    padding-bottom: 50px;
+}
+
+.center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*height: 200px;*/
+}
+
+.center-text{
+    text-align: center;
+}
+
+.ml-4 {
+    margin-left: 1.5em;
+}
+
+.fw-bold{
+    font-weight: bold;
+}
+
+.search-input {
+    font-size: 1em;
+    padding: 0.6em 1em;
+}
+
+.search-input{
+    border: none;
+    outline: none;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+/*################*/
+
+ul {
+    overflow: hidden;
+}
+li {
+    display: inline-block;
+}
+
+/*################*/

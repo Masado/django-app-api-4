@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}ID taken{% endblock %}
+{% load static %}
+{% block extrahead %}<link rel="stylesheet" href="{% static "run/style.css" %}">{% endblock %}
+
+{% block content %}
+
+    <p>
+        <h3>Unfortunately it appears that a run already exists with the Run-ID '{{ run_id }}'.</h3>
+    </p>
+    <p>
+        Please click the button below to return to the previous page. This will generate a new
+        Run-ID for you while keeping the inputs you already provided.
+    </p><br>
+    <div class="center">
+    <p style="padding: 0 7em 2em 0;">
+        <input class="back-button" type="button" onclick="history.back();" value="Take me back">
+    </p>
+    </div>
+
+
+
+{% endblock %}

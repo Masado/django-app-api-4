@@ -1,0 +1,11 @@
+receiving incremental file list
+cd+++++++++ gallus_gallus/
+>f+++++++++ gallus_gallus/CHECKSUMS
+>f+++++++++ gallus_gallus/Gallus_gallus.GRCg6a.105.abinitio.gtf.gz
+>f+++++++++ gallus_gallus/Gallus_gallus.GRCg6a.105.chr.gtf.gz
+>f+++++++++ gallus_gallus/Gallus_gallus.GRCg6a.105.gtf.gz
+>f+++++++++ gallus_gallus/README
+
+sent 127 bytes  received 26,140,373 bytes  2,751,631.58 bytes/sec
+total size is 26,133,567  speedup is 1.00
+
