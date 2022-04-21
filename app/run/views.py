@@ -1981,6 +1981,7 @@ class CrisprCasView(View):
         handle_uploaded_file(db_fasta, run_id)
         if not check_fasta(id_path + str(db_fasta)):
             return redirect("run:inputProblems", "fasta")
+        db_fasta = db_fasta.name
 
         # get the sequence type for the database
         db_type = request.POST['db_type']
