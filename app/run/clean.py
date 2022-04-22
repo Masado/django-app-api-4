@@ -2,6 +2,7 @@ import os
 import shutil
 import datetime
 from .models import Run
+from .tasks import get_id_path
 
 
 def clean_runs():

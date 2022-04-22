@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage, Storage
 from pathlib import Path
 from datetime import datetime, time, date
+from django.core.management import call_command
 import os
 import shutil
 import subprocess as sp

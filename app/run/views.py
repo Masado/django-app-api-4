@@ -1135,7 +1135,9 @@ class AtacSeqRun(View):
                                       skip_consensus_peaks, deseq2_vst, skip_diff_analysis, skip_fastqc,
                                       skip_picard_metrics, skip_preseq, skip_plot_profile, skip_plot_fingerprint,
                                       skip_ataqv, skip_igv, skip_multiqc,
-                                      run=run)
+                                      #run=run
+                                      run_id=run_id
+                                      )
 
             # compress results
             from .tasks import zip_file, tar_file

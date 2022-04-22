@@ -184,6 +184,7 @@ RUN pip install -r requirements.txt
 # install R dependencies
 RUN Rscript -e "install.packages('BiocManager')"
 RUN Rscript -e "BiocManager::install('netresponse')"
+RUN R --version
 COPY ./requirements.r .
 RUN Rscript requirements.r --vanilla
 
