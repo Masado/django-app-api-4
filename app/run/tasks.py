@@ -170,7 +170,12 @@ def zip_file(name, target, id_path=".", target_2=""):
                      )
     if process.returncode == 0:
         print("zip archive finished..")
-    return 0
+        return 0
+    else:
+        print("zip archive failed..")
+        print("stdout:", process.stdout)
+        print("stderr:", process.stderr)
+        return process.returncode
 
 
 def untar_file(t, run_id):
@@ -207,7 +212,12 @@ def tar_file(name, target, id_path=".", target_2=""):
                      )
     if process.returncode == 0:
         print("tar archive finished..")
-    return 0
+        return 0
+    else:
+        print("tar archive failed..")
+        print("stdout:", process.stdout)
+        print("stderr:", process.stderr)
+        return process.returncode
 
 
 def make_tarfile(target, output_name, id_path):
@@ -1209,8 +1219,9 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
             clean_wd(id_path=id_path)
             create_completion_file(directory=id_path)
         else:
-            tar_file("results_post.tar.gz", "output/", id_path=id_path)
-            zip_file("results_post.zip", "output/", id_path=id_path)
+            print("run_id_post: ", run_id_post)
+            tar_file("results_post.tar.gz", "results/", id_path=id_path)
+            zip_file("results_post.zip", "results/", id_path=id_path)
             clean_wd(id_path=id_path)
             create_completion_file(directory=id_path)
         return True
