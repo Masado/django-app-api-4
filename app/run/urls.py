@@ -37,5 +37,6 @@ urlpatterns = [
     path('sheets/', views.spreadsheet_view, name='Spreadsheets'),
     path('inputproblem?=<reason>/', views.input_problem_view, name='inputProblems'),
     # path('references/', views.reference_loader_view, name='ReferenceLoader'),
+    path('myruns/', views.RunsExecutedListView.as_view(), name='my-runs'),
 
 ]

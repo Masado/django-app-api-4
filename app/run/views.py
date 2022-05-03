@@ -10,6 +10,7 @@ from django.conf import settings
 from django.views import generic
 from django.views.generic import View
 from django.http import Http404, HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 import tarfile
 
 from requests import post
@@ -2023,3 +2024,12 @@ class CrisprCasTutorial(View):
                 return download_tutorial(request, pipe="crisprcas", file="crisprcas.tar.gz")
 
 #######################################################
+# User related views
+class RunsExecutedListView(LoginRequiredMixin, generic.ListView):
+    model = Run
+    template_name = 'run/runs_executed_list.html'
+
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Run.objects.filter(user=self.request.user).order_by('-start_time')

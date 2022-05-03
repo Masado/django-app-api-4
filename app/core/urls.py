@@ -29,6 +29,7 @@ urlpatterns = [
     path("pipelines/", include('pipelines.urls')),
     path("run/", include('run.urls')),
     path("fetch/", include('fetcher.urls')),
+    path("accounts/", include("django.contrib.auth.urls")),
 ]
 
 if bool(settings.DEBUG):
