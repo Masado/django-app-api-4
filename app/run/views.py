@@ -10,6 +10,7 @@ from django.conf import settings
 from django.views import generic
 from django.views.generic import View
 from django.http import Http404, HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 import tarfile
 
 from requests import post
@@ -374,6 +375,11 @@ class PostRNASeq(View):
             lmax = request.POST['lmax']
             lstep = request.POST['lstep']
 
+            if request.user.is_authenticated:
+                user_pk = request.user.pk
+            else:
+                user_pk = None
+
             # set out_path
             out_path = (id_path + "output/")
             create_directory(out_path + "images/")
@@ -389,7 +395,8 @@ class PostRNASeq(View):
                                 # tx2=tx2_file,
                                 pathways=pathways_number, kmin=kmin, kmax=kmax, kstep=kstep, lmin=lmin,
                                 lmax=lmax, lstep=lstep, out=out_path, 
-                                run_id=run_id)
+                                run_id=run_id,
+                                user_pk=user_pk)
 
             return redirect('/run/download_' + run_id + '/')
 
@@ -524,13 +531,19 @@ class PostAC(View):
         else:
             collect = False
 
+        if request.user.is_authenticated:
+            user_pk = request.user.pk
+        else:
+            user_pk = None
+
         os.chdir(id_path)
 
         from .tasks import postatacchipseq
         postatacchipseq.delay(bed_file, gtf_file, ext_chr, computation_method, upstream, downstream,
                                 regions_length, ref_point, collect,
                                 bam_archive,
-                                run_id=run_id)
+                                run_id=run_id,
+                                user_pk=user_pk)
 
         return redirect('/run/download_' + run_id + '/')
 
@@ -665,13 +678,18 @@ class AtacSeqRun(View):
             print("script_location: ", script_location)
             print("id_path:", id_path)
 
-            # change to working directory
-            os.chdir(id_path)
-
             if 'post_atacseq' in request.POST:
                 post_atacseq = True
             else:
                 post_atacseq = False
+
+            if request.user.is_authenticated:
+                user_pk = request.user.pk
+            else:
+                user_pk = None
+
+            # change to working directory
+            os.chdir(id_path)
 
             if post_atacseq:
             
@@ -725,6 +743,7 @@ class AtacSeqRun(View):
                                 igenome_reference=igenome_reference, fasta_file=str(fasta_file),
                                 gtf_annotation=str(gtf_annotation), macs_size=macs_size, narrow_peaks=narrow_peaks,
                                 run_id=run_id,
+                                user_pk=user_pk,
                                 post_atacseq=True,
                                 ext_chr=ext_chr, computation_method=computation_method, upstream=upstream, downstream=downstream, 
                                 regions_length=regions_length, ref_point=ref_point, collect=collect, 
@@ -736,7 +755,8 @@ class AtacSeqRun(View):
                 atacseq.delay(script_location=script_location, design_file=str(design_file), single_end=single_end,
                                 igenome_reference=igenome_reference, fasta_file=str(fasta_file),
                                 gtf_annotation=str(gtf_annotation), macs_size=macs_size, narrow_peaks=narrow_peaks,
-                                run_id=run_id)
+                                run_id=run_id,
+                                user_pk=user_pk,)
             
             return redirect('/run/download_' + run_id + '/')
 
@@ -1279,6 +1299,11 @@ class ChipSeqRun(View):
         else:
             post_chipseq = False
 
+        if request.user.is_authenticated:
+            user_pk = request.user.pk
+        else:
+            user_pk = None
+
         if post_chipseq:
             
             if 'ext_chr' in request.POST:
@@ -1330,6 +1355,7 @@ class ChipSeqRun(View):
                             igenome_reference=igenome_reference, fasta_file=fasta_file, gtf_file=gtf_file,
                             bed_file=bed_file, macs_size=macs_size, narrow_peaks=narrow_peaks,
                             run_id=run_id,
+                            user_pk=user_pk,
                             post_chipseq=True,
                             ext_chr=ext_chr, computation_method=computation_method, upstream=upstream, downstream=downstream, 
                             regions_length=regions_length, ref_point=ref_point, collect=collect, 
@@ -1341,7 +1367,8 @@ class ChipSeqRun(View):
             chipseq.delay(design_file=design_file, single_end=single_end,
                             igenome_reference=igenome_reference, fasta_file=fasta_file, gtf_file=gtf_file,
                             bed_file=bed_file, macs_size=macs_size, narrow_peaks=narrow_peaks,
-                            run_id=run_id)
+                            run_id=run_id,
+                            user_pk=user_pk)
 
 
         return redirect('/run/download_' + run_id + '/')
@@ -1630,6 +1657,11 @@ class RnaSeqRun(View):
         # if aligner == "star_salmon":
         #     pseudo_salmon_value = False
 
+        if request.user.is_authenticated:
+            user_pk = request.user.pk
+        else:
+            user_pk = None
+
         print("pseudo_salmon_value: ", pseudo_salmon_value)
 
         print("id_path:", id_path)
@@ -1673,7 +1705,6 @@ class RnaSeqRun(View):
             #     annotation_file = ungzip_file(annotation_file_compressed)
 
             # get annotation file
-            
             if 'gtf_annotation_file' in request.FILES:
                 annotation_file = request.FILES['gtf_annotation_file']
                 handle_uploaded_file(annotation_file, run_id)
@@ -1714,6 +1745,7 @@ class RnaSeqRun(View):
             out_path = (id_path + "output/")
             create_directory(out_path + "images/")
 
+
             from .tasks import rnaseq
             rnaseq.delay(csv_file=csv_file, umi_value=umi_value, umi_pattern=umi_pattern,
                         umi_method=umi_method, igenome_reference=igenome_reference, fasta_file=fasta_file,
@@ -1723,7 +1755,8 @@ class RnaSeqRun(View):
                         star_index_name=star_index_name, hisat2_index_name=hisat2_index_name,
                         rsem_index_name=rsem_index_name, salmon_index_name=salmon_index_name, aligner=aligner,
                         pseudo_salmon_value=pseudo_salmon_value,
-                        run_id=run_id, 
+                        run_id=run_id,
+                        user_pk=user_pk,
                         ############################
                         ## Post-RNA-Seq arguments ##
                         ############################
@@ -1745,7 +1778,8 @@ class RnaSeqRun(View):
                             star_index_name=star_index_name, hisat2_index_name=hisat2_index_name,
                             rsem_index_name=rsem_index_name, salmon_index_name=salmon_index_name, aligner=aligner,
                             pseudo_salmon_value=pseudo_salmon_value,
-                            run_id=run_id
+                            run_id=run_id,
+                            user_pk=user_pk
                             )
         
         return redirect('/run/download_' + run_id + '/')
@@ -1850,12 +1884,18 @@ class SarekRun(View):
         # change to working directory
         os.chdir(id_path)
 
+        if request.user.is_authenticated:
+            user_pk = request.user.pk
+        else:
+            user_pk = None
+
         # import and run pipeline call
         from .tasks import sarek
         sarek.delay(tsv_file=tsv_file, igenome_reference=igenome_reference,
                     fasta_file=fasta_file, dbsnp=dbsnp, dbsnp_index=dbsnp_index,
                     tools=tools,
-                    run_id=run_id)
+                    run_id=run_id,
+                    user_pk=user_pk)
 
         return redirect('/run/download_' + run_id + '/')
 
@@ -1995,10 +2035,16 @@ class CrisprCasView(View):
         # change working directory to id_path
         os.chdir(id_path)
 
+        if request.user.is_authenticated:
+            user_pk = request.user.pk
+        else:
+            user_pk = None
+
         # import and run pipeline call
         from .tasks import crisprcas
         crisprcas.delay(db=db_fasta, db_type=db_type, script_location=script_location,
-                           run_id=run_id)
+                           run_id=run_id,
+                           user_pk=user_pk)
 
         # redirect to download page
         return redirect('/run/download_' + run_id + '/')
@@ -2023,3 +2069,12 @@ class CrisprCasTutorial(View):
                 return download_tutorial(request, pipe="crisprcas", file="crisprcas.tar.gz")
 
 #######################################################
+# User related views
+class RunsExecutedListView(LoginRequiredMixin, generic.ListView):
+    model = Run
+    template_name = 'run/runs_executed_list.html'
+
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Run.objects.filter(user=self.request.user).order_by('-start_time')

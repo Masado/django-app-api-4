@@ -160,3 +160,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour="18", minute="0"),
     }
 }
+
+LOGIN_REDIRECT_URL = "/"
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

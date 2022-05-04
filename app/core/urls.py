@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from pages.views import home_view, about_view, contact_view #, image_upload
+from pages.views import home_view, about_view, contact_view, signup_view
 
 urlpatterns = [
     path("", home_view, name="home"),
@@ -29,6 +29,8 @@ urlpatterns = [
     path("pipelines/", include('pipelines.urls')),
     path("run/", include('run.urls')),
     path("fetch/", include('fetcher.urls')),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("signup/", signup_view, name="signup"),
 ]
 
 if bool(settings.DEBUG):

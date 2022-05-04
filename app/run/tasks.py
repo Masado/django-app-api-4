@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage, Storage
+from django.contrib.auth.models import User
 from pathlib import Path
 from datetime import datetime, time, date
 from django.core.management import call_command
@@ -594,6 +595,7 @@ logger = logging.getLogger(__name__)
 def atacseq(script_location, design_file, single_end, igenome_reference, fasta_file, gtf_annotation,
             macs_size, narrow_peaks,
             run_id,
+            user_pk,
             #############################
             ## Post-ChIP-Seq arguments ##
             #############################
@@ -634,6 +636,9 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     run = Run(run_id=run_id, pipeline="nf-core/ATAC-Seq")
     run.save()
     # print("run start_time: ", run.start_time)
+
+    if user_pk:
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = ' '.join(command)
     run.save()
@@ -710,6 +715,7 @@ def rnaseq(
         bed_file, transcript_fasta, star_index_name, hisat2_index_name, rsem_index_name, salmon_index_name, aligner,
         pseudo_salmon_value,
         run_id,
+        user_pk,
         ############################
         ## Post-RNA-Seq arguments ##
         ############################
@@ -763,6 +769,9 @@ def rnaseq(
     run = Run(run_id=run_id, pipeline="nf-core/RNA-Seq")
     run.save()
     print("run start_time: ", run.start_time)
+
+    if user_pk:
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = ' '.join(command)
     run.save()
@@ -832,6 +841,7 @@ def rnaseq(
                             pathways=pathways_number, kmin=kmin, kmax=kmax, kstep=kstep, lmin=lmin,
                             lmax=lmax, lstep=lstep, out=out_path, 
                             run_id=run_id,
+                            user_pk=user_pk,
                             run_id_post=run_id_p)
 
         else:
@@ -843,6 +853,7 @@ def rnaseq(
 @shared_task
 def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, bed_file, macs_size, narrow_peaks,
             run_id,
+            user_pk,
             #############################
             ## Post-ChIP-Seq arguments ##
             #############################
@@ -887,6 +898,9 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     run = Run(run_id=run_id, pipeline="nf-core/ChIP-Seq")
     run.save()
     print("run start_time: ", run.start_time)
+
+    if user_pk:
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = model_command
     run.save()
@@ -949,6 +963,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
                                          collect=collect,
                                          bam_archive=None,
                                          run_id=run_id,
+                                         user_pk=user_pk,
                                          run_id_post=run_id_p)
 
 
@@ -960,7 +975,8 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
 
 @shared_task
 def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
-          run_id
+          run_id,
+          user_pk,
           ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/sarek/main.nf"
     command = ['nextflow', 'run',
@@ -996,6 +1012,8 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     run.save()
     print("run start_time: ", run.start_time)
 
+    if user_pk:
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = model_command
     run.save()
@@ -1043,6 +1061,7 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
 def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, organism, pathways, kmin,
                kmax, kstep, lmin, lmax, lstep, out,
                run_id,
+               user_pk,
                run_id_post=None,
                ):
     from .scripts.tasks import run_pipe
@@ -1097,6 +1116,9 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
     model_command = model_command.replace("/usr/src/app/mediafiles/run/" + run_id + "/output/", "output/")
     model_command = model_command.replace("/usr/src/app/nfscripts/post_rnaseq/scripts/", "scripts/")
 
+    if user_pk:
+        run.user = User.objects.filter(pk=user_pk)
+
     run.pipeline_command = model_command
     run.save()
 
@@ -1138,6 +1160,7 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
                     regions_length, ref_point, collect,
                     bam_archive,
                     run_id,
+                    user_pk,
                     run_id_post=None
                     ):
     from .scripts.tasks import run_pipe
@@ -1182,6 +1205,9 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
     model_command = model_command.replace(
         "/usr/src/app/nfscripts/post_atacchipseq/main_1.1.nf",
         "post_atachchipseq.nf")
+
+    if user_pk:
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = model_command
     run.save()
@@ -1229,7 +1255,8 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
 
 @shared_task
 def crisprcas(db, db_type, script_location,
-              run_id
+              run_id,
+              user_pk,
               ):
     command = ['nextflow', 'run', '%s' % script_location + 'main_1.1.nf', '--data', 'data', '--db', '%s' % db,
                '--db_type', '%s' % db_type, '--html', '%s' % script_location]
@@ -1243,6 +1270,9 @@ def crisprcas(db, db_type, script_location,
     model_command = model_command.replace(
         "/usr/src/app/nfscripts/crispr_cas/main_1.1.nf",
         "crisprcas.nf")
+
+    if user_pk:
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = model_command
     run.save()

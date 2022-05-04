@@ -6,9 +6,9 @@ from .models import Run
 
 
 class RunAdmin(admin.ModelAdmin):
-    list_display = ['id', 'run_id', 'pipeline', 'exit_status', 'start_time', 'duration']
+    list_display = ['id', 'run_id', 'user', 'pipeline', 'exit_status', 'start_time', 'duration']
     list_filter = ['pipeline', 'exit_status']
-    search_fields = ['id', 'run_id', 'pipeline', 'exit_status', 'pipeline_command', 'start_time']
+    search_fields = ['id', 'run_id', 'user', 'pipeline', 'exit_status', 'pipeline_command', 'start_time']
 
 
 admin.site.register(Run, RunAdmin)
