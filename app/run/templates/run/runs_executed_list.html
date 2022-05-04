@@ -5,19 +5,6 @@
 
     {% if run_list %}
 
-    <!-- <ul>
-        {% for run in run_list %}
-        <li>
-            <a href="{% url 'run:detail' run.run_id %}">{{ run.run_id }}</a> ({{ run.pipeline }})
-        </li>
-        <br>
-        <li>
-            <a href="{% url 'run:UniversalDownload' run.run_id %}">Download page</a>
-        </li>
-        <br><br>
-        {% endfor %}
-    </ul> -->
-
     <table>
         <tr>
             <td style="padding: 10px"><strong>Run-ID</strong></td>
@@ -31,9 +18,17 @@
         <tr>
             <td style="padding: 10px">{{ run.run_id }}</td>
             <td style="padding: 10px">{{ run.pipeline }}</td>
-            <td style="padding: 10px">{{ run.exit_status }}</td>
+            <td style="padding: 10px">
+                {% if run.exit_status == "0" %}
+                    Exited successfully
+                {% elif run.exit_status == "1" %}
+                    Crashed
+                {% else %}
+                    Has not finished
+                {% endif %}
+            </td>
             <td style="padding: 10px">{{ run.start_time }}</td>
-            <td style="padding: 10px"><a href="{% url 'run:detail' run.run_id">Details</a></td>
+            <td style="padding: 10px"><a href="{% url 'run:detail' run.run_id %}">Details</a></td>
             <td style="padding: 10px"><a href="{% url 'run:UniversalDownload' run.run_id %}">Download</a></td>
         </tr>
         {% endfor %}
