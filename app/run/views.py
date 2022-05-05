@@ -1,3 +1,4 @@
+from cProfile import run
 import os
 import zipfile
 import tarfile
@@ -72,7 +73,7 @@ def get_download_view(request, *args, **kwargs):
         # set path to run directory
         path = (str(settings.MEDIA_ROOT) + '/run/' + run_id)
         # if the entered run_id has a corresponding run directory, redirect to the download page for the entered run_id
-        if os.path.exists(path):
+        if os.path.exists(path) or Run.objects.filter(run_id=run_id).count() != 0:
 
             if os.path.exists(path + '/.crashed.txt'):  # check if pipeline has crashed
                 with open(path + '/.crashed.txt', 'r') as fl:
@@ -246,9 +247,16 @@ class UniversalDownloadView(View):
 
     def get(self, request, *args, **kwargs):
         run_id = kwargs['run_id']
+
+        if Run.objects.get(run_id = run_id).user is not None and Run.objects.get(run_id = run_id).user != request.user:
+            return redirect('run:no-access')
+
         directory = get_id_path(run_id)
-        if os.path.isdir(directory):
-            media_list = os.listdir(directory)
+        if os.path.isdir(directory) or Run.objects.filter(run_id=run_id).count() != 0:
+            if os.path.isdir(directory):
+                media_list = os.listdir(directory)
+            else:
+                media_list = []
             context = {'run_id': run_id, 'media_list': media_list}
             return render(request, self.template_name, context=context)
         else:
@@ -281,6 +289,10 @@ class UniversalDownloadView(View):
         elif "detail" in request.POST:
             return redirect('run:detail', run_id)
 
+def no_acess(request, *args, **kwargs):
+    template_name = 'run/access_denied.html'
+
+    return render(request, template_name)
 
 ###########################################################
 # Post-Pipeline views and tutorial

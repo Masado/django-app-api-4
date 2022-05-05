@@ -38,5 +38,6 @@ urlpatterns = [
     path('inputproblem?=<reason>/', views.input_problem_view, name='inputProblems'),
     # path('references/', views.reference_loader_view, name='ReferenceLoader'),
     path('myruns/', views.RunsExecutedListView.as_view(), name='my-runs'),
+    path('noaccess/', views.no_acess, name='no-access')
 
 ]
