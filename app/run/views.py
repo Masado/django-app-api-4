@@ -38,6 +38,9 @@ def detail_view(request, *args, **kwargs):
     # get run_id
     run_id = kwargs["run_id"]
 
+    if Run.objects.get(run_id = run_id).user is not None and Run.objects.get(run_id = run_id).user != request.user:
+            return redirect('run:no-access')
+
     run = Run.objects.get(run_id=run_id)
 
     context = {"run_id": run_id, "run": run}

@@ -25,7 +25,6 @@ urlpatterns = [
     path("about/", about_view, name="about"),
     path("admin/", admin.site.urls),
     path("contact/", contact_view, name="contact"),
-    # path("upload/", image_upload, name="upload"),
     path("pipelines/", include('pipelines.urls')),
     path("run/", include('run.urls')),
     path("fetch/", include('fetcher.urls')),
