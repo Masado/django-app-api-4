@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from pathlib import Path
 from datetime import datetime, time, date
 from django.core.management import call_command
+from pysam import FastxFile
 import os
 import shutil
 import subprocess as sp
@@ -570,6 +571,25 @@ def clean_runs():
         else:
             print("Path was not found")
         run.delete()
+
+
+def fastq_to_fasta(fastq, run_id):
+    id_path = get_id_path(run_id)
+    file_path = str(id_path) + "/" + fastq
+    if not fastq.endswith(".gz"):
+        basename = os.path.basename(file_path)
+        filename = os.path.splitext(fastq)[0]
+        with FastxFile(file_path) as fh:
+            for entry in fh:
+                sequence_id = entry.name
+                sequence = entry.sequence
+                with open(f"{id_path}/{filename}.fasta", "a") as fo:
+                    fo.write(sequence_id + "\n")
+                    fo.write(sequence + "\n")
+        return f"{filename}.fasta"
+    else:
+        return None
+
 
 
 ########################################################################################################################################

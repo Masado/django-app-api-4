@@ -20,7 +20,8 @@ from .tasks import generate_and_check_id, check_for_run_dir, get_id_path, get_me
     create_directory, create_progress_file, clean_wd, get_taxid, \
     store, handle_uploaded_file, handle_and_unzip, handle_and_untar, \
     untar_file, ungzip_file, unzip_file, mv_file, cp_file, \
-    download_file, download_tar, download_zip
+    download_file, download_tar, download_zip, \
+    fastq_to_fasta
 from .sanity import check_bed, check_gtf, check_fasta, check_rnaseq_samplesheet, check_atacseq_design, \
     check_chipseq_design, check_sarek_design
 
@@ -490,11 +491,14 @@ class PostAC(View):
         if 'fasta_file' in request.FILES:
             fasta_file = request.FILES['fasta_file']
             handle_uploaded_file(fasta_file, run_id)
-            if not check_gtf(id_path + str(fasta_file)):
+            if not check_fasta(id_path + str(fasta_file)):
                 return redirect("run:inputProblems", "fasta")
             fasta_file = fasta_file.name
         else:
             fasta_file = None
+
+        if fasta_file.endwith(".fastq"):
+                fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         if 'bw_archive' in request.FILES:
             bw_archive = request.FILES['bw_archive']
@@ -658,6 +662,9 @@ class AtacSeqRun(View):
             else:
                 fasta_file = None
             print("print fasta_file: ", fasta_file)
+
+            if fasta_file.endwith(".fastq"):
+                fasta_file = fastq_to_fasta(fasta_file, run_id)
 
             # get gtf_annotation and handle file
             if 'gtf_annotation' in request.FILES:
@@ -1274,6 +1281,9 @@ class ChipSeqRun(View):
         else:
             fasta_file = None
 
+        if fasta_file.endwith(".fastq"):
+                fasta_file = fastq_to_fasta(fasta_file, run_id)
+
         # get gtf_file and handle file
         if "gtf_file" in request.FILES:
             gtf_file = request.FILES['gtf_file']
@@ -1571,6 +1581,9 @@ class RnaSeqRun(View):
             fasta_file = fasta_file.name
         else:
             fasta_file = None
+
+        if fasta_file.endwith(".fastq"):
+                fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         # get gtf_file and handle file
         if 'gtf_file' in request.FILES:
@@ -1883,6 +1896,9 @@ class SarekRun(View):
         else:
             fasta_file = None
             print("fasta_file was not provided")
+
+        if fasta_file.endwith(".fastq"):
+                fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         if 'dbsnp_file' in request.FILES:
             dbsnp = request.FILES['dbsnp_file']

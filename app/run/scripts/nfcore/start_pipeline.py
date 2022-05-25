@@ -89,8 +89,8 @@ def rnaseq(
         'nf-core/rnaseq',
         '-r', '3.5',
         '--input', '%s' % csv_file,
-        '--max_memory', '%s.GB' % str(get_memory()),
-        '--max_cpus', '%s' % str(get_cpus())
+        '--max_memory', '4.GB',
+        '--max_cpus', '1')
     ]
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
