@@ -424,6 +424,7 @@ cat("", file=f)
 for (node in result.KPM$resultGraphs[[1]]$nodes) {
   remainder <- 11 - nchar(node$name)
   t <- paste("ENSGALP", paste(replicate(remainder, "0"), collapse=""), node$name, sep="")
+  # t <- paste(node$name, sep="")
   print(t)
   cat(t, file=f, sep="\n", append=TRUE)
 }

@@ -97,7 +97,7 @@ def rsync_file(source, destination):
                 print("Something is wrong")
             retries += 1 
             print("retries:", retries)
-            if retries >= 50:
+            if retries >= 20:
                 return HttpResponse("There was some kind of error. Please try again later.")
             time.sleep(5)
 

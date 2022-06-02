@@ -660,7 +660,12 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
-    run.pipeline_command = ' '.join(command)
+    model_command = ' '.join(command)
+    model_command = model_command.replace(
+        "/usr/src/app/nfscripts/nfcore/atacseq/main.nf",
+        "nf-core/atacseq")
+
+    run.pipeline_command = model_command
     run.save()
 
     id_path = get_id_path(run_id)
@@ -1137,7 +1142,7 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
     model_command = model_command.replace("/usr/src/app/nfscripts/post_rnaseq/scripts/", "scripts/")
 
     if user_pk:
-        run.user = User.objects.filter(pk=user_pk)
+        run.user = User.objects.get(pk=user_pk)
 
     run.pipeline_command = model_command
     run.save()

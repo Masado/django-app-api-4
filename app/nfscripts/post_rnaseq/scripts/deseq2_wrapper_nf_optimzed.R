@@ -47,9 +47,10 @@ files <- file.path(if (substr(args_value[match("--salmon", args_tag)], 1, 1) == 
 #files <- file.path("results_chicken_first40_test/salmon/", samples$run, "quant.sf")
 names(files) <- samples$run
 tx2gene <- read_csv(file.path(if (substr(args_value[match("--tx2gene", args_tag)], 1, 1) == "/") args_value[match("--tx2gene", args_tag)] else paste(getwd(), "/", args_value[match("--tx2gene", args_tag)], sep="")))
-#tx2gene <- read_csv(file.path("test_out/tx2gene_modefied.csv"))
+#tx2gene <- read_csv(file.path("test_out/tx2gene_modefied.csv"), col_names = FALSE)
 txi <- tximport(files, type="salmon", tx2gene=tx2gene)
 #out <- "results_chicken_first40_test/deseq2"
+#out <- "testing/deseq2"
 
 ddsTxi <- DESeqDataSetFromTximport(txi, colData = samples, design = ~ condition)
 

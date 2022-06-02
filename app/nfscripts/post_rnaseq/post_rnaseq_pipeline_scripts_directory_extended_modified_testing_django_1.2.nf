@@ -50,7 +50,7 @@ process preparation {
 	mkdir -p !{o}
 	mkdir -p !{o}/images
 	mkdir -p !{o}/tex_files/images
-	awk 'BEGIN {FS = OFS = ","} {print $1, $1}' !{salmon}/tx2gene.csv > tx2gene_modefied.csv
+	awk 'BEGIN {FS = OFS = ","} {print $1, $2}' !{salmon}/tx2gene.csv > tx2gene_modefied.csv
 	grep -e 'CDS' !{anno} > transcript_ids.txt
 	grep -e 'pp' !{network} > network_reduced.sif
 	'''
@@ -106,7 +106,7 @@ process matrix_construction {
 	file 'deseq_indicator_matrix_extended.txt' into deseqMatrix_ch
 
 	"""
-	$script/matrix_constructor_v3.1.py --deseq *.csv --ids $tid2pid --species $species --out deseq_indicator_matrix_extended.txt
+	$script/matrix_constructor_v3.2.py --deseq *.csv --ids $tid2pid --species $species --out deseq_indicator_matrix_extended.txt
 	"""
 }
 
