@@ -31,7 +31,7 @@ services:
     depends_on:
       - web
   redis:
-    image: redis:alpine
+    image: redis:6-alpine
   celery:
     build: 
       context: ./app
@@ -46,7 +46,7 @@ services:
     build: 
       context: ./app
       dockerfile: Dockerfile.prod
-    command: celery --app=core beat --loglevel=info -c 3
+    command: celery --app=core beat --loglevel=info
     env_file:
       - ./.env.prod
     depends_on:

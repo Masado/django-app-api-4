@@ -24,10 +24,10 @@ services:
       - POSTGRES_PASSWORD=core
       - POSTGRES_DB=core_dev
   redis:
-    image: redis:alpine
+    image: redis:6-alpine
   celery_dev:
     build: ./app
-    command: celery --app=core worker --loglevel=info
+    command: celery --app=core worker --loglevel=info -c 3
     volumes:
       - ./app/:/usr/src/app/
     env_file:
