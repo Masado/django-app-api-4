@@ -633,7 +633,6 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
         '--max_memory', '%s.GB' % str(get_memory()),
         # '--max_cpus', '2'
         '--max_cpus', '%s' % str(get_cpus())
-        #  , '--outdir', '%s' % outdir,
     ]
     if single_end == 'true':
         command.extend(['--single_end', 'True'])
@@ -669,16 +668,19 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     run.save()
 
     id_path = get_id_path(run_id)
+    print("Changing Run directory")
+    os.chdir(id_path)
+    print(os.curdir)
 
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
 
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
-        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
     else:
-        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
     t0 = time.time()
@@ -758,7 +760,8 @@ def rnaseq(
         # '--max_memory', '%s.GB' % str(get_memory()),
         # '--max_cpus', '%s' % str(get_cpus())
         '--max_memory', '4.GB',
-        '--max_cpus', '1'
+        '--max_cpus', '1',
+        # '-profile', 'conda'
     ]
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
@@ -807,7 +810,9 @@ def rnaseq(
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
-                                        ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
+                                        ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" 
+
+        # m_env["R_LIBS"] =  "/home/app/miniconda3/envs/nf-core-rnaseq-3.4/lib/R/library:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/lib/R/library"  
     else:
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
@@ -895,7 +900,7 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         '--input', '%s' % design_file,
         '--max_memory', '4.GB',
         # '--max_memory', '%s.GB' % str(get_memory()),
-        '--max_cpus', '2'
+        '--max_cpus', '2',
         # '--max_cpus', '%s' % str(get_cpus())
     ]
     if single_end is True:
@@ -935,10 +940,10 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
     m_env = os.environ.copy()
 
     if bool(settings.DEBUG):
-        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:"\
+        m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
     else:
-        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
+        m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
     id_path = get_id_path(run_id)

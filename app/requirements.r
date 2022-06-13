@@ -1,5 +1,7 @@
 # gprofiler2
 install.packages('tidyselect')
+install.packages("data.table")
+install.packages("plotly")
 install.packages('gprofiler2')
 install.packages('readr')
 library(tidyselect)
@@ -8,21 +10,22 @@ library(readr)
 
 # DESeq2
 install.packages("jsonlite")
-install.packages("data.table")
+
 install.packages('BiocManager')
 install.packages("xtable")
 BiocManager::install("tximport")
 BiocManager::install("DESeq2")
+library(tximport)
 library(DESeq2)
 
 # KeyPathwayMineR
 install.packages('igraph')
 install.packages('rjson')
 install.packages('foreach')
-BiocManager::install('netresponse')
+# BiocManager::install('netresponse')
 
 library(igraph)
-library(netresponse)
+# library(netresponse)
 
 # Atacseq
 install.packages('optparse')

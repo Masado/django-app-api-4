@@ -42,6 +42,8 @@ services:
     depends_on:
       - web
       - redis
+    volumes:
+      - media_volume:/home/app/web/mediafiles
   celery-beat:
     build: 
       context: ./app
@@ -52,6 +54,8 @@ services:
     depends_on:
       - web
       - redis
+    volumes:
+      - media_volume:/home/app/web/mediafiles
 volumes:
   postgres_data:
   static_volume:

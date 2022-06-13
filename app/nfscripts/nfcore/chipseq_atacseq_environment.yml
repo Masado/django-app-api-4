@@ -19,9 +19,9 @@ dependencies:
   - conda-forge::r-tidyr=1.1.0
   - conda-forge::r-scales=1.1.1
   - conda-forge::r-pheatmap=1.0.12
-  - conda-forge::r-lattice=0.20_41
+  - conda-forge::r-lattice=0.20_41  
   - conda-forge::r-upsetr=1.4.0
-  - conda-forge::r-xfun=0.20
+  - conda-forge::r-xfun=0.22
   - conda-forge::gawk=5.1.0
   - conda-forge::pigz=2.3.4
 

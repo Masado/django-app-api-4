@@ -4,6 +4,7 @@ from collections import OrderedDict, defaultdict, Counter
 import logging
 import glob
 import os
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def run_pipe(command, id_path, shell_bo=False, start_msg="Starting nextflow pipe
                      shell=shell_bo,
                      universal_newlines=True,
                      env=m_env,
-                     cwd=id_path
+                     # cwd=id_path
                      )
     if process.returncode == 0:
         if not silent:

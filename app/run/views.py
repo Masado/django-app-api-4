@@ -4,7 +4,7 @@ import zipfile
 import tarfile
 import pandas as pd
 import numpy as np
-from time import time
+from time import time, sleep
 from datetime import datetime, time, date, timedelta
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -497,7 +497,7 @@ class PostAC(View):
         else:
             fasta_file = None
 
-        if fasta_file.endwith(".fastq"):
+        if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         if 'bw_archive' in request.FILES:
@@ -663,7 +663,7 @@ class AtacSeqRun(View):
                 fasta_file = None
             print("print fasta_file: ", fasta_file)
 
-            if fasta_file.endwith(".fastq"):
+            if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
             # get gtf_annotation and handle file
@@ -1281,7 +1281,7 @@ class ChipSeqRun(View):
         else:
             fasta_file = None
 
-        if fasta_file.endwith(".fastq"):
+        if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         # get gtf_file and handle file
@@ -1582,7 +1582,7 @@ class RnaSeqRun(View):
         else:
             fasta_file = None
 
-        if fasta_file.endwith(".fastq"):
+        if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         # get gtf_file and handle file
@@ -1809,6 +1809,8 @@ class RnaSeqRun(View):
                             run_id=run_id,
                             user_pk=user_pk
                             )
+
+        sleep(10)
         
         return redirect('/run/download_' + run_id + '/')
 
@@ -1897,7 +1899,7 @@ class SarekRun(View):
             fasta_file = None
             print("fasta_file was not provided")
 
-        if fasta_file.endwith(".fastq"):
+        if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
         if 'dbsnp_file' in request.FILES:

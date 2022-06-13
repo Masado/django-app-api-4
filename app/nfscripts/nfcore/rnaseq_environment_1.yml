@@ -19,6 +19,7 @@ dependencies:
   - bioconda::bioconductor-genomeinfodb=1.30.0
   - bioconda::bioconductor-biobase=2.54.0
   - bioconda::bioconductor-s4vectors=0.32.0
+  - bioconda::bioconductor-biocgenerics=0.40.0
   - conda-forge::r-ggplot2=3.3.5
 
   - bioconda::gffread
