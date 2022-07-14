@@ -668,9 +668,11 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     run.save()
 
     id_path = get_id_path(run_id)
-    print("Changing Run directory")
+    
+    # change to working directory
     os.chdir(id_path)
-    print(os.curdir)
+
+    print("Current working directory:", os.getcwd())
 
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
@@ -948,6 +950,11 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
 
     id_path = get_id_path(run_id)
 
+    # change to working directory
+    os.chdir(id_path)
+
+    print("Current working directory:", os.getcwd())
+
     t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env, id_path=id_path)
     t1 = time.time()
@@ -1058,6 +1065,13 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     else:
         m_env["PATH"] = "/home/app/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"]
 
+    id_path = get_id_path(run_id=run_id)
+
+    # change to working directory
+    os.chdir(id_path)
+
+    print("Current working directory:", os.getcwd())
+
     t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     t1 = time.time()
@@ -1151,6 +1165,13 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
 
     run.pipeline_command = model_command
     run.save()
+
+    id_path = get_id_path(run_id=run_id)
+
+    # change to working directory
+    os.chdir(id_path)
+
+    print("Current working directory:", os.getcwd())
 
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting Post-RNA-seq pipeline...",
@@ -1253,6 +1274,11 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
 
     id_path = get_id_path(run_id=run_id)
 
+    # change to working directory
+    os.chdir(id_path)
+
+    print("Current working directory:", os.getcwd())
+
     t0 = time.time()
     result = run_pipe(command=command, id_path=id_path, start_msg="Starting Post-ATAC-Seq/ChIP-Seq pipeline...",
                       stop_msg="Post-ATAC-Seq/ChIP-Seq pipeline finished successfully!", m_env=m_env)
@@ -1312,6 +1338,13 @@ def crisprcas(db, db_type, script_location,
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/crispr-cas-1.0/bin"
     else:
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/crispr-cas-1.0/bin"
+
+    id_path = get_id_path(run_id=run_id)
+
+    # change to working directory
+    os.chdir(id_path)
+
+    print("Current working directory:", os.getcwd())
 
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting CRISRP/Cas pipeline...",

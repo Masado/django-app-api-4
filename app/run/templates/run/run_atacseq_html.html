@@ -234,7 +234,7 @@
                 </tr>
                 <tr>
                     <td class="noBorder" colspan="3"><em><small>A tool to help you create the input spreadsheet file can be found
-                        <a href="http://localhost:8000/run/sheets/" target="_blank">here</a>.</small></em></td>
+                        <a href="{% url 'run:Spreadsheets' %}" target="_blank">here</a>.</small></em></td>
                 </tr>
                 <tr>
                     <td class="noBorder"><label for="id_file_folder" class="float-right">File folder:</label></td>
@@ -279,7 +279,7 @@
                 <tr>
                     <td class="noBorder" colspan="3"><small><em>
                         A full list of iGenome references available for nf-core pipelines can be found <a
-                            href="http://0.0.0.0:8000/run/igenome/"
+                            href="{% url 'run:iGenome' %}"
                             target="_blank">here</a>.
                     </em></small></td>
                 </tr>
@@ -297,7 +297,7 @@
                     <td class="noBorder" colspan="3">
                         <em><small>
                             If you need help obtaining one or more of the required reference files you can try using our <br>
-                            <a href="http://0.0.0.0:8000/run/references/" target="_blank">reference loader</a> to obtain
+                            <a href="{% url 'fetcher:fetcher' %}" target="_blank">reference loader</a> to obtain
                             the latest Ensembl data for the species you used.
                         </small></em>
                     </td>

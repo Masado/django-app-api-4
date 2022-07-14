@@ -1,0 +1,1 @@
+2022-07-11 09:38:12	-	nauseous_feynman	-	45c667ad5c1f37b5b5048160335707d4	1a9f630e-7cd8-4d18-88e9-dcff9e1be730	nextflow run /usr/src/app/nfscripts/nfcore/chipseq/main.nf --input design_local.csv --max_memory 4.GB --max_cpus 2 --genome R64-1-1
