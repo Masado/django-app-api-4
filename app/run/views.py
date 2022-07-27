@@ -1858,6 +1858,7 @@ class SarekRun(View):
         handle_uploaded_file(request.FILES['tsv_file'], run_id)
         if not check_sarek_design(id_path + str(tsv_file)):
             return redirect("run:inputProblems", "tsv")
+        tsv_file = tsv_file.name
 
         # get file_folder, handle and decompress
         if 'file_folder' in request.FILES:
@@ -1895,6 +1896,7 @@ class SarekRun(View):
             print("fasta_file was provided")
             if not check_fasta(id_path + str(fasta_file)):
                 return redirect("run:inputProblems", "fasta")
+            fasta_file = fasta_file.name
         else:
             fasta_file = None
             print("fasta_file was not provided")
@@ -1905,12 +1907,14 @@ class SarekRun(View):
         if 'dbsnp_file' in request.FILES:
             dbsnp = request.FILES['dbsnp_file']
             handle_uploaded_file(dbsnp, run_id)
+            dbsnp = dbsnp.name
         else:
             dbsnp = None
 
         if 'dbsnp_index' in request.FILES:
             dbsnp_index = request.FILES['dbsnp_index']
             handle_uploaded_file(dbsnp_index, run_id)
+            dbsnp_index = dbsnp_index.name
         else:
             dbsnp_index = None
 
@@ -1929,7 +1933,9 @@ class SarekRun(View):
                     tools=tools,
                     run_id=run_id,
                     user_pk=user_pk)
-
+        
+        sleep(10)
+        
         return redirect('/run/download_' + run_id + '/')
 
 

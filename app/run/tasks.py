@@ -1019,6 +1019,7 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     command = ['nextflow', 'run',
         # '%s' % script_location,
         'nf-core/sarek',
+        '-r', '2.7.1',
         '--input', '%s' % tsv_file,
         # '--max_memory', '2.GB',
         '--max_memory', '%s.GB' % str(get_memory()),
@@ -1073,7 +1074,7 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     print("Current working directory:", os.getcwd())
 
     t0 = time.time()
-    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
+    result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env, id_path=id_path)
     t1 = time.time()
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
