@@ -1240,7 +1240,7 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
     if downstream is not None:
         command.extend(['--downstream', '%s' % downstream])
     if regions_length is not None:
-        command.extend(['--regions_length', '%s' % regions_length])
+        command.extend(['--regionBodyLength', '%s' % regions_length])
     if ref_point is not None:
         command.extend(['--reference_point', '%s' % ref_point])
     if collect is True:
