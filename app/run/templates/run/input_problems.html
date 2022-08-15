@@ -48,6 +48,14 @@
                 Please ensure that the file contains the correct headers and try again.
             </p>
         </div>
+    % elif reason == "file-folder" %
+        <div id="id_reason_file_folder">
+            <h2>Input folder produced errors</h2>
+            <p>
+                We encountered a problem while tranfering your input files.<br>
+                Please ensure that the files are transfered inside of a .tar.gz or .zip archive.
+            </p>
+        </div>
     {% else %}
         <div>
             <p>

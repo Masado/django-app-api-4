@@ -12,7 +12,6 @@ from pysam import FastxFile
 import os
 import shutil
 import subprocess as sp
-import tarfile
 import glob
 
 
@@ -446,10 +445,8 @@ def check_for_run_dir(run_id):
 
 
 # download file function
-# def download_file(request, run_id, file):
 def download_file(request, file_path):
-    # get file_path
-    # file_path = settings.MEDIA_ROOT + '/run/' + run_id + "/" + file
+    # get file name and extension
     filename, file_extension = os.path.splitext(file_path)
     file = file_path.split("/")[-1]
     run_id = file_path.split("/")[-2]
@@ -458,8 +455,8 @@ def download_file(request, file_path):
     print("filename:", filename)
     print("file_extension:", file_extension)
     print("run_id:", run_id)
+    
     # download file
-
     if os.path.exists(file_path):
         if file_extension == ".pdf":
             with open(file_path, 'rb') as fh:
@@ -630,11 +627,8 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     print("Starting nextflow pipeline...")
     command = ['nextflow', 'run',
         '%s' % script_location,
-        # 'nf-core/atacseq',
         '--input', '%s' % design_file,
-        # '--max_memory', '2.GB',
         '--max_memory', '%s.GB' % str(get_memory()),
-        # '--max_cpus', '2'
         '--max_cpus', '%s' % str(get_cpus())
     ]
     if single_end == 'true':
@@ -654,11 +648,11 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
 
     print("atacseq-command:", command)
 
-    # print("datetime: ", datetime.now())
+    # create Run object
     run = Run(run_id=run_id, pipeline="nf-core/ATAC-Seq")
     run.save()
-    # print("run start_time: ", run.start_time)
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
@@ -667,19 +661,20 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
         "/usr/src/app/nfscripts/nfcore/atacseq/main.nf",
         "nf-core/atacseq")
 
+    # update Run object
     run.pipeline_command = model_command
     run.save()
 
+    # get id_path
     id_path = get_id_path(run_id)
     
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
     start_msg = "Starting ATAC-seq pipeline..."
     stop_msg = "ATAC-Seq pipeline finished successfully!"
 
+    # create copy of environment, then add workflow specific environment to PATH
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
@@ -688,9 +683,11 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, id_path=id_path, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     t1 = time.time()
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()
@@ -705,12 +702,14 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
         make_tarfile("results/", "results_2.tar.gz", id_path=id_path)
         zip_file("results.zip", "results/", id_path=id_path)
 
+        # if post-workflow is enabled, prepare and execute it
         if post_atacseq:
             from distutils.dir_util import copy_tree
             run_id_p = run_id + '_p'
 
             os.chdir(id_path)
 
+            # copy required files to run directory
             copy_tree(id_path + "results/bwa/mergedLibrary/bigwig", id_path + "bigwig/")
 
             if post_bed_file is None:
@@ -723,8 +722,6 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
                 post_annotation_file = get_gtf(run_id)
                 copy_file("results/genome/" + post_annotation_file, str(settings.MEDIA_ROOT) + '/run/' + run_id)
 
-            # filelist = ["results", "work"]
-            # del_file(filelist, id_path=id_path)
             mv_file(id_path + "/results/", id_path + "/results_chipseq/", id_path=id_path)
 
             postatacchipseq.delay(bed_file=post_bed_file, gtf_file=post_annotation_file, ext_chr=ext_chr,
@@ -758,16 +755,12 @@ def rnaseq(
 ):
     scirpt_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/rnaseq/main.nf"
 
-
     command = ['nextflow', 'run',
         'nf-core/rnaseq',
         '-r', '3.5',
         '--input', '%s' % csv_file,
-        # '--max_memory', '%s.GB' % str(get_memory()),
-        # '--max_cpus', '%s' % str(get_cpus())
         '--max_memory', '4.GB',
         '--max_cpus', '1',
-        # '-profile', 'conda'
     ]
     if umi_value is True:
         command.extend(['--with_umi', 'True', '--umitools_extract_method', '%s' % umi_method, '--umitools_bc_pattern',
@@ -799,41 +792,41 @@ def rnaseq(
 
     print("rnaseq-command:", command)
 
-    # print("datetime: ", datetime.now())
+    # create Run object
     run = Run(run_id=run_id, pipeline="nf-core/RNA-Seq")
     run.save()
-    print("run start_time: ", run.start_time)
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
+    # update Run object
     run.pipeline_command = ' '.join(command)
     run.save()
 
     start_msg = "Starting RNA-Seq Pipeline.."
     stop_msg = "RNA-Seq Pipeline finished successfully!"
 
+    # create copy of environment, then add workflow specific environment to PATH
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
                                         ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" 
-
-        # m_env["R_LIBS"] =  "/home/app/miniconda3/envs/nf-core-rnaseq-3.4/lib/R/library:/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/lib/R/library"  
     else:
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin"
 
+    # get id_path
     id_path = get_id_path(run_id)
 
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, id_path=id_path, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env)
     t1 = time.time()
-    print("result: ", result)
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()
@@ -848,12 +841,12 @@ def rnaseq(
         make_tarfile("results/", "results_2.tar.gz", id_path=id_path)
         zip_file("results.zip", "results/", id_path=id_path)
         
+        # if post-workflow is enabled, prepare and execute it
         if post_rnaseq:
             run_id_p = run_id + "_p"
 
             if aligner == "star_salmon":
                 mv_file(id_path + "/results/star_salmon/", ".", id_path=id_path)
-                # salmon_file = str(id_path) + '/star_salmon/'
                 mv_file(id_path + "/star_salmon/", id_path + "/salmon/", id_path=id_path)
                 salmon_file = str(id_path) + '/salmon/'
             else:
@@ -881,7 +874,7 @@ def rnaseq(
                             run_id_post=run_id_p)
 
         else:
-            # clean_wd(id_path=id_path)
+            clean_wd(id_path=id_path)
             create_completion_file(directory=id_path)
             return True
 
@@ -898,16 +891,12 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
             post_bed_file=None, post_annotation_file=None
             ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main.nf"
-    # script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/chipseq/main_loc.nf"
     command = [
         'nextflow', 'run',
-        # 'nf-core/chipseq',
         '%s' % script_location,
         '--input', '%s' % design_file,
         '--max_memory', '4.GB',
-        # '--max_memory', '%s.GB' % str(get_memory()),
         '--max_cpus', '2',
-        # '--max_cpus', '%s' % str(get_cpus())
     ]
     if single_end is True:
         command.extend(['--single_end', 'True'])
@@ -931,20 +920,23 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         "/usr/src/app/nfscripts/nfcore/chipseq/main.nf",
         "nf-core/chipseq")
 
+    # create Run object in database
     run = Run(run_id=run_id, pipeline="nf-core/ChIP-Seq")
     run.save()
-    print("run start_time: ", run.start_time)
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
+    # update Run object
     run.pipeline_command = model_command
     run.save()
 
     start_msg = "Starting ChIP-Seq pipeline.."
     stop_msg = "ChIP-Seq pipeline finished successfully!"
-    m_env = os.environ.copy()
 
+    # create copy of environment, then add workflow specific environment to PATH
+    m_env = os.environ.copy()
     if bool(settings.DEBUG):
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
@@ -952,16 +944,17 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin" \
                                         ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
+    # get id_path
     id_path = get_id_path(run_id)
 
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env, id_path=id_path)
     t1 = time.time()
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()
@@ -976,12 +969,14 @@ def chipseq(design_file, single_end, igenome_reference, fasta_file, gtf_file, be
         make_tarfile("results/", "results_2.tar.gz", id_path=id_path)
         zip_file("results.zip", "results/", id_path=id_path)
 
+        # if post-workflow is enabled, execute it
         if post_chipseq:
             from distutils.dir_util import copy_tree
             run_id_p = run_id + '_p'
 
             os.chdir(id_path)
 
+            # copy required files to run directory
             copy_tree(id_path + "results/bwa/mergedLibrary/bigwig", id_path + "bigwig/")
 
             if post_bed_file is None:
@@ -1021,15 +1016,11 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
           ):
     script_location = str(settings.BASE_DIR) + "/nfscripts/nfcore/sarek/main.nf"
     command = ['nextflow', 'run',
-        # '%s' % script_location,
         'nf-core/sarek',
         '-r', '2.7',
         '--input', '%s' % tsv_file,
         '--max_memory', '4.GB',
-        # '--max_memory', '%s.GB' % str(get_memory()),
         '--max_cpus', '2'
-        # '--max_cpus', '%s' % str(get_cpus())
-        # , '--skip_qc', 'bamqc,BaseRecalibrator'
     ]
     if igenome_reference is not None:
         command.extend(['--genome', '%s' % igenome_reference])
@@ -1050,13 +1041,16 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
         "/usr/src/app/nfscripts/nfcore/sarek/main.nf",
         "nf-scripts/sarek")
 
+    # create Run object
     run = Run(run_id=run_id, pipeline="nf-core/Sarek")
     run.save()
     print("run start_time: ", run.start_time)
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
+    # update Run object
     run.pipeline_command = model_command
     run.save()
 
@@ -1064,22 +1058,24 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     start_msg = "Starting Sarek pipeline..."
     stop_msg = "Sarek pipeline finished successfully!"
 
+    # create copy of environment, then add workflow specific environment to PATH
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
         m_env["PATH"] = "/root/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"] 
     else:
         m_env["PATH"] = "/home/app/miniconda3/envs/nf-core-sarek-2.7/bin:" + m_env["PATH"]
 
+    # get id_path
     id_path = get_id_path(run_id=run_id)
 
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, start_msg=start_msg, stop_msg=stop_msg, m_env=m_env, id_path=id_path)
     t1 = time.time()
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()
@@ -1115,7 +1111,9 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
                ):
     from .scripts.tasks import run_pipe
     import csv
+    # get base_dir
     base_dir = str(settings.BASE_DIR)
+    # get id_path
     id_path = get_id_path(run_id)
     os.chdir(id_path)
     scripts_dir = base_dir + '/nfscripts/post_rnaseq/scripts/'
@@ -1126,21 +1124,20 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
     command = ['nextflow', 'run',
                pipe_location,
                '-with-dag', 'flowchart.pdf',
-               '--samples', '%s' % samples, '--salmon', 'salmon/', # '%s' % salmon, 
+               '--samples', '%s' % samples, '--salmon', 'salmon/',  
                '--compare', '%s' % compare,
                '--annotation', '%s' % annotation_file, '--network',
                '%s' % network, '--scripts', scripts_dir,
                '--species', '%s' % species_id, '--organism', '%s' % organism, '--pathways', '%s' % pathways,
                '--kmin', '%s' % kmin, '--kmax', '%s' % kmax, '--kstep', '%s' % kstep,
                '--lmin', '%s' % lmin, '--lmax', '%s' % lmax, '--lstep', '%s' % lstep, '--out', '%s' % out]
+
+    # create or add tx2gene.csv to command
     if os.path.isfile('%s/tx2gene.csv' % salmon):
         command.extend(['--tx2', 'salmon/tx2gene.csv'])
     elif os.path.isfile('%s/salmon_tx2gene.csv' % salmon):
         os.replace('%s/salmon_tx2gene.csv' % salmon, '%s/tx2gene.csv' % salmon)
         command.extend(['--tx2', 'salmon/tx2gene.csv'])
-    # elif os.path.isfile('%s/salmon_tx2gene.tsv' % salmon):
-    #     os.replace('%s/salmon_tx2gene.tsv' % salmon, '%s/tx2gene.tsv' % salmon)
-    #     command.extend(['--tx2', 'salmon/tx2gene.tsv'])
     else:
         from .scripts.tasks import tx2gene
         print("Generating tx2gene.csv")
@@ -1150,6 +1147,7 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
 
     print("postrnaseq-command:", command)
 
+    # create Run object in database
     if run_id_post is None:
         run = Run(run_id=run_id, pipeline="Post-RNA-Seq")
         run.save()
@@ -1158,30 +1156,32 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
         run.save()
 
     model_command = ' '.join(command)
-
     model_command = model_command.replace(
         "/usr/src/app/nfscripts/post_rnaseq/post_rnaseq_pipeline_scripts_directory_extended_modified_testing_django_1.1.nf",
         "post_rnaseq.nf")
     model_command = model_command.replace("/usr/src/app/mediafiles/run/" + run_id + "/output/", "output/")
     model_command = model_command.replace("/usr/src/app/nfscripts/post_rnaseq/scripts/", "scripts/")
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
+    # update Run object
     run.pipeline_command = model_command
     run.save()
 
+    # get id_path
     id_path = get_id_path(run_id=run_id)
 
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting Post-RNA-seq pipeline...",
                       stop_msg="POST-RNA-seq pipeline finished successfully!", id_path=id_path)
     t1 = time.time()
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()
@@ -1249,6 +1249,7 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         command.extend(['--bam', 'bam/'])
     print(command)
 
+    # create Run object
     if run_id_post is None:
         run = Run(run_id=run_id, pipeline="Post-ATAC/ChIP-Seq")
         run.save()
@@ -1256,20 +1257,21 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         run = Run(run_id=run_id_post, pipeline="Post-ATAC/ChIP-Seq")
         run.save()
     
-
     model_command = ' '.join(command)
     model_command = model_command.replace(
         "/usr/src/app/nfscripts/post_atacchipseq/main_1.1.nf",
         "post_atachchipseq.nf")
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
 
+    # update Run object
     run.pipeline_command = model_command
     run.save()
 
+    # create copy of environment, then add workflow specific environment to PATH
     m_env = os.environ.copy()
-
     if bool(settings.DEBUG):
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:"\
                                         ":/root/miniconda3/envs/nf-core-rnaseq-3.4/bin"
@@ -1277,19 +1279,19 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         m_env["PATH"] = m_env["PATH"] + ":/home/app/miniconda3/envs/nf-core-atacseq-1.2.1-chipseq-1.2.2/bin:" \
                                         ":/home/app/miniconda3/envs/nf-core-rnaseq-3.4/bin"
 
+    # get id_path
     id_path = get_id_path(run_id=run_id)
 
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, id_path=id_path, start_msg="Starting Post-ATAC-Seq/ChIP-Seq pipeline...",
                       stop_msg="Post-ATAC-Seq/ChIP-Seq pipeline finished successfully!", m_env=m_env)
     t1 = time.time()
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
-
     run.exit_status = result
     run.save()
 
@@ -1324,6 +1326,7 @@ def crisprcas(db, db_type, script_location,
 
     print(command)
 
+    # create Run object
     run = Run(run_id=run_id, pipeline="CrisprCas")
     run.save()
 
@@ -1332,12 +1335,14 @@ def crisprcas(db, db_type, script_location,
         "/usr/src/app/nfscripts/crispr_cas/main_1.1.nf",
         "crisprcas.nf")
 
+    # if User primary key is passed, retrieve and link User to Run object
     if user_pk:
         run.user = User.objects.get(pk=user_pk)
-
+    # update Run object
     run.pipeline_command = model_command
     run.save()
     
+    # create copy of environment, then add workflow specific environment to PATH
     m_env = os.environ.copy()
     if bool(settings.DEBUG):
         m_env["PATH"] = m_env["PATH"] + ":/root/miniconda3/envs/crispr-cas-1.0/bin"
@@ -1349,8 +1354,7 @@ def crisprcas(db, db_type, script_location,
     # change to working directory
     os.chdir(id_path)
 
-    print("Current working directory:", os.getcwd())
-
+    # start run
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting CRISRP/Cas pipeline...",
                       stop_msg="CRISPR/Cas pipeline finished successfully!",
@@ -1358,6 +1362,7 @@ def crisprcas(db, db_type, script_location,
                       id_path=id_path
                       )
     t1 = time.time()
+    # update Run object
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
     run.exit_status = result
     run.save()

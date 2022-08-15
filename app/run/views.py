@@ -246,11 +246,14 @@ def spreadsheet_view(request, *args, **kwargs):
 ###########################################################
 # universal_download view
 class UniversalDownloadView(View):
+    # set template_name
     template_name = 'run/universal_download.html'
 
+    # generate the download page
     def get(self, request, *args, **kwargs):
         run_id = kwargs['run_id']
 
+        # if the Run object is linked to a specific user, refuse access to anyone but that user
         if Run.objects.get(run_id = run_id).user is not None and Run.objects.get(run_id = run_id).user != request.user:
             return redirect('run:no-access')
 
@@ -261,13 +264,16 @@ class UniversalDownloadView(View):
             else:
                 media_list = []
             context = {'run_id': run_id, 'media_list': media_list}
+            # render the page
             return render(request, self.template_name, context=context)
         else:
+            # redirect to a fail page
             return render(request, template_name='run/universal_download_fail.html', context={'run_id': run_id})
 
     @staticmethod
     def post(request, *args, **kwargs):
         run_id = kwargs['run_id']
+        # depending on the requested download, provides different file
         if "download_log" in request.POST:
             file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/" + ".nextflow.log"
             return download_file(request, file_path)
@@ -595,7 +601,7 @@ class PostACSeqTutorial(View):
 ###########################################################
 # nf-core views
 
-# class function for the nf-core Atac-Seq pipeline
+# view function for the nf-core Atac-Seq pipeline
 class AtacSeqRun(View):
     # set template for pipeline page
     template_name = 'run/run_atacseq_html.html'
@@ -616,10 +622,8 @@ class AtacSeqRun(View):
         base_dir = str(settings.BASE_DIR)
         script_location = base_dir + '/nfscripts/nfcore/atacseq/main.nf'
 
-        # check if directory already exists
-        print("starting 'check_for_run_dir'")
-
         # check if run ID is already taken and redirect if necessary
+        print("starting 'check_for_run_dir'")
         if check_for_run_dir(run_id):
             # return redirect('run:idTaken', run_id)
             return render(request, 'run/id_taken.html', {'run_id': run_id})
@@ -647,10 +651,11 @@ class AtacSeqRun(View):
                 if file_folder is not None:
                     if file_folder.name[-4:] == ".zip":
                         handle_and_unzip(request.FILES["file_folder"], run_id)
-                    elif file_folder.name[-7:] == ".tar.gz":  # get bed_file and handle file
+                    elif file_folder.name[-7:] == ".tar.gz": 
                         handle_and_untar(request.FILES["file_folder"], run_id)
             else:
-                pass
+                return redirect("run:inputProblems", "file-folder")
+
 
             # get single_end value
             single_end = request.POST['single_end']
@@ -671,6 +676,7 @@ class AtacSeqRun(View):
                 fasta_file = None
             print("print fasta_file: ", fasta_file)
 
+            # if fasta_file is in fastq format, reduce to fasta
             if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
@@ -699,20 +705,19 @@ class AtacSeqRun(View):
             if macs_size == "":
                 macs_size = None
 
+            # check if pipeline shall be run in narrow peaks mode
             if 'narrow_peaks' in request.POST:
                 narrow_peaks = True
             else:
                 narrow_peaks = False
 
-            # test some variables
-            print("script_location: ", script_location)
-            print("id_path:", id_path)
-
+            # check if post_atacseq will be run after ATAC-Seq
             if 'post_atacseq' in request.POST:
                 post_atacseq = True
             else:
                 post_atacseq = False
 
+            # if a user is logged in, get their primary key
             if request.user.is_authenticated:
                 user_pk = request.user.pk
             else:
@@ -721,30 +726,37 @@ class AtacSeqRun(View):
             # change to working directory
             os.chdir(id_path)
 
+            # if post_atacseq is to be run immediately after ATAC-Seq, additional input is retrieved
             if post_atacseq:
-            
+                
+                # get names of chromosomes to be extracted
                 if 'ext_chr' in request.POST:
                     ext_chr = request.POST['ext_chr']
                 else:
                     ext_chr = None
 
+                # get the computation method
                 computation_method = request.POST['computation_method']
 
+                # get upstream value
                 if 'upstream' in request.POST:
                     upstream = request.POST['upstream']
                 else:
                     upstream = None
 
+                # get downstream value
                 if 'downstream' in request.POST:
                     downstream = request.POST['downstream']
                 else:
                     downstream = None
 
+                # get regions_length value
                 if 'regions_length' in request.POST:
                     regions_length = request.POST['regions_length']
                 else:
                     regions_length = None
 
+                # get reference point
                 if 'ref_point' in request.POST:
                     ref_point = request.POST['ref_point']
                     if ref_point not in ['TSS', 'TES', 'center']:
@@ -752,22 +764,25 @@ class AtacSeqRun(View):
                 else:
                     ref_point = 'TSS'
 
+                # check if results are to be collected into a single image
                 if 'collect' in request.POST:
                     collect = True
                 else:
                     collect = False
 
+                # get bed file
                 if bed_file is not None:
                     post_bed_file = bed_file
                 else:
                     post_bed_file = None
 
+                # get GTF annotation file
                 if gtf_annotation is not None:
                     post_annotation_file = gtf_annotation
                 else:
                     post_annotation_file = None
                 
-                # import and run pipeline call
+                # import and run pipeline call with command and resources necessary to run Post-ATAC-Seq immediately afterwards
                 from .tasks import atacseq
                 atacseq.delay(script_location=script_location, design_file=str(design_file), single_end=single_end,
                                 igenome_reference=igenome_reference, fasta_file=str(fasta_file),
@@ -788,107 +803,8 @@ class AtacSeqRun(View):
                                 run_id=run_id,
                                 user_pk=user_pk,)
             
+            # redirect to download page
             return redirect('/run/download_' + run_id + '/')
-
-            # compress results
-            # from .tasks import zip_file, tar_file
-            # tar_file("results.tar.gz", "results/")
-            # zip_file("results.zip", "results/")
-
-            if post_atacseq is True:
-                if result == 0:
-                    # prepare work directory
-                    from distutils.dir_util import copy_tree
-                    from .tasks import del_file
-
-                    copy_tree(id_path + "results/bwa/mergedLibrary/bigwig", "bigwig/")
-
-                    bigwig_dir = id_path + "bigwig/"
-
-                    if 'ext_chr' in request.POST:
-                        ext_chr = request.POST['ext_chr']
-                    else:
-                        ext_chr = None
-
-                    computation_method = request.POST['computation_method']
-
-                    if 'upstream' in request.POST:
-                        upstream = request.POST['upstream']
-                    else:
-                        upstream = None
-
-                    if 'downstream' in request.POST:
-                        downstream = request.POST['downstream']
-                    else:
-                        downstream = None
-
-                    if 'regions_length' in request.POST:
-                        regions_length = request.POST['regions_length']
-                    else:
-                        regions_length = None
-
-                    if 'ref_point' in request.POST:
-                        ref_point = request.POST['ref_point']
-                        if ref_point not in ['TSS', 'TES', 'center']:
-                            ref_point = 'TSS'
-                    else:
-                        ref_point = 'TSS'
-
-                    if 'collect' in request.POST:
-                        collect = True
-                    else:
-                        collect = False
-
-                    if bed_file is not None:
-                        post_bed_file = bed_file
-                    else:
-                        from .tasks import get_genes_bed
-                        from distutils.file_util import copy_file
-                        post_bed_file = get_genes_bed(run_id)
-                        copy_file("results/genome/" + post_bed_file, ".")
-
-                    if gtf_annotation is not None:
-                        post_annotation_file = gtf_annotation
-                    else:
-                        from .tasks import get_gtf
-                        from distutils.file_util import copy_file
-                        post_annotation_file = get_gtf(run_id)
-                        copy_file("results/genome/" + post_annotation_file, ".")
-
-                    filelist = ["results", "work"]
-                    del_file(filelist)
-
-                    run = Run(run_id=run_id + "_p", pipeline="Post-RNA-Seq", start_time=datetime.now())
-                    run.save()
-
-                    from .scripts.postrnaseq.start_pipeline import postatacchipseq
-                    result = postatacchipseq(bed_file=post_bed_file, gtf_file=post_annotation_file, ext_chr=ext_chr,
-                                             computation_method=computation_method, upstream=upstream,
-                                             downstream=downstream, regions_length=regions_length, ref_point=ref_point,
-                                             collect=collect,
-                                             run=run)
-
-                    # import functions and compress results
-                    from .tasks import zip_file, tar_file
-                    tar_file("results_post.tar.gz", "results/")
-                    zip_file("results_post.zip", "results/")
-
-                    # deleting progress file
-                    del_file([".inprogress.txt"])
-
-                    clean_wd()
-
-                    # redirect to download- or fail-page, based on results
-                    if result != 0:
-                        result = str(result)
-                        print("And thanks for all the fish!")
-                        return redirect('/run/fail_' + run_id + '_' + result + '/')
-                    else:
-                        # redirect to download page
-                        return redirect('/run/download_' + run_id + '/')
-            else:
-                print("And thanks for all the fish!")
-                
 
         elif "run_atacseq_advanced" in request.POST:
 
@@ -912,7 +828,6 @@ class AtacSeqRun(View):
                 handle_uploaded_file(design_file, run_id)
                 command.extend(['--input', '%s' % design_file])
             else:
-                print("Here be dragons")
                 raise Http404
 
             if "file_folder" in request.FILES:
@@ -1169,7 +1084,6 @@ class AtacSeqRun(View):
             skip_multiqc = request.POST['skip_multiqc']
             if skip_multiqc:
                 command.extend(['--skip_multiqc'])
-                command.extend(['--skip_multiqc'])
 
             os.chdir(id_path)
 
@@ -1209,11 +1123,10 @@ class AtacSeqRun(View):
                 return redirect('/run/fail_' + run_id + '_' + result + '/')
             else:
                 # redirect to download page
-                # return redirect('/run/nfcore/download_' + run_id + '/')
                 return redirect('/run/download_' + run_id + '/')
 
 
-# class function for the nf-core ChIP-Seq pipeline
+# view function for the nf-core ChIP-Seq pipeline
 class ChipSeqRun(View):
     # set template for pipeline page
     template_name = 'run/run_chipseq_html.html'
@@ -1229,7 +1142,6 @@ class ChipSeqRun(View):
     # post function
     def post(self, request, *args, **kwargs):
         # set variables
-        # run_id = kwargs['run_id']
         run_id = request.POST['run_id']
         id_path = get_id_path(run_id)  # id_path is nextflow's working directory in the media/run directory
 
@@ -1247,9 +1159,6 @@ class ChipSeqRun(View):
         # create progress file
         create_progress_file(id_path)
 
-        # get organism_name
-        # organism_name = request.POST['organism_name']
-
         # get design_file and handle file
         design_file = request.FILES['design_file']
         handle_uploaded_file(design_file, run_id)
@@ -1266,7 +1175,7 @@ class ChipSeqRun(View):
                 elif file_folder.name[-7:] == ".tar.gz":
                     handle_and_untar(file_folder, run_id)
         else:
-            pass
+            return redirect("run:inputProblems", "file-folder")
 
         # get single_end value
         single_end = request.POST['single_end']
@@ -1276,8 +1185,6 @@ class ChipSeqRun(View):
             igenome_reference = request.POST['igenome_reference']
         else:
             igenome_reference = None
-
-        print("igenome reference:", igenome_reference)
 
         # get fasta_file and handle file
         if "fasta_file" in request.FILES:
@@ -1289,6 +1196,7 @@ class ChipSeqRun(View):
         else:
             fasta_file = None
 
+        # if fasta file is in fastq format, reduce to fasta
         if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
@@ -1327,40 +1235,49 @@ class ChipSeqRun(View):
         # change to working directory
         os.chdir(id_path)
 
+        # check if post_chipseq shall be run after ChIP-Seq
         if 'post_chipseq' in request.POST:
             post_chipseq = True
         else:
             post_chipseq = False
 
+        # if a user is logged in, get their primary key
         if request.user.is_authenticated:
             user_pk = request.user.pk
         else:
             user_pk = None
 
+        # if post_chipseq is to be run immediately after ChIP-Seq, additional input is retrieved
         if post_chipseq:
             
+            # get chromosome names to be extracted
             if 'ext_chr' in request.POST:
                 ext_chr = request.POST['ext_chr']
             else:
                 ext_chr = None
 
+            # get the computation method to be used
             computation_method = request.POST['computation_method']
 
+            # get upstream value
             if 'upstream' in request.POST:
                 upstream = request.POST['upstream']
             else:
                 upstream = None
 
+            # get downstream value
             if 'downstream' in request.POST:
                 downstream = request.POST['downstream']
             else:
                 downstream = None
 
+            # get regions_length value
             if 'regions_length' in request.POST:
                 regions_length = request.POST['regions_length']
             else:
                 regions_length = None
 
+            # get reference point
             if 'ref_point' in request.POST:
                 ref_point = request.POST['ref_point']
                 if ref_point not in ['TSS', 'TES', 'center']:
@@ -1368,21 +1285,25 @@ class ChipSeqRun(View):
             else:
                 ref_point = 'TSS'
 
+            # check if results are to be collected into a single image
             if 'collect' in request.POST:
                 collect = True
             else:
                 collect = False
 
+            # get bed file
             if bed_file is not None:
                 post_bed_file = bed_file
             else:
                 post_bed_file = None
 
+            # get GTF annotation file
             if gtf_file is not None:
                 post_annotation_file = gtf_file
             else:
                 post_annotation_file = None
             
+            # import and run pipeline call
             from .tasks import chipseq
             chipseq.delay(design_file=design_file, single_end=single_end,
                             igenome_reference=igenome_reference, fasta_file=fasta_file, gtf_file=gtf_file,
@@ -1403,111 +1324,11 @@ class ChipSeqRun(View):
                             run_id=run_id,
                             user_pk=user_pk)
 
-
+        # redirect to download page
         return redirect('/run/download_' + run_id + '/')
 
-        if post_chipseq is True:
-            if result == 0:
-                # prepare work directory
-                from distutils.dir_util import copy_tree
 
-                from .tasks import del_file
-
-                copy_tree(id_path + "results/bwa/mergedLibrary/bigwig", "bigwig/")
-                # copy_file(id_path + "results/bwa/*/bigwig", ".")
-                # copy_file("results/bwa/*/bigwig", ".")
-
-                bigwig_dir = str(id_path) + "/bigwig/"
-
-                if 'ext_chr' in request.POST:
-                    ext_chr = request.POST['ext_chr']
-                else:
-                    ext_chr = None
-
-                computation_method = request.POST['computation_method']
-
-                if 'upstream' in request.POST:
-                    upstream = request.POST['upstream']
-                else:
-                    upstream = None
-
-                if 'downstream' in request.POST:
-                    downstream = request.POST['downstream']
-                else:
-                    downstream = None
-
-                if 'regions_length' in request.POST:
-                    regions_length = request.POST['regions_length']
-                else:
-                    regions_length = None
-
-                if 'ref_point' in request.POST:
-                    ref_point = request.POST['ref_point']
-                    if ref_point not in ['TSS', 'TES', 'center']:
-                        ref_point = 'TSS'
-                else:
-                    ref_point = 'TSS'
-
-                if 'collect' in request.POST:
-                    collect = True
-                else:
-                    collect = False
-
-                if bed_file is not None:
-                    post_bed_file = bed_file
-                else:
-                    from .tasks import get_genes_bed  # , copy_file
-                    from distutils.file_util import copy_file
-                    post_bed_file = get_genes_bed(run_id)
-                    copy_file("results/genome/" + post_bed_file, ".")
-
-                # post_annotation_file = gtf_file
-
-                if gtf_file is not None:
-                    post_annotation_file = gtf_file
-                else:
-                    from .tasks import get_gtf
-                    from distutils.file_util import copy_file
-                    post_annotation_file = get_gtf(run_id)
-                    copy_file("results/genome/" + post_annotation_file, ".")
-
-                filelist = ["results", "work"]
-                del_file(filelist)
-
-                run = Run(run_id=run_id + "_p", pipeline="Post-ATAC-Seq")
-                run.save()
-
-                from .scripts.postrnaseq.start_pipeline import postatacchipseq
-                result = postatacchipseq(bed_file=post_bed_file, gtf_file=post_annotation_file, ext_chr=ext_chr,
-                                         computation_method=computation_method, upstream=upstream,
-                                         downstream=downstream, regions_length=regions_length, ref_point=ref_point,
-                                         collect=collect,
-                                         run=run)
-
-                # import functions and compress results
-                from .tasks import zip_file, tar_file
-                tar_file("results_post.tar.gz", "results/")
-                zip_file("results_post.zip", "results/")
-
-                # deleting progress file
-                del_file([".inprogress.txt"])
-
-                clean_wd()
-
-                # redirect to download- or fail-page, based on results
-                if result != 0:
-                    result = str(result)
-                    print("And thanks for all the fish!")
-                    return redirect('/run/fail_' + run_id + '_' + result + '/')
-                else:
-                    # redirect to download page
-                    return redirect('/run/download_' + run_id + '/')
-        else:
-            # print("And thanks for all the fish!")
-            return redirect('/run/download_' + run_id + '/')
-
-
-# class function for the nf-core RNA-Seq pipeline
+# view function for the nf-core RNA-Seq pipeline
 class RnaSeqRun(View):
     # set template for pipeline page
     template_name = 'run/run_rnaseq_html.html'
@@ -1527,7 +1348,6 @@ class RnaSeqRun(View):
         run_id = request.POST['run_id']
         id_path = get_id_path(run_id)  # id_path is nextflow's working directory in the media/run directory
         base_dir = str(settings.BASE_DIR)
-        script_location = base_dir + '/nfscripts/nfcore/rnaseq/main.nf'
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
@@ -1552,6 +1372,7 @@ class RnaSeqRun(View):
         handle_uploaded_file(request.FILES['csv_file'], run_id)
         if not check_rnaseq_samplesheet(id_path + str(csv_file)):
             return redirect("run:inputProblems", "csv")
+        # set the variable to the file name
         csv_file = csv_file.name
 
 
@@ -1599,6 +1420,7 @@ class RnaSeqRun(View):
             handle_uploaded_file(gtf_file, run_id)
             if not check_gtf(id_path + str(gtf_file)):
                 return redirect("run:inputProblems", "gtf")
+            # set the variable to the file name
             gtf_file = gtf_file.name
         else:
             gtf_file = None
@@ -1609,6 +1431,7 @@ class RnaSeqRun(View):
             handle_uploaded_file(bed_file, run_id)
             if not check_bed(id_path + str(bed_file)):
                 return redirect("run:inputProblems", "bed")
+            # set the variable to the file name
             bed_file = bed_file.name
         else:
             bed_file = None
@@ -1619,6 +1442,7 @@ class RnaSeqRun(View):
             handle_uploaded_file(transcript_fasta, run_id)
             if not check_fasta(id_path + str(fasta_file)):
                 return redirect("run:inputProblems", "fasta")
+            # set the variable to the file name
             transcript_fasta = transcript_fasta.name
         else:
             transcript_fasta = None
@@ -1663,44 +1487,33 @@ class RnaSeqRun(View):
         else:
             salmon_index_name = None
 
+        # get aligner to be used
         if request.POST['aligner'] != "":
             aligner = request.POST['aligner']
         else:
             aligner = None
 
-        print("aligner: ", aligner)
-
+        # check if salmon shall be run by itself alongside the aligner
         if request.POST['pseudo_salmon_value'] == "true":
             pseudo_salmon_value = True
         else:
             pseudo_salmon_value = False
 
-        test_post_rnaseq = request.POST.get('post_rnaseq')
-        print("test_post_rnaseq:", test_post_rnaseq)
-        if request.POST.get('post_rnaseq'):
-            print("post_rnaseq is True")
-        else:
-            print("post_rnaseq is False")
-
+        # check if post_rnaseq shall be run after RNA-Seq
         if 'post_rnaseq' in request.POST:
             post_rnaseq = True
         else:
             post_rnaseq = False
 
+        # if post_rnaseq is True, set pseudo_salmon_value to True as well
         if post_rnaseq is True:
             pseudo_salmon_value = True
 
-        # if aligner == "star_salmon":
-        #     pseudo_salmon_value = False
-
+        # if a user is logged in, get their primary key
         if request.user.is_authenticated:
             user_pk = request.user.pk
         else:
             user_pk = None
-
-        print("pseudo_salmon_value: ", pseudo_salmon_value)
-
-        print("id_path:", id_path)
 
         # change to working directory
         os.chdir(id_path)
@@ -1723,22 +1536,6 @@ class RnaSeqRun(View):
             compare_tsv_file = request.FILES['compare_tsv_file']
             handle_uploaded_file(compare_tsv_file, run_id)
             compare_tsv_file = compare_tsv_file.name
-
-            # # get annotation file
-            # if gtf_file is not None:
-            #     annotation_file = gtf_file
-            # else:
-            #     from .app_settings import ENSEMBL_RELEASE_NUMBER
-            #     # get gtf annotation
-            #     from .tasks import rsync_file, ungzip_file
-            #     gaf_name = organism_name.strip().lower().replace(" ", "_")
-            #     source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + gaf_name
-            #     destination = "."
-            #     getout = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
-            #     annotation_file_compressed = rsync_file(source=source, destination=destination,
-            #                                             getout=getout,
-            #                                             run_id=run_id)
-            #     annotation_file = ungzip_file(annotation_file_compressed)
 
             # get annotation file
             if 'gtf_annotation_file' in request.FILES:
@@ -1768,25 +1565,15 @@ class RnaSeqRun(View):
             lmax = request.POST['lmax']
             lstep = request.POST['lstep']
 
-            # move to tasks
-            # if aligner == "star_salmon":
-            #     mv_file(id_path + "/results/star_salmon/", ".")
-            #     mv_file(id_path + "/star_salmon/", id_path + "/salmon/")
-            #     salmon_file = str(id_path) + '/salmon/'
-            # else:
-            #     cp_file(id_path + "/results/salmon/", ".")
-            #     salmon_file = str(id_path) + '/salmon/'
-
             # set out_path
             out_path = (id_path + "output/")
             create_directory(out_path + "images/")
 
-
+            # import and run pipeline call
             from .tasks import rnaseq
             rnaseq.delay(csv_file=csv_file, umi_value=umi_value, umi_pattern=umi_pattern,
                         umi_method=umi_method, igenome_reference=igenome_reference, fasta_file=fasta_file,
                         gtf_file=gtf_file,
-                        # gff_file=gff_file,
                         bed_file=bed_file, transcript_fasta=transcript_fasta,
                         star_index_name=star_index_name, hisat2_index_name=hisat2_index_name,
                         rsem_index_name=rsem_index_name, salmon_index_name=salmon_index_name, aligner=aligner,
@@ -1809,7 +1596,6 @@ class RnaSeqRun(View):
             rnaseq.delay(csv_file=csv_file, umi_value=umi_value, umi_pattern=umi_pattern,
                             umi_method=umi_method, igenome_reference=igenome_reference, fasta_file=fasta_file,
                             gtf_file=gtf_file,
-                            # gff_file=gff_file,
                             bed_file=bed_file, transcript_fasta=transcript_fasta,
                             star_index_name=star_index_name, hisat2_index_name=hisat2_index_name,
                             rsem_index_name=rsem_index_name, salmon_index_name=salmon_index_name, aligner=aligner,
@@ -1817,13 +1603,14 @@ class RnaSeqRun(View):
                             run_id=run_id,
                             user_pk=user_pk
                             )
-
+        # sleep for 10 seconds in order to give the task enough time to create the Run object in the database
         sleep(10)
         
+        # redirect to download page
         return redirect('/run/download_' + run_id + '/')
 
 
-# class function for the nf-core Sarek pipeline
+# view function for the nf-core Sarek pipeline
 class SarekRun(View):
     # set template for pipeline page
     template_name = 'run/run_sarek_html.html'
@@ -1840,7 +1627,6 @@ class SarekRun(View):
     @staticmethod
     def post(request, *args, **kwargs):
         # set variables
-        # run_id = kwargs['run_id']
         run_id = request.POST['run_id']
         id_path = get_id_path(run_id)
 
@@ -1878,7 +1664,7 @@ class SarekRun(View):
                 elif file_folder.name[-7:] == ".tar.gz":
                     handle_and_untar(request.FILES['file_folder'], run_id)
         else:
-            pass
+            return redirect("run:inputProblems", "file-folder")
 
         # get igenome reference
         if request.POST['igenome_reference'] != "":
@@ -1909,9 +1695,11 @@ class SarekRun(View):
             fasta_file = None
             print("fasta_file was not provided")
 
+        # if fasta_file in fastq format, reduce to fasta file
         if fasta_file is not None and fasta_file.endswith(".fastq"):
                 fasta_file = fastq_to_fasta(fasta_file, run_id)
 
+        # get dbsnp file
         if 'dbsnp_file' in request.FILES:
             dbsnp = request.FILES['dbsnp_file']
             handle_uploaded_file(dbsnp, run_id)
@@ -1919,6 +1707,7 @@ class SarekRun(View):
         else:
             dbsnp = None
 
+        # get dbsnp index file
         if 'dbsnp_index' in request.FILES:
             dbsnp_index = request.FILES['dbsnp_index']
             handle_uploaded_file(dbsnp_index, run_id)
@@ -1929,6 +1718,7 @@ class SarekRun(View):
         # change to working directory
         os.chdir(id_path)
 
+        # if a user is logged in, get their primary key
         if request.user.is_authenticated:
             user_pk = request.user.pk
         else:
@@ -1942,8 +1732,10 @@ class SarekRun(View):
                     run_id=run_id,
                     user_pk=user_pk)
         
+        # sleep for 10 seconds to allow the task to create the Run object in the database
         sleep(10)
         
+        # redirect to download page
         return redirect('/run/download_' + run_id + '/')
 
 
@@ -1952,11 +1744,14 @@ class SarekRun(View):
 
 # RNA-Seq tutorial
 class RNASeqTutorial(View):
+    # set template_name
     template_name = "run/tutorial_nf_rnaseq.html"
 
+    # get function
     def get(self, request, *args, **kwargs):
         return render(request, template_name=self.template_name)
 
+    # post function
     @staticmethod
     def post(request, *args, **kwargs):
         from .tasks import download_tutorial
@@ -1969,11 +1764,14 @@ class RNASeqTutorial(View):
 
 # ChIP-Seq tutorial
 class ChIPSeqTutorial(View):
+    # set template_name
     template_name = "run/tutorial_nf_chipseq.html"
 
+    # get functon
     def get(self, request, *args, **kwargs):
         return render(request, template_name=self.template_name)
 
+    # post function
     @staticmethod
     def post(request, *args, **kwargs):
         from .tasks import download_tutorial
@@ -1986,11 +1784,14 @@ class ChIPSeqTutorial(View):
 
 # ATAC-Seq tutorial
 class ATACSeqTutorial(View):
+    # set template name
     template_name = "run/tutorial_nf_atacseq.html"
 
+    # get function
     def get(self, request, *args, **kwargs):
         return render(request, template_name=self.template_name)
 
+    # post function
     @staticmethod
     def post(request, *args, **kwargs):
         from .tasks import download_tutorial
@@ -2003,11 +1804,14 @@ class ATACSeqTutorial(View):
 
 # Sarek tutorial
 class SarekTutorial(View):
+    # set template_name
     template_name = "run/tutorial_nf_sarek.html"
 
+    # get function
     def get(self, request, *args, **kwargs):
         return render(request, template_name=self.template_name)
 
+    # post function
     @staticmethod
     def post(request, *args, **kwargs):
         from .tasks import download_tutorial
@@ -2021,7 +1825,7 @@ class SarekTutorial(View):
 ###########################################################
 # other pipeline views
 
-# class function of the crisprcas pipeline
+# view function of the crisprcas pipeline
 class CrisprCasView(View):
     template_name = 'run/run_crispr_cas.html'
 
@@ -2037,13 +1841,11 @@ class CrisprCasView(View):
     def post(request, *args, **kwargs):
 
         # get run_id and id_path
-        # run_id = kwargs['run_id']
         run_id = request.POST['run_id']
         id_path = get_id_path(run_id)  # id_path is nextflow's working directory in the media/run directory
 
         # check if directory already exists
         print("starting 'check_for_run_dir'")
-
         # check if run ID is already taken and redirect if necessary
         if check_for_run_dir(run_id):
             # return redirect('run:idTaken', run_id)
@@ -2082,6 +1884,7 @@ class CrisprCasView(View):
         # change working directory to id_path
         os.chdir(id_path)
 
+        # if a user is logged in, get their primary key
         if request.user.is_authenticated:
             user_pk = request.user.pk
         else:
@@ -2101,11 +1904,14 @@ class CrisprCasView(View):
 # other pipeline tutorial views
 
 class CrisprCasTutorial(View):
+    # set template_name
     template_name = "run/tutorial_crisprcas.html"
 
+    # get function
     def get(self, request, *args, **kwargs):
         return render(request, template_name=self.template_name)
 
+    # post function
     @staticmethod
     def post(request, *args, **kwargs):
         from .tasks import download_tutorial
@@ -2117,10 +1923,15 @@ class CrisprCasTutorial(View):
 
 #######################################################
 # User related views
+
+# view showing all runs executed by the currently logged in user
 class RunsExecutedListView(LoginRequiredMixin, generic.ListView):
+    # set the model to be used
     model = Run
+    # set template_name
     template_name = 'run/runs_executed_list.html'
 
+    # set paginator to create a new page for every 10 entries
     paginate_by = 10
 
     def get_queryset(self):
