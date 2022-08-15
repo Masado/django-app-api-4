@@ -89,7 +89,15 @@
         {#        <div>#}
         {#            <label for="id_annotation_file">Annotation file: </label>#}
         {##}
+        {#            <input id="id_a        {#        <div>#}
+        {#            <label for="id_annotation_file">Annotation file: </label>#}
+        {##}
         {#            <input id="id_annotation_file" class="ml-4" type="file" accept=".gtf" name="annotation_file" required>#}
+        {##}
+        {#            <input type="button" class="help-button ml-2" value="?"#}
+        {#                   title="Please upload a gtf-annotation file">#}
+        {#        </div>#}
+        {#        </p>#}
         {##}
         {#            <input type="button" class="help-button ml-2" value="?"#}
         {#                   title="Please upload a gtf-annotation file">#}
@@ -238,16 +246,16 @@
                            title="Please upload a tsv file containing the comparisons you would like to run (e.g.: Row 1: 'Wildtype1', 'Control1')">
                 </td>
             </tr>
-{#            <tr>#}
-{#                <td class="noBorder"><label for="id_annotation_file" class="float-right">Annotation file: </label></td>#}
-{#                <td class="noBorder">#}
-{#                    <input id="id_annotation_file" type="file" accept=".gtf"#}
-{#                           name="annotation_file" required></td>#}
-{#                <td class="noBorder">#}
-{#                    <input type="button" class="help-button ml-2" value="?"#}
-{#                           title="Please upload a gtf-annotation file">#}
-{#                </td>#}
-{#            </tr>#}
+            <tr>
+                <td class="noBorder"><label for="id_annotation_file" class="float-right">Annotation file: </label></td>
+                <td class="noBorder">
+                    <input id="id_annotation_file" type="file" accept=".gtf"
+                           name="annotation_file"></td>
+                <td class="noBorder">
+                    <input type="button" class="help-button ml-2" value="?"
+                           title="Please upload a gtf-annotation file">
+                </td>
+            </tr>
             <tr>
                 <td class="noBorder"><label for="id_network_file" class="float-right">Network file: </label></td>
                 <td class="noBorder">

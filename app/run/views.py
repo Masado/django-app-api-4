@@ -106,10 +106,9 @@ def get_fail_view(request, *args, **kwargs):
     result = kwargs['result']
     id_path = str(settings.MEDIA_ROOT) + "/run/" + run_id + "/"
 
-    if request.method == 'POST' and 'download_log' in request.POST:
-        file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/" + ".nextflow.log"
-        return download_file(request, file_path)
-        # return download_file(request, run_id, ".nextflow.log")
+    # if request.method == 'POST' and 'download_log' in request.POST:
+        # file_path = str(settings.MEDIA_ROOT) + '/run/' + run_id + "/" + ".nextflow.log"
+        # return download_file(request, file_path)
 
     # set context
     context = {'run_id': run_id, 'result': result}
@@ -365,17 +364,26 @@ class PostRNASeq(View):
             compare_tsv_file = compare_tsv_file.name
 
             from .app_settings import ENSEMBL_RELEASE, ENSEMBL_RELEASE_NUMBER
+            
+            # get annotation file
+            if 'annotation_file' in request.FILES:
+                annotation_file = request.FILES['annotation_file']
+                handle_uploaded_file(annotation_file, run_id)
+                annotation_file = annotation_file.name
+            else:
+                from .tasks import rsync_file, ungzip_file
+                expected_file_name = organism_name.strip().lower().replace(" ", "_")
+                print("gaf_name: ", expected_file_name)
+                source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + expected_file_name
+                destination = "."
+                get_out = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
+                print("get_out: ", get_out)
+                annotation_file_compressed = rsync_file(source=source, destination=destination, getout=get_out,
+                                                        run_id=run_id)
+                print("annotation_file_compressed: ", annotation_file_compressed)
+                annotation_file = ungzip_file(annotation_file_compressed)
 
-            # get gtf annotation
-            from .tasks import rsync_file, ungzip_file
-            expected_file_name = organism_name.strip().lower().replace(" ", "_")
-            print("gaf_name: ", expected_file_name)
-            source = "rsync://ftp.ensembl.org/ensembl/pub/current_gtf/" + expected_file_name
-            destination = "."
-            get_out = '.' + ENSEMBL_RELEASE_NUMBER + ".gtf.gz"
-            annotation_file_compressed = rsync_file(source=source, destination=destination, getout=get_out,
-                                                    run_id=run_id)
-            annotation_file = ungzip_file(annotation_file_compressed)
+            
 
             # get network file
             network_file = request.FILES['network_file']

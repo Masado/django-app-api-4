@@ -48,6 +48,8 @@ process unzip {
 //Prozess zum Detektieren der CRISPR-Kassetten mit CRT (Crisper-Recognition-Tool)
 process detectionCRT {
 
+	conda 'bioconda::crisper_recognition_tool==1.2'
+
 	publishDir "${params.outdir}/detectionCRT", mode: 'copy'
         				
 	input:
@@ -157,6 +159,8 @@ process mergeCrisprCas {
 process blastSpacer {
 
 	publishDir "${params.outdir}/Blast", mode: 'copy'
+	
+	conda 'bioconda::blast==2.12.0'
 
         input:
         file mergedSpacer from mergedSpacer_ch
@@ -217,6 +221,9 @@ process htmlResult {
 //Prozess für multiple Sequenz-Alignments der einzelnen Query-Hit Paare
 process clustalwSpacers {
 
+	conda 'bioconda::clustalw==2.1'
+	conda 'conda-forge::parallel==20210622'
+
 	publishDir "${params.outdir}/clutsalw/Spacers", mode: 'copy'
 
 	input:	
@@ -233,6 +240,8 @@ process clustalwSpacers {
 
 //Prozess zum mergen der multiplen Sequenz-Alignments in eine JavaScript-Datei
 process mergeSpacerMSAs {
+
+	
 
 	publishDir params.outdir + "js", mode: 'copy'
 
@@ -252,6 +261,8 @@ process mergeSpacerMSAs {
 //Prozess für multiple Sequenz Alignments der merged Crispr Kassetten
 process clustalwProcessMergedCrisprCas {
 
+	conda 'bioconda::clustalw==2.1'
+
 	publishDir "${params.outdir}/clutsalw/CRISPR", mode: 'copy'
 
 	input:
@@ -270,6 +281,8 @@ process clustalwProcessMergedCrisprCas {
 //Prozess zum Erstellen eines Phylogenetischen Baumes mit den CRISPR-Cassetten
 process phylTree {
 	publishDir params.outdir + "js/", mode: 'copy'
+	
+	conda 'bioconda::newick_utils==1.6'
 
 	input:
 	file treeBuilder_crispr from crispr_clustalw_ch
@@ -311,6 +324,8 @@ process needlemanWunschCRTOutput {
 //Prozess zum Clustern der merged Spacer nach Similarity mithilfe von CD-Hit
 process CDHitClustern {
 	publishDir params.outdir + "js/", mode: 'copy'
+	
+	conda 'bioconda::cd-hit==4.8.1'
 
 	input:
 	file toCDHit_cluster from mergedSpacer_toCDHit_ch
@@ -329,6 +344,8 @@ process CDHitClustern {
 
 //Prozess zum clustern nach Spacer-Similarity der nach Repeat-Homologie sortierten Spacer
 process sortedSpacerCDHitClustern {
+
+	conda 'bioconda::cd-hit==4.8.1'
 
 	publishDir params.outdir + "js/cdhit_sorted_repeater/", mode: 'copy'
 

@@ -654,24 +654,22 @@ COPY public.django_admin_log (id, action_time, object_id, object_repr, action_fl
 6	2021-11-03 21:43:05.099873+00	2	Sarek	1	[{"added": {}}]	8	1
 7	2021-11-03 21:43:23.181605+00	3	ChIP-Seq	1	[{"added": {}}]	8	1
 8	2021-11-03 21:43:38.654851+00	4	ATAC-Seq	1	[{"added": {}}]	8	1
-9	2021-11-03 21:43:56.720819+00	5	CRISPR/Cas	1	[{"added": {}}]	8	1
-10	2021-11-03 21:44:26.512542+00	6	Post-ChIP-Seq	1	[{"added": {}}]	8	1
-11	2021-11-03 21:44:49.573332+00	7	Post-ATAC-Seq	1	[{"added": {}}]	8	1
-12	2021-11-03 21:45:03.441729+00	8	Post-RNA-Seq	1	[{"added": {}}]	8	1
-13	2021-11-03 21:45:54.534453+00	1	Post-ATAC-Seq	1	[{"added": {}}]	9	1
-14	2021-11-03 21:46:22.627976+00	2	Post-ChIP-Seq	1	[{"added": {}}]	9	1
-15	2021-11-03 21:47:04.596863+00	3	Post-RNA-Seq	1	[{"added": {}}]	9	1
-16	2021-11-09 17:11:25.518692+00	9	Test pipeline	1	[{"added": {}}]	8	1
-17	2021-11-09 17:12:13.410347+00	9	Test pipeline	3		8	1
-18	2021-11-16 14:10:24.770704+00	8	Post-RNA-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-19	2021-11-16 14:10:34.26606+00	7	Post-ATAC-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-20	2021-11-16 14:10:38.562509+00	6	Post-ChIP-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-21	2021-11-16 14:10:45.832882+00	5	CRISPR/Cas	2	[{"changed": {"fields": ["Description"]}}]	8	1
-22	2021-11-16 14:10:55.980012+00	1	RNA-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-23	2021-11-16 14:11:10.390777+00	6	Post-ChIP-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-24	2021-11-16 14:11:30.242777+00	4	ATAC-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-25	2021-11-16 14:11:38.211189+00	3	ChIP-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
-26	2021-11-16 14:11:48.791582+00	2	Sarek	2	[{"changed": {"fields": ["Description"]}}]	8	1
+9	2021-11-03 21:44:26.512542+00	6	Post-ChIP-Seq	1	[{"added": {}}]	8	1
+10	2021-11-03 21:44:49.573332+00	7	Post-ATAC-Seq	1	[{"added": {}}]	8	1
+11	2021-11-03 21:45:03.441729+00	8	Post-RNA-Seq	1	[{"added": {}}]	8	1
+12	2021-11-03 21:45:54.534453+00	1	Post-ATAC-Seq	1	[{"added": {}}]	9	1
+13	2021-11-03 21:46:22.627976+00	2	Post-ChIP-Seq	1	[{"added": {}}]	9	1
+14	2021-11-03 21:47:04.596863+00	3	Post-RNA-Seq	1	[{"added": {}}]	9	1
+15	2021-11-09 17:11:25.518692+00	9	Test pipeline	1	[{"added": {}}]	8	1
+16	2021-11-09 17:12:13.410347+00	9	Test pipeline	3		8	1
+17	2021-11-16 14:10:24.770704+00	8	Post-RNA-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+18	2021-11-16 14:10:34.26606+00	7	Post-ATAC-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+19	2021-11-16 14:10:38.562509+00	6	Post-ChIP-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+20	2021-11-16 14:10:55.980012+00	1	RNA-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+21	2021-11-16 14:11:10.390777+00	6	Post-ChIP-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+22	2021-11-16 14:11:30.242777+00	4	ATAC-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+23	2021-11-16 14:11:38.211189+00	3	ChIP-Seq	2	[{"changed": {"fields": ["Description"]}}]	8	1
+24	2021-11-16 14:11:48.791582+00	2	Sarek	2	[{"changed": {"fields": ["Description"]}}]	8	1
 \.
 
 
@@ -757,11 +755,10 @@ COPY public.pipelines_datasetpipelines (id, pipeline_name, short_description, de
 --
 
 COPY public.pipelines_pipeline (id, pipeline_name, base_pipeline, description, short, pub_date, sorting_id) FROM stdin;
-8	Post-RNA-Seq	RNA-Seq	Analysis pipeline for further analisation of the results of nfcore's RNA-Seq pipeline. It performs functional enrichment analysis running g:Profiler and extracts all maximal connected sub-networks of a biological network using KeyPathwayMiner.	postrna	2021-11-03 21:45:03.440989+00	2
-7	Post-ATAC-Seq	ATAC-Seq	Pipeline for further analysis of the results of nf-core's ATAC-Seq pipeline. It visualizes the results of the pipeline in form of normalized bigWig files.	postacs	2021-11-03 21:44:49.570258+00	4
-5	CRISPR/Cas	base	This pipeline is designed to find CRISPR-Cassettes in the sequence input. Repeats and spacers of the cassettes are extracted from the sequences and analyzed to generate a phylogenetic tree based on the repeats, as well as to find similarities in the spacers.	crisprcas	2021-11-03 21:43:56.720266+00	8
+7	Post-RNA-Seq	RNA-Seq	Analysis pipeline for further analisation of the results of nfcore's RNA-Seq pipeline. It performs functional enrichment analysis running g:Profiler and extracts all maximal connected sub-networks of a biological network using KeyPathwayMiner.	postrna	2021-11-03 21:45:03.440989+00	2
+6	Post-ATAC-Seq	ATAC-Seq	Pipeline for further analysis of the results of nf-core's ATAC-Seq pipeline. It visualizes the results of the pipeline in form of normalized bigWig files.	postacs	2021-11-03 21:44:49.570258+00	4
 1	RNA-Seq	nf-core base	nf-core's RNA-Seq analysis pipeline. It can be used to analyse RNA sequencing data obtained from organisms with a reference genome and annotation. It utilizes STAR with Salmon or RSEM, or HISAT2 for alignment of the RNA-seq data and for quantification of gene expression. Quality control is done through RSeQC, Qualimap, dupRadar, Preseq and DESeq2.	nfcore/rnaseq	2021-11-03 21:42:27.256191+00	1
-6	Post-ChIP-Seq	ChIP-Seq	Pipeline for further analysis of the results of nf-core's ChIP-Seq pipeline. It visualizes the results of the pipeline in form of normalized bigWig files.	postacs	2021-11-03 21:44:26.512046+00	6
+5	Post-ChIP-Seq	ChIP-Seq	Pipeline for further analysis of the results of nf-core's ChIP-Seq pipeline. It visualizes the results of the pipeline in form of normalized bigWig files.	postacs	2021-11-03 21:44:26.512046+00	6
 4	ATAC-Seq	nf-core base	nf-core's ATAC-seq pipeline, used for ATAC-seq data. It uses tools like deepTools for genome-wide enrichment, MACS2 for peak-calling and DESeq2 for differential analysis.	nfcore/atacseq	2021-11-03 21:43:38.652263+00	3
 3	ChIP-Seq	nf-core base	nf-core's ChIP-Seq pipeline for Chromatin ImmunopreciPitation sequencing (ChIP-Seq) data. It uses tools like deepTools for genome-wide enrichment, MACS2 for peak-calling and DESeq2 for differential analysis.	nfcore/chipseq	2021-11-03 21:43:23.1788+00	5
 2	Sarek	nf-core base	nf-core's Sarek pipeline, used to detect variants on whole genome or targeted sequencing data. It is designed for Human or mouse, but can work with data of any species with a reference genome. It uses tools like BWA mem to map Reads to Reference, GATK BaseRecalibrator for Quality Score Recalibration and Qualimap and bamqc for quality control	nfcore/sarek	2021-11-03 21:43:05.096455+00	7

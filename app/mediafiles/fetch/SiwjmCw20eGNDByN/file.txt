@@ -1,0 +1,6 @@
+receiving incremental file list
+>f+++++++++ Gallus_gallus.bGalGal1.mat.broiler.GRCg7b.107.gtf.gz
+
+sent 43 bytes  received 17,812,291 bytes  2,740,359.08 bytes/sec
+total size is 17,807,803  speedup is 1.00
+

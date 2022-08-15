@@ -1,6 +1,6 @@
-CURRENT_RELEASE = 106
+CURRENT_RELEASE = 107
 
-ENSEMBL_RELEASE_LIST = ['106', '105', '104', '103', '102', '101', '100', '99', '98', '97', '96', '95', '94', '93', '92', '91',
+ENSEMBL_RELEASE_LIST = ['107', '106', '105', '104', '103', '102', '101', '100', '99', '98', '97', '96', '95', '94', '93', '92', '91',
                         '90', '89', '88', '87', '86', '80', '77', '75', '54']
 
 SPECIES_LIST = ['acanthochromis polyacanthus', 'accipiter nisus', 'ailuropoda melanoleuca', 'amazona collaria',

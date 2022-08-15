@@ -72,14 +72,14 @@
             <br>
         {% endif %}
 
-        {% if '.nextflow.log' in media_list %}
+<!--         {% if '.nextflow.log' in media_list %}
             <p>If you would like a more detailed description of your run you can also download the log-file:</p>
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="minh-80" name="download_log">Download nextflow-log</button>
             </form>
             <br>
-        {% endif %}
+        {% endif %} -->
 
         {% if 'report.pdf' in media_list %}
             <p>You can download a report in form of a pdf-file here:</p>

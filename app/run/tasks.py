@@ -382,6 +382,9 @@ def rsync_file(
                                           str(settings.MEDIA_ROOT) + "/" + rsync_type + "/" + run_id + "/" + file_name)
                             else:
                                 file_name = items[1].strip()
+
+                            print("file_name: ", file_name)
+                            print("file_name.strip(): ", file_name.strip())
                             return file_name.strip()
 
             finished = True
@@ -730,6 +733,7 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
                                          collect=collect,
                                          bam_archive=None,
                                          run_id=run_id,
+                                         user_pk=user_pk,
                                          run_id_post=run_id_p)
 
         else:
@@ -877,7 +881,7 @@ def rnaseq(
                             run_id_post=run_id_p)
 
         else:
-            clean_wd(id_path=id_path)
+            # clean_wd(id_path=id_path)
             create_completion_file(directory=id_path)
             return True
 
@@ -1019,12 +1023,12 @@ def sarek(tsv_file, igenome_reference, fasta_file, dbsnp, dbsnp_index, tools,
     command = ['nextflow', 'run',
         # '%s' % script_location,
         'nf-core/sarek',
-        '-r', '2.7.1',
+        '-r', '2.7',
         '--input', '%s' % tsv_file,
-        # '--max_memory', '2.GB',
-        '--max_memory', '%s.GB' % str(get_memory()),
-        # '--max_cpus', '2'
-        '--max_cpus', '%s' % str(get_cpus())
+        '--max_memory', '4.GB',
+        # '--max_memory', '%s.GB' % str(get_memory()),
+        '--max_cpus', '2'
+        # '--max_cpus', '%s' % str(get_cpus())
         # , '--skip_qc', 'bamqc,BaseRecalibrator'
     ]
     if igenome_reference is not None:
@@ -1350,7 +1354,8 @@ def crisprcas(db, db_type, script_location,
     t0 = time.time()
     result = run_pipe(command=command, start_msg="Starting CRISRP/Cas pipeline...",
                       stop_msg="CRISPR/Cas pipeline finished successfully!",
-                      m_env=m_env
+                      m_env=m_env,
+                      id_path=id_path
                       )
     t1 = time.time()
     run.duration = time.strftime('%H:%M:%S', time.gmtime(t1 - t0))
