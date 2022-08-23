@@ -27,4 +27,8 @@ If you are using the "development" version of the web-application you can replac
 If you are using the "prodcution" version of the web-application you can replace the empty database using the following command:
 'docker-compose -f docker-compose.prod.yml exec -T db psql -U core core_prod < db-groundwork.sql'
 
+After applying the database copy to the internal database the last step required to use the web application is to apply the recorded migrations. To do so, use the following command for the development version:
+'docker-compose exec web_dev python3 manage.py migrate'
+or this command for the production version:
+'docker-compose -f docker-compose.prod.yml exec web python3 manage.py migrate'
 
