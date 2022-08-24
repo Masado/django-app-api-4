@@ -1,0 +1,26 @@
+Input tsv-file:
+	- tiny-manta.tsv
+	- tiny-manta-https.tsv
+	- tiny-manta-normal.tsv
+	- tiny-manta-normal-https.tsv
+You may use any of the .tsv files as the Input tsv-file. The files that include "https" in their name will stage the required fastq.gz, any other .tsv file will need you to upload the testdata.tar.gz archive as well.
+Files including a "normal" in their name will only use the fastq.gz files of the normal folder, any other files will use both normal and tumor.
+
+File folder:
+	- testdata.tar.gz
+The "testdata.tar.gz" archive contains a folder called "testdata", which in turn contains the .fastq.gz files referenced in the "tiny-manta.tsv" and "tiny-manta-normal.tsv" Input files.
+
+iGenome reference:
+The iGenome reference for all test-datasets in this explanation is "GRCh38". 
+
+Fasta genome reference:
+	- reference/Homo_sapiens_assembly38_chr20.fasta
+You can find the "Homo_sapiens_assembly38_chr20.fasta" file in the reference folder.
+
+dbsnp file:
+	- reference/dbsnp_146_hg38_chr20_tso-only.vcf.gz
+The dbsnp file can be found in the reference folder. Please upload it in combination with the dbsnp index.
+
+dbsnp index:
+	- refrence/dbsnp_146_hg38_chr20_tso-only.vcf.gz.tbi
+The dbsnp index can be found in the reference folder. Please upload it in combination with the dbsnp file.

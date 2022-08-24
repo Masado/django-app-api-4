@@ -31,7 +31,11 @@
             </td>
             <td style="padding: 10px">{{ run.start_time }}</td>
             <td style="padding: 10px"><a href="{% url 'run:detail' run.run_id %}">Details</a></td>
-            <td style="padding: 10px"><a href="{% url 'run:UniversalDownload' run.run_id %}">Download</a></td>
+            {% if run.post_status %}
+                <td style="padding: 10px"><a href="{% url 'run:UniversalDownload' run.parent_run_id %}">Download</a></td>
+            {% else %}
+                <td style="padding: 10px"><a href="{% url 'run:UniversalDownload' run.run_id %}">Download</a></td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>
@@ -53,4 +57,21 @@
     {% else %}
     <p>There are no executed pipeline runs.</p>
     {% endif %}
+
+    <script>
+        function check_post(){
+            const id = run_id;
+            if (id.endsWith("_p")){
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+        function say_true(){
+            return true;
+        }
+    </script>
+
 {% endblock %}

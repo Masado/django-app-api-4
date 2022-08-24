@@ -13,6 +13,8 @@ class Run(models.Model):
     start_time = models.DateTimeField('date started', auto_now_add=True)
     duration = models.CharField('duration', max_length=10, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    post_status = models.BooleanField('post worklow', default=False)
+    parent_run_id = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.run_id

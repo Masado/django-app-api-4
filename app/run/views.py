@@ -1663,8 +1663,6 @@ class SarekRun(View):
                     handle_and_unzip(request.FILES['file_folder'], run_id)
                 elif file_folder.name[-7:] == ".tar.gz":
                     handle_and_untar(request.FILES['file_folder'], run_id)
-        else:
-            return redirect("run:inputProblems", "file-folder")
 
         # get igenome reference
         if request.POST['igenome_reference'] != "":

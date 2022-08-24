@@ -628,8 +628,8 @@ def atacseq(script_location, design_file, single_end, igenome_reference, fasta_f
     command = ['nextflow', 'run',
         '%s' % script_location,
         '--input', '%s' % design_file,
-        '--max_memory', '%s.GB' % str(get_memory()),
-        '--max_cpus', '%s' % str(get_cpus())
+        '--max_memory', '2.GB',
+        '--max_cpus', '2'
     ]
     if single_end == 'true':
         command.extend(['--single_end', 'True'])
@@ -1152,7 +1152,7 @@ def postrnaseq(samples, salmon, compare, annotation_file, network, species_id, o
         run = Run(run_id=run_id, pipeline="Post-RNA-Seq")
         run.save()
     else:
-        run = Run(run_id=run_id_post, pipeline="Post-RNA-Seq")
+        run = Run(run_id=run_id_post, pipeline="Post-RNA-Seq", post_status=True, parent_run_id=run_id)
         run.save()
 
     model_command = ' '.join(command)
@@ -1254,7 +1254,7 @@ def postatacchipseq(bed_file, gtf_file, ext_chr, computation_method, upstream, d
         run = Run(run_id=run_id, pipeline="Post-ATAC/ChIP-Seq")
         run.save()
     else:
-        run = Run(run_id=run_id_post, pipeline="Post-ATAC/ChIP-Seq")
+        run = Run(run_id=run_id_post, pipeline="Post-ATAC/ChIP-Seq", post_status=True, parent_run_id=run_id)
         run.save()
     
     model_command = ' '.join(command)
